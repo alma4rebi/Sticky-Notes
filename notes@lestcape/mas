@@ -1,0 +1,105 @@
+
+
+
+
+
+
+
+      //CinnamonEntry.addContextMenu(this.entry);
+
+
+
+      this.clutterText.set_single_line_mode(false);
+      this.clutterText.set_activatable(false);
+      this.clutterText.set_line_wrap(true);
+      this.clutterText.set_line_wrap_mode(imports.gi.Pango.WrapMode.WORD_CHAR);
+try {
+      this.clutterText.set_editable(true);
+      global.focus_manager.add_group(this.entry);
+      //this.entry.grab_key_focus();
+      // 
+/*
+      this._group = new St.Group({ visible: false, x: 0, y: 0 });
+      Main.uiGroup.add_actor(this._group);
+      let constraint = new Clutter.BindConstraint({ source: global.stage,
+                                                    coordinate: Clutter.BindCoordinate.POSITION | Clutter.BindCoordinate.SIZE });
+      this._group.add_constraint(constraint);
+      this._group.add_actor(this.clutterText);
+
+      //this._group.connect('destroy', Lang.bind(this, this._onGroupDestroy));
+      this._group.connect('key-press-event', Lang.bind(this, function(object, keyPressEvent) {
+         Main.notify("Toy");
+      }));
+*/
+
+this.clutterText.connect('button-press-event', Lang.bind(this, function(object) {
+  // Main.notify("clicked" + global.stage.get_key_focus());
+     global.stage.set_key_focus(this.entry);
+}));
+
+this.clutterText.connect('key-press-event', Lang.bind(this, function(object, keyPressEvent) {
+   Main.notify("Toy");
+}));
+
+
+      this.entry.set_size(150, -1);
+      this.entry.style="font-size: " + "15pt";
+
+      this.entry.clutter_text.connect("text-changed", Lang.bind(this, function() {
+         //Main.notify("change");
+         this.text = this.entry.clutter_text.text;
+      }));
+
+     this.entry.clutter_text.connect("key-press-event", Lang.bind(this, function(object, keyPressEvent) {
+         Main.notify("Toy Clutter Text");
+      }));
+
+     this.entry.connect("key-press-event", Lang.bind(this, function(object, keyPressEvent) {
+         Main.notify("Toy Entry");
+      }));
+
+     this.mainBox.connect("key-press-event", Lang.bind(this, function(object, keyPressEvent) {
+         Main.notify("Toy MainBox");
+      }));
+
+     this.connect("key-press-event", Lang.bind(this, function(object, keyPressEvent) {
+         Main.notify("Toy Desklet");
+      }));
+
+} catch(e) {
+   Main.notify("Error: ", e.message);
+}
+      this.mainBox.add(this.entry, {y_fill: true, y_align: St.Align.START});
+
+      this.setContent(this.mainBox);
+/*
+      this.settings = new Settings.DeskletSettings(this, this.metadata["uuid"], this.instance_id);
+      this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL,
+                                  "text",
+                                  "text",
+                                   function() {
+                                       this.entry.set_text(this.text);
+                                   });
+*/
+      this.entry.set_text(this.text);
+
+/*insert*/
+		
+      // Set the font sizes from .json file
+		
+      // let dir_path = ;
+      // this.save_path = dir_path.replace('~', GLib.get_home_dir());
+      /*this.configFile = GLib.get_home_dir() + "/.local/share/cinnamon/desklets/TimeAndDate@nightflame/metadata.json";
+      this.helpFile = GLib.get_home_dir() + "/.local/share/cinnamon/desklets/TimeAndDate@nightflame/README";
+		
+      global.log("Config file " + this.configFile);
+		
+      this._menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+
+      this._menu.addAction(_("Edit Config"), Lang.bind(this, function() {
+         Util.spawnCommandLine("xdg-open " + this.configFile);
+      }));
+		
+      this._menu.addAction(_("Help"), Lang.bind(this, function() {
+         Util.spawnCommandLine("xdg-open " + this.helpFile);
+      }));*/
