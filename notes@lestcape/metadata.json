@@ -1,5 +1,5 @@
 {
-    "uuid": "note@lestcape",
+    "uuid": "notes@lestcape",
     "name": "Sticky Note",
     "description": "A sticky note desklet",
     "prevent-decorations": false,

@@ -40,7 +40,6 @@ MyDesklet.prototype = {
       this.instance_id = desklet_id;
       this.setHeader(_("Sticky Notes"));
       this.noteCurrent = 0;
-
       this._boxColor = "#000000";
       this._transparency = 50;
       this._borderBoxWidth = 2;
@@ -49,6 +48,8 @@ MyDesklet.prototype = {
       this._width = 120;
       this.active = false;
       this.eventButton = null;
+      this.capturedEventId = 0;
+      this.focusIDSignal = 0;
       try {
          this._initDeskletContruction();
          this._initConnectionSignal();
@@ -91,8 +92,8 @@ MyDesklet.prototype = {
                this.showErrorMessage(e.message);
             }
          } else {
-            this.notesList[this.noteCurrent][1] = noteMessage;
-            this.writeNoteToFile(this.noteCurrent);
+            this.notesList[this.noteCurrent - 1][1] = noteMessage;
+            this.writeNoteToFile(this.noteCurrent - 1);
          }
       }
    },
@@ -297,6 +298,7 @@ MyDesklet.prototype = {
          global.set_stage_input_mode(Cinnamon.StageInputMode.NORMAL);
          this.eventButton = null;
          this.clutterText.set_editable(false);
+         this.newNote(this.entry.text);
          //Meta.enable_unredirect_for_screen(global.screen);
       } catch(e) {
          this.showErrorMessage(e.message);
@@ -394,14 +396,14 @@ MyDesklet.prototype = {
        // the banner text to the body as the first element.
       this._addBannerBody();
     },
-*/
+
 
    enableScrolling: function(enableScrolling) {
       this._scrollPolicy = enableScrolling ? Gtk.PolicyType.AUTOMATIC : Gtk.PolicyType.NEVER;
       if(this._scrollArea)
          this._scrollArea.vscrollbar_policy = Gtk.PolicyType.AUTOMATIC;
    },
-
+*/
    _buttonCreation: function(icon, toolTip) {    
       let bttIcon = new St.Icon({ icon_name: icon,
 	                         icon_type: St.IconType.SYMBOLIC,
@@ -418,8 +420,8 @@ MyDesklet.prototype = {
    },
 
    _initConnectionSignal: function() {
-     // this.clutterText.connect('key-press-event', Lang.bind(this, this._onKeyPress));
-     // this.clutterText.connect('text-changed', Lang.bind(this, this._onTextChanged));
+      this.clutterText.connect('key-press-event', Lang.bind(this, this._onKeyPress));
+      this.clutterText.connect('text-changed', Lang.bind(this, this._onTextChanged));
 
       this.clutterText.connect('button-press-event', Lang.bind(this, function(actor, event) {
          try {
@@ -460,13 +462,16 @@ MyDesklet.prototype = {
    _onCapturedEvent: function(actor, event) {
       try {
          let source = event.get_source();
-         if(event.type() == Clutter.EventType.BUTTON_PRESS) {
-            if((!this.actor.contains(source)) && (!Main.layoutManager.keyboardBox.contains(source))) {
+         if(!this.actor.contains(source)) {
+            if(event.type() == Clutter.EventType.BUTTON_PRESS) {
+               //if(!Main.layoutManager.keyboardBox.contains(source)) {
+                  //this.newNote(this.entry.text);
+                  //this.showErrorMessage("me fui");
+               //}
+            } else
                this.unlock();
-               this.newNote(this.entry.text);
-               //this.showErrorMessage("me fui");
-            }
-         }
+         }// else
+            //this.showErrorMessage("Sirve");
       } catch(e) {
          this.showErrorMessage(e.message);
       }
@@ -503,14 +508,13 @@ MyDesklet.prototype = {
                                        //this.showErrorMessage("ganed");
             }
             else {
-               
                this.entry.remove_style_pseudo_class('focus');
                //global.set_stage_input_mode(Cinnamon.StageInputMode.NORMAL);
                //global.set_stage_input_mode(Cinnamon.StageInputMode.FULLSCREEN);
                global.stage.set_key_focus(null);
                this.clutterText.set_selection(0, 0);
                this.clutterText.set_cursor_visible(true);
-               this.newNote(this.entry.text);
+               //this.newNote(this.entry.text);
                this.unlock();
             }
 
