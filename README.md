@@ -1,17 +1,17 @@
 Sticky Notes
 =====
 
-Desklet: Drives Manager Version: v1.1-RTM
+Desklet: Sticky Notes Version: v0.2-Beta
 
 O.S.: Cinnamon 
 
-Release Date: 30 October 2013
+Release Date: 08 November 2013
 
 Author: Lester Carballo Pérez
 
 Email: lestcape@gmail.com
  
-Website: https://github.com/lestcape/Drives-Manager
+Website: https://github.com/lestcape/Notes
 
 --------------
 

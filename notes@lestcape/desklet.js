@@ -1,5 +1,5 @@
-// Desklet : Sticky Notes           Version      : v0.1-Beta
-// O.S.    : Cinnamon               Release Date : 07 November 2013.
+// Desklet : Sticky Notes           Version      : v0.2-Beta
+// O.S.    : Cinnamon               Release Date : 08 November 2013.
 // Author  : Lester Carballo Pérez  Email        : lestcape@gmail.com
 //
 // Website : https://github.com/lestcape/Notes
@@ -262,16 +262,33 @@ MyDesklet.prototype = {
          this.currentNote.set_text("1");
          this.numberNote.set_text(notes.length.toString());
          if(notes.length > 0) {
+            notes = this._sorting(notes);
             this.noteCurrent = 1;
             this.currentNote.set_text("1");
             this.entry.text = notes[0][1];
-            this._text = this.entry.text;
+            this._text = this.entry.text; 
          }
       } catch(e) {
          this.showErrorMessage(e.message);
       }
       return notes;
    },
+
+    _sorting: function(notes) {
+       let valueL, valueF, tempSwap;
+       for(let posF=0; posF < notes.length - 1; posF++) {
+          valueF = parseInt(notes[posF][0]);
+          for(let posL=posF + 1; posL < notes.length; posL++) {
+             valueL = parseInt(notes[posL][0]);
+             if(valueL < valueF) {
+                tempSwap = notes[posL];
+                notes[posL] = notes[posF];
+                notes[posF] = tempSwap;
+             }
+          }
+       }
+       return notes;
+    },
 
    _onAddNote: function() {
       this.reset();
@@ -568,6 +585,7 @@ MyDesklet.prototype = {
             this.fixWidth(this._fWidth);
          }
          else if (event.get_button() == 3) {
+            this._menu.close();
             this.entry._menu.open();
          }
       } catch(e) {
