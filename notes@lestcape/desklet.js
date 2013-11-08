@@ -1,5 +1,5 @@
-// Desklet : Sticky Notes           Version      : v0.2-Beta
-// O.S.    : Cinnamon               Release Date : 08 November 2013.
+// Desklet : Sticky Notes           Version      : v0.1-Beta
+// O.S.    : Cinnamon               Release Date : 07 November 2013.
 // Author  : Lester Carballo Pérez  Email        : lestcape@gmail.com
 //
 // Website : https://github.com/lestcape/Notes
@@ -484,7 +484,7 @@ MyDesklet.prototype = {
       buttonBanner.add(centerBox, {x_fill: false, expand: true, x_align: St.Align.MIDDLE});
       buttonBanner.add(rightBox, {x_fill: true, x_align: St.Align.END});
 
-      this.entry = new St.Entry({ name: 'noteEntry', /*hint_text: _("Type to your note..."),*/ track_hover: false, can_focus: true });
+      this.entry = new St.Entry({ name: 'noteEntry', hint_text: _("Type to your note..."), track_hover: false, can_focus: true });
 
       this.mainBox.add(buttonBanner, {x_fill: true, expand: true, x_align: St.Align.START});
       this.mainBox.add(this.entry, {x_fill: true, y_fill: true, x_align: St.Align.START});
