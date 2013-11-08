@@ -1,30 +1,133 @@
-
-// Notes Cinnamon Desklet v0.1 - 6 November 2013
-
-//This is a simple desklet to add notes in the desktop.
-//This is only for experimental uses.
-//Base on https://github.com/linuxmint/Cinnamon/pull/2119
-//of dalcde https://github.com/dalcde
+// Desklet : Sticky Notes           Version      : v0.1-Beta
+// O.S.    : Cinnamon               Release Date : 07 November 2013.
+// Author  : Lester Carballo Pérez  Email        : lestcape@gmail.com
 //
-// Lester Carballo Pérez
-// lestcape@gmail.com
-
-const Gio = imports.gi.Gio;
-const St = imports.gi.St;
-
-const Desklet = imports.ui.desklet;
+// Website : https://github.com/lestcape/Notes
+//
+// Based on: https://github.com/linuxmint/Cinnamon/pull/2119
+//
+// This is a simple desklet to add notes in the desktop.
+// The Notes will be saved when a focus of the text editor was lost.
+//
+//    This program is free software:
+//
+//    You can redistribute it and/or modify it under the terms of the
+//    GNU General Public License as published by the Free Software
+//    Foundation, either version 3 of the License, or (at your option)
+//    any later version.
+//
+//    This program is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+//
+//    You should have received a copy of the GNU General Public License
+//    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
 
 const Lang = imports.lang;
-const Mainloop = imports.mainloop;
+const Gio = imports.gi.Gio;
+const St = imports.gi.St;
 const GLib = imports.gi.GLib;
-const PopupMenu = imports.ui.popupMenu;
-const Util = imports.misc.util;
-const Main = imports.ui.main;
 const Clutter = imports.gi.Clutter;
 const Cinnamon = imports.gi.Cinnamon;
-const Gtk = imports.gi.Gtk;
+const Desklet = imports.ui.desklet;
+const PopupMenu = imports.ui.popupMenu;
+const Main = imports.ui.main;
 const Tooltips = imports.ui.tooltips;
-//const Meta = imports.gi.Meta;
+const Settings = imports.ui.settings;
+//const Mainloop = imports.mainloop;
+//const Gtk = imports.gi.Gtk;
+//const CinnamonEntry = imports.ui.cinnamonEntry;
+const Util = imports.misc.util;
+
+
+function _EntryMenu(entry) {
+    this._init(entry);
+}
+
+_EntryMenu.prototype = {
+   __proto__: PopupMenu.PopupMenu.prototype,
+
+   _init: function(entry) {
+
+      PopupMenu.PopupMenu.prototype._init.call(this, entry, 0, St.Side.TOP);
+
+      this.actor.add_style_class_name('entry-context-menu');
+
+      this._entry = entry;
+      this._clipboard = St.Clipboard.get_default();
+
+      // Populate menu
+      let item;
+      item = new PopupMenu.PopupMenuItem(_("Copy"));
+      item.connect('activate', Lang.bind(this, this._onCopyActivated));
+      this.addMenuItem(item);
+      this._copyItem = item;
+
+      item = new PopupMenu.PopupMenuItem(_("Paste"));
+      item.connect('activate', Lang.bind(this, this._onPasteActivated));
+      this.addMenuItem(item);
+      this._pasteItem = item;
+
+      this.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+
+      let item;
+      item = new PopupMenu.PopupMenuItem(_("Delete"));
+      item.connect('activate', Lang.bind(this, this._onDeleteActivated));
+      this.addMenuItem(item);
+      this._deleteItem = item;
+
+      Main.uiGroup.add_actor(this.actor);
+      this.actor.hide();
+   },
+
+   open: function() {
+      this._updatePasteItem();
+      this._updateCopyItem();
+
+      //let direction = Gtk.DirectionType.TAB_FORWARD;
+      /*if (!this.actor.navigate_focus(null, direction, false))
+         this.actor.grab_key_focus();*/
+
+      PopupMenu.PopupMenu.prototype.open.call(this);
+   },
+
+   _updateCopyItem: function() {
+      this.selection = this._entry.clutter_text.get_selection();
+      this._copyItem.setSensitive(this.selection && this.selection != '');
+      this._deleteItem.setSensitive(this.selection && this.selection != '');
+      this.selectBounds = this._entry.clutter_text.get_selection_bound();
+   },
+
+   _updatePasteItem: function() {
+      this._clipboard.get_text(Lang.bind(this,
+         function(clipboard, text) {
+            this._pasteItem.setSensitive(text && text != '');
+         }));
+    },
+
+    _onCopyActivated: function() {
+       //let selection = this._entry.clutter_text.get_selection();
+       this._clipboard.set_text(this.selection);
+    },
+
+    _onPasteActivated: function() {
+       this._clipboard.get_text(Lang.bind(this,
+          function(clipboard, text) {
+             if (!text)
+                return;
+             this._entry.clutter_text.delete_selection();
+             let pos = this._entry.clutter_text.get_cursor_position();
+             this._entry.clutter_text.insert_text(text, pos);
+          }));
+    },
+
+    _onDeleteActivated: function() {
+      // this._entry.clutter_text.delete_selection();
+       this._entry.clutter_text.delete_text(this.selectBounds - this.selection.length, this.selectBounds);
+    }
+};
 
 function MyDesklet(metadata, desklet_id){
    this._init(metadata, desklet_id);
@@ -39,41 +142,49 @@ MyDesklet.prototype = {
       this.metadata = metadata;
       this.instance_id = desklet_id;
       this.setHeader(_("Sticky Notes"));
+
+      this.helpFile = GLib.get_home_dir() + "/.local/share/cinnamon/desklets/"+this.metadata["uuid"]+"/" + _("README");
+      this._menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());		
+      this._menu.addAction(_("Help"), Lang.bind(this, function() {
+         Util.spawnCommandLine("xdg-open " + this.helpFile);
+      }));
+      this._menu.addAction(_("Web Site"), Lang.bind(this, function() {
+         Util.spawnCommandLine("xdg-open " + "http://github.com/lestcape/Notes");
+      }));
+
+      this._text = "";
       this.noteCurrent = 0;
       this._boxColor = "#000000";
       this._transparency = 50;
-      this._borderBoxWidth = 2;
-      this._borderBoxColor = "#fff";
-      this.fWidth = false;
-      this._width = 120;
-      this.active = false;
-      this.eventButton = null;
-      this.capturedEventId = 0;
+      this._borderBoxWidth = 1;
+      this._borderBoxColor = "#ffffff";
+      this._textSize = 9;
+      this._fontFamily = ""; //Default Font family
+      this._fontColor= "#ffffff";
+      this._fWidth = false;
+      this._width = 170;
       this.focusIDSignal = 0;
+      this.keyPressIDSignal = 0;
       try {
          this._initDeskletContruction();
-         this._initConnectionSignal();
-         
          this.notesList = this.readNotesFromFile();
+         this._initSettings();
+         this.clutterText.connect('button-press-event', Lang.bind(this, this._onButtonPress));        
 
-         this.setStyle();
-         //this.fixWidth(true);
          this._createMenu();
 
          this.setContent(this.mainBox);
       } catch(e) {
          this.showErrorMessage(e.message);
       }
-      this._updateDate();
    },
 
    showErrorMessage: function(menssage) {
-      this.unlock();
       Main.notifyError(_("Error"), menssage);
    },
 
    newNote: function(noteMessage) {
-      if((noteMessage)&&(noteMessage != "")) {
+      if((noteMessage)&&(noteMessage != "")&&(noteMessage != _("Type to your note..."))) {
          if((this.notesList.length == 0)||(this.noteCurrent > this.notesList.length)) {
             try {
                let maxValue = 0;
@@ -88,10 +199,12 @@ MyDesklet.prototype = {
                this.notesList.push([strinName, noteMessage]);
                this.writeNoteToFile(this.noteCurrent);
                this.numberNote.set_text(this.notesList.length.toString());
+               this.noteCurrent = this.notesList.length;
+               this.currentNote.set_text(this.noteCurrent.toString());
             } catch(e) {
                this.showErrorMessage(e.message);
             }
-         } else {
+         } else if(this.notesList[this.noteCurrent - 1][1] != noteMessage) {
             this.notesList[this.noteCurrent - 1][1] = noteMessage;
             this.writeNoteToFile(this.noteCurrent - 1);
          }
@@ -109,10 +222,12 @@ MyDesklet.prototype = {
 
             dstream.put_string(this.notesList[pos][1], null);
             fstream.close(null);
+            return true;
          } catch(e) {
             this.showErrorMessage(e.message);
          }
       }
+      
    },
 
    deleteNote: function(pos) {
@@ -120,7 +235,7 @@ MyDesklet.prototype = {
          let file = Gio.file_new_for_path(GLib.get_home_dir() + "/.local/share/notes/" + this.notesList[pos][0] + ".note");
          if(file.query_exists(null))
             return file.delete(null);
-      }
+      } 
       return false;
    },
 
@@ -136,7 +251,7 @@ MyDesklet.prototype = {
                   let dstream = new Gio.DataInputStream.new(fstream);
                   let data = dstream.read_until("", null);
                   fstream.close(null);
-                  notes[pos][1] = data[0].toString();
+                  notes[pos][1] = data[0];
                } catch(e) {
                   this.showErrorMessage(e.message);
                }
@@ -144,12 +259,13 @@ MyDesklet.prototype = {
                this.showErrorMessage(e.message);
          }
          this.noteCurrent = 0;
-         this.currentNote.set_text("0");
+         this.currentNote.set_text("1");
          this.numberNote.set_text(notes.length.toString());
          if(notes.length > 0) {
             this.noteCurrent = 1;
             this.currentNote.set_text("1");
             this.entry.text = notes[0][1];
+            this._text = this.entry.text;
          }
       } catch(e) {
          this.showErrorMessage(e.message);
@@ -158,24 +274,42 @@ MyDesklet.prototype = {
    },
 
    _onAddNote: function() {
-      this.entry.text = "";
+      this.reset();
       this.noteCurrent = this.notesList.length + 1;
       this.currentNote.set_text(this.noteCurrent.toString());
    },
 
-   _onCloseNote: function() {
+   _onRemoveNote: function() {
       try {
-         if(this.notesList.length != 0) { 
-            if(this.noteCurrent < this.notesList.length) {
-               this.deleteNote(this.noteCurrent - 1);
-               this.entry.text = this.notesList[this.noteCurrent][1];
-               this.notesList.splice(this.noteCurrent, 1);
-               this.numberNote.set_text(this.notesList.length.toString());
-            } else {
-            
+         if(this.notesList.length > 1) { 
+            if((this.noteCurrent != 0)&&(this.noteCurrent <= this.notesList.length)) {
+               if(this.deleteNote(this.noteCurrent - 1)) {
+                  this.notesList.splice(this.noteCurrent - 1, 1);
+                  this.numberNote.set_text(this.notesList.length.toString());
+                  if(this.noteCurrent > this.notesList.length) {
+                     this.noteCurrent = this.notesList.length;
+                     this.currentNote.set_text(this.noteCurrent.toString());
+                     this.entry.text = this.notesList[this.noteCurrent - 1][1];
+                  } else
+                     this.entry.text = this.notesList[this.noteCurrent][1];
+               }
+            } else if(this.noteCurrent == 0) {
+               if(this.deleteNote(this.noteCurrent)) {
+                  this.notesList.splice(this.noteCurrent, 1);
+                  this.entry.text = this.notesList[this.noteCurrent][1];
+                  this.numberNote.set_text(this.notesList.length.toString());
+               }
             }
-            this.showErrorMessage("noteCurrent: " + this.noteCurrent + " lengh:" + this.notesList.length);
+         } else if(this.notesList.length == 1) {
+            if(this.deleteNote(0)) {
+               this.noteCurrent = 1;
+               this.notesList.splice(0, 1);
+               this.numberNote.set_text("0");
+               this.currentNote.set_text("1");
+               this.reset();
+            }
          }
+        // this.showErrorMessage("noteCurrent: " + this.noteCurrent + " lengh:" + this.notesList.length);
       } catch(e) {
          this.showErrorMessage(e.message);
       }
@@ -258,14 +392,18 @@ MyDesklet.prototype = {
    },
 
    setStyle: function() {
-      let _color = (this._boxColor.replace(")","," + this._transparency + ")")).replace('rgb','rgba');
-      this.mainBox.set_style('padding: 4px; border:'+ this._borderBoxWidth +
-                                 'px solid ' + this._borderBoxColor + '; background-color: ' +
-                                  _color + '; border-radius: 12px;');
+      let _color = (this._boxColor.replace(')',',' + this._transparency + ')')).replace('rgb','rgba');
+      this.mainBox.set_style('padding: 4px; border: '+ this._borderBoxWidth + 'px solid ' + this._borderBoxColor +
+                             '; background-color: ' + _color + '; border-radius: 12px; color: ' + this._fontColor +
+                             '; text-shadow: 1px 1px 2px #000; font-weight: bold;');
+      let fontTag = '';
+      if((this._fontFamily)&&(this._fontFamily != ""))
+         fontTag = 'font-family: ' + this._fontFamily + ';';
+      this.entry.set_style('font-size: ' + this._textSize + 'pt; color: ' + this._fontColor + '; font-weight: normal; ' + fontTag);
    },
 
    fixWidth: function(fix) {
-      this.fWidth = fix;
+      this._fWidth = fix;
       if(fix)
          this.entry.set_width(this._width);
       else
@@ -274,35 +412,17 @@ MyDesklet.prototype = {
  
    on_desklet_removed: function() {
       this.reset();
-      if(this.timeout > 0)
-         Mainloop.source_remove(this.timeout);
+      if(this.focusIDSignal > 0)
+         this.clutterText.disconnect(this.focusIDSignal);
+      this.focusIDSignal = 0;
+      if(this.keyPressIDSignal == 0)
+         this.clutterText.disconnect(this.keyPressIDSignal);
+      this.keyPressIDSignal = 0;
    },
 
    reset: function () {
-      this.entry.text = '';
-      this.unlock();
-   },
-
-   unlock: function () {
-      try {
-         if(this.capturedEventId > 0)
-            global.stage.disconnect(this.capturedEventId);
-         this.capturedEventId = 0;
-         if(this.focusIDSignal > 0)
-            global.stage.disconnect(this.focusIDSignal);
-         this.focusIDSignal = 0;
-         this.active = false;
-         this.clutterText.set_selection(0, 0);
-         this.clutterText.set_cursor_visible(true);
-         global.stage.set_key_focus(null);
-         global.set_stage_input_mode(Cinnamon.StageInputMode.NORMAL);
-         this.eventButton = null;
-         this.clutterText.set_editable(false);
-         this.newNote(this.entry.text);
-         //Meta.enable_unredirect_for_screen(global.screen);
-      } catch(e) {
-         this.showErrorMessage(e.message);
-      }
+      this.entry.text = "";
+      global.stage.set_key_focus(null);
    },
 
    _initDeskletContruction: function() {
@@ -318,15 +438,12 @@ MyDesklet.prototype = {
       leftBox.add(addButton, {x_fill: true, x_align: St.Align.END});
 
       this.currentNote = new St.Label();
-      this.currentNote.style="font-size: " + 10 + "pt";
-      this.currentNote.set_text("0");
+      this.currentNote.set_text("1");
 
       this.numberNote = new St.Label();
-      this.numberNote.style="font-size: " + 10 + "pt";
       this.numberNote.set_text("0");
 
       let separator = new St.Label();
-      separator.style="font-size: " + 10 + "pt";
       separator.set_text("/");
 
       let backButton = this._buttonCreation('edit-undo', _("Back Note"));
@@ -341,28 +458,30 @@ MyDesklet.prototype = {
       centerBox.add(this.numberNote, {x_fill: true, x_align: St.Align.MIDDLE});
       centerBox.add(nextButton, {x_fill: true, x_align: St.Align.MIDDLE});      
 
-      let closeButton = this._buttonCreation('window-close', _("Close Note"));
-      closeButton.connect('clicked', Lang.bind(this, this._onCloseNote));
+      let deleteButton = this._buttonCreation('window-close', _("Remove Note"));
+      deleteButton.connect('clicked', Lang.bind(this, this._onRemoveNote));
       
-      rightBox.add(closeButton, {x_fill: true, x_align: St.Align.END});
+      rightBox.add(deleteButton, {x_fill: true, x_align: St.Align.END});
 
       buttonBanner.add(leftBox, {x_fill: true, x_align: St.Align.START});
       buttonBanner.add(centerBox, {x_fill: false, expand: true, x_align: St.Align.MIDDLE});
       buttonBanner.add(rightBox, {x_fill: true, x_align: St.Align.END});
 
-     // this.entry = new St.Entry({ name: 'noteEntry', hint_text: _("Type to your note..."), track_hover: false, can_focus: true });
-      this.entry = new St.Entry({ name: 'noteEntry', hint_text: "", track_hover: false, can_focus: true });
+      this.entry = new St.Entry({ name: 'noteEntry', /*hint_text: _("Type to your note..."),*/ track_hover: false, can_focus: true });
 
       this.mainBox.add(buttonBanner, {x_fill: true, expand: true, x_align: St.Align.START});
-      this.mainBox.add(textBox, {x_fill: true, y_fill: true, x_align: St.Align.START});
+      this.mainBox.add(this.entry, {x_fill: true, y_fill: true, x_align: St.Align.START});
+      //this.mainBox.add(textBox, {x_fill: true, y_fill: true, x_align: St.Align.START});
+
 
       this.clutterText = this.entry.clutter_text;
       this.clutterText.set_single_line_mode(false);
       this.clutterText.set_activatable(false);
       this.clutterText.set_line_wrap(true);
       this.clutterText.set_line_wrap_mode(imports.gi.Pango.WrapMode.WORD_CHAR);
-      textBox.add(this.entry, {x_fill: true, y_fill: false, expand: true, x_align: St.Align.START, y_align: St.Align.START});
-/*      
+      this.clutterText.set_selected_text_color(new Clutter.Color({red : 0, blue : 155, green : 0, alpha : 255}));
+/*      textBox.add(this.entry, {x_fill: true, y_fill: false, expand: true, x_align: St.Align.START, y_align: St.Align.START});
+      
       this._scrollArea = new St.ScrollView({ name: 'note-scrollview', vscrollbar_policy: Gtk.PolicyType.AUTOMATIC,
                                              hscrollbar_policy: Gtk.PolicyType.NEVER, style_class: 'vfade' });
       this._scrollArea.add_actor(this.entry);
@@ -406,8 +525,8 @@ MyDesklet.prototype = {
 */
    _buttonCreation: function(icon, toolTip) {    
       let bttIcon = new St.Icon({ icon_name: icon,
-	                         icon_type: St.IconType.SYMBOLIC,
-				 style_class: 'popup-menu-icon' });
+	                          icon_type: St.IconType.SYMBOLIC,
+				  style_class: 'popup-menu-icon' });
       let btt = new St.Button({ child: bttIcon });
       btt.connect('notify::hover', Lang.bind(this, function(actor) {
          if(actor.get_hover())
@@ -419,73 +538,48 @@ MyDesklet.prototype = {
       return btt;
    },
 
-   _initConnectionSignal: function() {
-      this.clutterText.connect('key-press-event', Lang.bind(this, this._onKeyPress));
-      this.clutterText.connect('text-changed', Lang.bind(this, this._onTextChanged));
-
-      this.clutterText.connect('button-press-event', Lang.bind(this, function(actor, event) {
-         try {
-            if(this.focusIDSignal > 0)
-               global.stage.disconnect(this.focusIDSignal);
-            else
-               this.focusIDSignal = global.stage.connect('notify::key-focus', Lang.bind(this, this._onStageKeyFocusChanged));
-            if(this.capturedEventId > 0)
-               global.stage.disconnect(this.capturedEventId);
-            else
-               this.capturedEventId = global.stage.connect('captured-event', Lang.bind(this, this._onCapturedEvent));
-            
-            this.active = true;
-            this.eventButton = event;
-            if (this.eventButton.get_button() == 1) {
-               global.set_stage_input_mode(Cinnamon.StageInputMode.FOCUSED);
-               global.set_stage_input_mode(Cinnamon.StageInputMode.NORMAL);
-               this.clutterText.set_cursor_visible(true);
-               this.entry._menu.close();
-               this.clutterText.set_editable(true);
-               this.fixWidth(this.fWidth);
-            }
-            else if (this.eventButton.get_button() == 3) {
-              // global.set_stage_input_mode(Cinnamon.StageInputMode.NORMAL);
-               global.set_stage_input_mode(Cinnamon.StageInputMode.FULLSCREEN);
-               this.entry._menu.open();
-            }
-         } catch(e) {
-            this.showErrorMessage(e.message);
-         }
-      }));
-
-       //this.focusIDSignal = this.clutterText.connect('activate', Lang.bind(this, this._onStageKeyFocusChanged));
-       
-       //this.focusIDSignal = global.stage.connect('notify::key-focus', Lang.bind(this, this._onStageKeyFocusChanged));
-   },
-
-   _onCapturedEvent: function(actor, event) {
-      try {
-         let source = event.get_source();
-         if(!this.actor.contains(source)) {
-            if(event.type() == Clutter.EventType.BUTTON_PRESS) {
-               //if(!Main.layoutManager.keyboardBox.contains(source)) {
-                  //this.newNote(this.entry.text);
-                  //this.showErrorMessage("me fui");
-               //}
-            } else
-               this.unlock();
-         }// else
-            //this.showErrorMessage("Sirve");
+   _onFocusOut: function(actor, event) {
+       try {
+         if(this.focusIDSignal > 0)
+            this.clutterText.disconnect(this.focusIDSignal);
+         this.focusIDSignal = 0;
+         if(this.keyPressIDSignal == 0)
+            this.clutterText.disconnect(this.keyPressIDSignal);
+         this.keyPressIDSignal = 0;
+         this.newNote(this.entry.text);
+         this._text = this.entry.text;
       } catch(e) {
          this.showErrorMessage(e.message);
       }
    },
 
-   _updateDate: function(){
-      //this.showErrorMessage("Fue focouse:" + global.stage.get_key_focus());
-      this.timeout = Mainloop.timeout_add_seconds(1, Lang.bind(this, this._updateDate));	
+   _onButtonPress: function(actor, event) {
+      try {
+         if(this.focusIDSignal == 0)
+            this.focusIDSignal = this.clutterText.connect('key-focus-out', Lang.bind(this, this._onFocusOut));
+         if(this.keyPressIDSignal == 0)
+            this.keyPressIDSignal = this.clutterText.connect('key-press-event', Lang.bind(this, this._onKeyPress));
+         if (event.get_button() == 1) {
+            this._menu.close();
+            this.entry._menu.close();
+            global.set_stage_input_mode(Cinnamon.StageInputMode.FOCUSED);
+            global.set_stage_input_mode(Cinnamon.StageInputMode.NORMAL);
+            
+            this.fixWidth(this._fWidth);
+         }
+         else if (event.get_button() == 3) {
+            this.entry._menu.open();
+         }
+      } catch(e) {
+         this.showErrorMessage(e.message);
+      }
    },
 
    _createMenu: function() {
       this.entry._menu = new _EntryMenu(this.entry);
       this.entry._menuManager = new PopupMenu.PopupMenuManager({ actor: this.entry });
       this.entry._menuManager.addMenu(this.entry._menu);
+      //CinnamonEntry.addContextMenu(this.entry);
    },
 
    // the entry does not show the hint
@@ -493,125 +587,61 @@ MyDesklet.prototype = {
       return this.clutterText.text == this.entry.get_text();
    },
 
-   _onStageKeyFocusChanged: function() {
-      try {
-
-         let focus = global.stage.get_key_focus();
-         let appearFocused = this.entry.contains(focus);
-            if((this.eventButton == null)||(this.eventButton.get_source() != this.clutterText)
-               ||(this.eventButton.get_source() != this.clutterText) ||(!this.active)) {
-               appearFocused = false;
-            }
-            this.clutterText.set_cursor_visible(appearFocused);
-            if (appearFocused) {
-               this.entry.add_style_pseudo_class('focus');
-                                       //this.showErrorMessage("ganed");
-            }
-            else {
-               this.entry.remove_style_pseudo_class('focus');
-               //global.set_stage_input_mode(Cinnamon.StageInputMode.NORMAL);
-               //global.set_stage_input_mode(Cinnamon.StageInputMode.FULLSCREEN);
-               global.stage.set_key_focus(null);
-               this.clutterText.set_selection(0, 0);
-               this.clutterText.set_cursor_visible(true);
-               //this.newNote(this.entry.text);
-               this.unlock();
-            }
-
-      } catch(e) {
-         this.showErrorMessage(e.message);
-      }
-   },
-
-   _onTextChanged: function (se, prop) {
-      try {
-      } catch(e) {
-         this.showErrorMessage(e.message);
-      }
-   },
-
    _onKeyPress: function(entry, event) {
       let symbol = event.get_key_symbol();
-      if (symbol == Clutter.Escape) {
-         if (this._isActivated()) {
+      if(symbol == Clutter.Escape) {
+         if(this._isActivated()) {
             this.reset();
             return true;
          }
       }
+    /*  else if(symbol == Clutter.Paste) {
+        this.entry.text = this.entry.text.replace(/.*\((.+)\)/, '$1');
+        Main.notify(this.entry.text);
+        return true;
+      }*/
       return false;
-    }
-};
-
-function _EntryMenu(entry) {
-    this._init(entry);
-}
-
-_EntryMenu.prototype = {
-   __proto__: PopupMenu.PopupMenu.prototype,
-
-   _init: function(entry) {
-
-      PopupMenu.PopupMenu.prototype._init.call(this, entry, 0, St.Side.TOP);
-
-      this.actor.add_style_class_name('entry-context-menu');
-
-      this._entry = entry;
-      this._clipboard = St.Clipboard.get_default();
-
-      // Populate menu
-      let item;
-      item = new PopupMenu.PopupMenuItem(_("Copy"));
-      item.connect('activate', Lang.bind(this, this._onCopyActivated));
-      this.addMenuItem(item);
-      this._copyItem = item;
-
-      item = new PopupMenu.PopupMenuItem(_("Paste"));
-      item.connect('activate', Lang.bind(this, this._onPasteActivated));
-      this.addMenuItem(item);
-      this._pasteItem = item;
-
-      Main.uiGroup.add_actor(this.actor);
-      this.actor.hide();
-   },
-
-   open: function() {
-      this._updatePasteItem();
-      this._updateCopyItem();
-
-      let direction = Gtk.DirectionType.TAB_FORWARD;
-      if (!this.actor.navigate_focus(null, direction, false))
-         this.actor.grab_key_focus();
-
-      PopupMenu.PopupMenu.prototype.open.call(this);
-   },
-
-   _updateCopyItem: function() {
-      this.selection = this._entry.clutter_text.get_selection();
-      this._copyItem.setSensitive(this.selection && this.selection != '');
-   },
-
-   _updatePasteItem: function() {
-      this._clipboard.get_text(Lang.bind(this,
-         function(clipboard, text) {
-            this._pasteItem.setSensitive(text && text != '');
-         }));
     },
 
-    _onCopyActivated: function() {
-       //let selection = this._entry.clutter_text.get_selection();
-       this._clipboard.set_text(this.selection);
+    _onStyleChange: function() {
+       this.setStyle();
     },
 
-    _onPasteActivated: function() {
-       this._clipboard.get_text(Lang.bind(this,
-          function(clipboard, text) {
-             if (!text)
-                return;
-             this._entry.clutter_text.delete_selection();
-             let pos = this._entry.clutter_text.get_cursor_position();
-             this._entry.clutter_text.insert_text(text, pos);
-          }));
-    }
+    _onFixWidth: function() {
+       this.fixWidth(this._fWidth);
+    },
+
+    _onTextSetting: function() {
+       this.entry.text = this._text;
+    },
+
+    _initSettings: function() {
+      try {
+         this.settings = new Settings.DeskletSettings(this, this.metadata["uuid"], this.instance_id);
+         //this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "text", "_text", this._onTextSetting, null);
+         /*"text": {
+      "type": "entry",
+      "default": "",
+      "description": "Text current note:",
+      "tooltip": "The current note."
+       },*/
+         this.settings.bindProperty(Settings.BindingDirection.IN, "boxColor", "_boxColor", this._onStyleChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "fontColor", "_fontColor", this._onStyleChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "textSize", "_textSize", this._onStyleChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "fontFamily", "_fontFamily", this._onStyleChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "transparency", "_transparency", this._onStyleChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "borderBoxWidth", "_borderBoxWidth", this._onStyleChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "borderBoxColor", "_borderBoxColor", this._onStyleChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "fixWidth", "_fWidth", this._onFixWidth, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "width", "_width", this._onFixWidth, null);
+
+         this._onStyleChange();
+         this._onFixWidth();
+      } catch (e) {
+         this.showErrorMessage(e.message);
+         global.logError(e);
+      }
+   }
 };
 
 function main(metadata, desklet_id) {
