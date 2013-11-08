@@ -1,13 +1,43 @@
-Notes
+Sticky Notes
 =====
 
-Notes Cinnamon Desklet v0.1 - 6 November 2013
+Desklet: Drives Manager Version: v1.1-RTM
+
+O.S.: Cinnamon 
+
+Release Date: 30 October 2013
+
+Author: Lester Carballo Pérez
+
+Email: lestcape@gmail.com
+ 
+Website: https://github.com/lestcape/Drives-Manager
+
+--------------
 
 This is a simple desklet to add notes in the desktop.
 
-This is only for experimental uses.
+![Alt text](/notes@lestcape/Capture.png)
 
-Base on https://github.com/linuxmint/Cinnamon/pull/2119
+This program is free software:
+--------------
+You can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
-of dalcde https://github.com/dalcde
- 
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program. If not, see http://www.gnu.org/licenses/.
+
+
+Installation Instructions:
+--------------
+1. Download this desklet from their website : https://github.com/lestcape/Notes
+2. Unzip the downloaded file and copy the folder drivesManager@lestcape at /home/USERNAME/.local/share/cinnamon/desklets/ where USER is the user for your operating system.
+3. Enable the desklet in Cinnamon Settings and use it.
+
+==============
+To report problems, request new features, languages, or anything you want in the desklet, visit:
+https://github.com/lestcape/Notes/issues
+
+==============
+Thank you very much for using this product.
+Lester.
