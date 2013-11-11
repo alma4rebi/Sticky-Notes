@@ -1,0 +1,189 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Sticky-Notes 0.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2013-11-08 21:29-0600\n"
+"PO-Revision-Date: 2013-11-08 21:52-0600\n"
+"Last-Translator: Lester Carballo Pérez <lestcape@gmail.com>\n"
+"Language-Team: lestcape <lestcape@gmail.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: \n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Poedit-Language: English\n"
+
+#: desklet.js:63
+msgid "Copy"
+msgstr ""
+
+#: desklet.js:68
+msgid "Paste"
+msgstr ""
+
+#: desklet.js:76
+msgid "Delete"
+msgstr ""
+
+#: desklet.js:144
+msgid "Sticky Notes"
+msgstr ""
+
+#: desklet.js:146
+msgid "README"
+msgstr ""
+
+#: desklet.js:148
+msgid "Help"
+msgstr ""
+
+#: desklet.js:151
+msgid "Website"
+msgstr ""
+
+#: desklet.js:183
+msgid "Error"
+msgstr ""
+
+#: desklet.js:187
+#: desklet.js:487
+msgid "Type to your note..."
+msgstr ""
+
+#: desklet.js:402
+msgid "Unsupported text size '%s'  to use the font '%s' in this theme."
+msgstr ""
+
+#: desklet.js:453
+msgid "Add new Note"
+msgstr ""
+
+#: desklet.js:466
+msgid "Back Note"
+msgstr ""
+
+#: desklet.js:469
+msgid "Next Note"
+msgstr ""
+
+#: desklet.js:478
+msgid "Remove Note"
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->borderBoxColor->description
+msgid "Border's box color:"
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->borderBoxColor->tooltip
+msgid "Set the custom border box's color."
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->borderBoxWidth->description
+msgid "Border's box width:"
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->borderBoxWidth->tooltip
+msgid "Increase or decrease the border's box width."
+msgstr ""
+
+#. #-#-#-#-#  default.pot (PACKAGE VERSION)  #-#-#-#-#
+#. notes@lestcape->settings-schema.json->borderBoxWidth->units
+#. #-#-#-#-#  default.pot (PACKAGE VERSION)  #-#-#-#-#
+#. notes@lestcape->settings-schema.json->textSize->units
+#. #-#-#-#-#  default.pot (PACKAGE VERSION)  #-#-#-#-#
+#. notes@lestcape->settings-schema.json->width->units
+msgid "pixels"
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->stripe->description
+msgid "Selected theme of paper sheet:"
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->stripe->tooltip
+msgid "Select a theme of paper sheet to show in Notes."
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->staples->description
+msgid "Selected theme of staples:"
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->staples->tooltip
+msgid "Select theme of staples."
+msgstr ""
+
+#. #-#-#-#-#  default.pot (PACKAGE VERSION)  #-#-#-#-#
+#. notes@lestcape->settings-schema.json->staples->combobox->None
+#. #-#-#-#-#  default.pot (PACKAGE VERSION)  #-#-#-#-#
+#. notes@lestcape->settings-schema.json->staples->combobox->None
+msgid "None"
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->staples->combobox->doublestripe
+msgid "Double Stripe"
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->staples->combobox->doublestaple
+msgid "Double Staple"
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->textSize->description
+msgid "Font size:"
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->textSize->tooltip
+msgid "Increase or decrease the font size of Note text."
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->width->description
+msgid "Width:"
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->width->tooltip
+msgid "Increase or decrease the desklet width."
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->boxColor->description
+msgid "Box color:"
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->boxColor->tooltip
+msgid "Set the custom box's color."
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->fontFamily->description
+msgid "Font family:"
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->fontFamily->tooltip
+msgid "Select a Font family to use in Notes."
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->transparency->description
+msgid "Opacity:"
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->transparency->tooltip
+msgid "Select a opacity percent."
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->fixWidth->description
+msgid "Fixed width."
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->fixWidth->tooltip
+msgid "Check this if you want to control the width of desklet."
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->fontColor->description
+msgid "Font color:"
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->fontColor->tooltip
+msgid "Set the custom text color."
+msgstr ""
+

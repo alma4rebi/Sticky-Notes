@@ -1,0 +1,47 @@
+Desklet : Sticky Notes           Version            : v0.2-Beta
+S.O.    : Cinnamon               Release Date       : 11 Noviembre de 2013.
+Author  : Lester Carballo Pérez  Correo electrónico : lestcape@gmail.com
+
+Sitio Web : https://github.com/lestcape/Notes
+
+Basado en: https://github.com/linuxmint/Cinnamon/pull/2119
+
+Este es un simple desklet para añadir Notas en el escritorio.
+Las Notas serán salvadas cuando el foco del editor de texto se pierda.
+
+Este programa es software libre:
+--------------
+Usted puede redistribuirlo y/o modificarlo bajo los términos de la Licencia General Pública GNU publicada por la Fundación de Software Libre, con los requerimientos de la versión 3 de la licencia, o (a su opción) alguna versión posterior.
+
+Este programa es distribuido en el presunto supuesto que es útil, pero SIN NINGUNA GARANTÍA; ni siquiera la garantía implícita MERCANTIL o de APTITUD PARA UN PROPÓSITO PARTICULAR. Vea la Licencia General Pública GNU para más detalles.
+
+Usted podría haber recibido una copia de la Licencia General Pública GNU junto con este programa, pero si no es el caso usted puede verla en: http://www.gnu.org/licenses/
+
+Instrucciones de instalación:
+--------------
+1- Descargue este desklet desde su sitio web: https://github.com/lestcape/Notes
+2- Descomprima el archivo descargado y copie la carpeta notes@lestcape en la dirección /home/USUARIO/.local/share/cinnamon/desklets/ donde USUARIO es el correspondiente a su usuario en su sistema operativo.
+3- Habilite el desklet en la Configuración de Cinnamon y úselo.
+
+Registro de cambios:
+--------------
+
+0.2-Beta
+   - Añadido soporte para el idioma.
+   - Añadido el idioma español.
+   - Se implementó un mecanismo de selección de temas.
+   - Los menús emergentes se fusionaron en un solo menú.
+   - Se ha corregido un error en la selección del texto.
+   - Ahora se ordenan la notas por fecha.
+
+0.1- Beta
+   - Lanzamiento inicial.
+
+==============
+Para reportar problemas, pedir nuevas funcionalidades, agregar nuevos idiomas, iconos o cualquier cosa que usted desee sobre este desklet visite: 
+https://github.com/lestcape/Notes/issues
+
+==============
+Muchas gracias por usar este producto.
+Lester.
+

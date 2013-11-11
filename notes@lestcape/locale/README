@@ -1,31 +1,28 @@
-Sticky Notes
-=====
+Desklet : Sticky Notes           Version      : v0.2-Beta
+O.S.    : Cinnamon               Release Date : 11 November 2013.
+Author  : Lester Carballo Pérez  Email        : lestcape@gmail.com
 
-Desklet: Sticky Notes Version: v0.2-Beta
+Website : https://github.com/lestcape/Notes
 
-O.S.: Cinnamon 
-
-Release Date: 11 November 2013
-
-Author: Lester Carballo Pérez
-
-Email: lestcape@gmail.com
- 
-Website: https://github.com/lestcape/Notes
-
---------------
+Based on: https://github.com/linuxmint/Cinnamon/pull/2119
 
 This is a simple desklet to add notes in the desktop.
-
-![Alt text](/notes@lestcape/Capture.png)
+The Notes will be saved when a focus of the text editor was lost.
 
 This program is free software:
 --------------
-You can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+You can redistribute it and/or modify it under the terms of the
+GNU General Public License as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.
 
-This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with this program. If not, see http://www.gnu.org/licenses/.
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 Installation Instructions:
@@ -49,6 +46,7 @@ Change Log:
 0.1- Beta
    - Initial release.
 
+
 ==============
 To report problems, request new features, languages, or anything you want in the desklet, visit:
 https://github.com/lestcape/Notes/issues
@@ -56,3 +54,4 @@ https://github.com/lestcape/Notes/issues
 ==============
 Thank you very much for using this product.
 Lester.
+

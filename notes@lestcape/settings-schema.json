@@ -1,4 +1,24 @@
 {
+   "stripe": {
+      "type": "combobox",
+      "description": "Selected theme of paper sheet:",
+      "default": "None",
+      "tooltip": "Select a theme of paper sheet to show in Notes.",
+      "options": {
+         "None": "None",
+         "Double Stripe": "doublestripe"
+      }
+   },
+   "staples": {
+      "type": "combobox",
+      "description": "Selected theme of staples:",
+      "default": "None",
+      "tooltip": "Select theme of staples.",
+      "options": {
+         "None": "None",
+         "Double Staple": "doublestaple"
+      }
+   },
    "boxColor": {
       "type": "colorchooser",
       "default": "rgb(0,0,0)",
@@ -12,20 +32,20 @@
       "tooltip": "Set the custom text color."
    },
    "textSize": {
-      "default": 9,
+      "default": 12,
       "type": "spinbutton",
-      "min": 2,
-      "max": 14,
-      "description": "Text Note font size:",
+      "min": 10,
+      "max": 30,
+      "description": "Font size:",
       "units": "pixels",
       "step": 1,
-      "tooltip": "Increase or decrease the text Note font size."
+      "tooltip": "Increase or decrease the font size of Note text."
    },
    "fontFamily": {
       "type": "entry",
       "default": "",
-      "description": "Text Note font family:",
-      "tooltip": "The text Note font family."
+      "description": "Font family:",
+      "tooltip": "Select a Font family to use in Notes."
    },
    "transparency": {
       "type": "scale",

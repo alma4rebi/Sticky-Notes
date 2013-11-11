@@ -36,98 +36,16 @@ const PopupMenu = imports.ui.popupMenu;
 const Main = imports.ui.main;
 const Tooltips = imports.ui.tooltips;
 const Settings = imports.ui.settings;
-//const Mainloop = imports.mainloop;
-//const Gtk = imports.gi.Gtk;
+const Pango = imports.gi.Pango;
+const Mainloop = imports.mainloop;
+const Gtk = imports.gi.Gtk;
 //const CinnamonEntry = imports.ui.cinnamonEntry;
 const Util = imports.misc.util;
 
 
-function _EntryMenu(entry) {
-    this._init(entry);
+function _(str) {
+   return Gettext.dgettext("notes@lestcape", str);
 }
-
-_EntryMenu.prototype = {
-   __proto__: PopupMenu.PopupMenu.prototype,
-
-   _init: function(entry) {
-
-      PopupMenu.PopupMenu.prototype._init.call(this, entry, 0, St.Side.TOP);
-
-      this.actor.add_style_class_name('entry-context-menu');
-
-      this._entry = entry;
-      this._clipboard = St.Clipboard.get_default();
-
-      // Populate menu
-      let item;
-      item = new PopupMenu.PopupMenuItem(_("Copy"));
-      item.connect('activate', Lang.bind(this, this._onCopyActivated));
-      this.addMenuItem(item);
-      this._copyItem = item;
-
-      item = new PopupMenu.PopupMenuItem(_("Paste"));
-      item.connect('activate', Lang.bind(this, this._onPasteActivated));
-      this.addMenuItem(item);
-      this._pasteItem = item;
-
-      this.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
-
-      let item;
-      item = new PopupMenu.PopupMenuItem(_("Delete"));
-      item.connect('activate', Lang.bind(this, this._onDeleteActivated));
-      this.addMenuItem(item);
-      this._deleteItem = item;
-
-      Main.uiGroup.add_actor(this.actor);
-      this.actor.hide();
-   },
-
-   open: function() {
-      this._updatePasteItem();
-      this._updateCopyItem();
-
-      //let direction = Gtk.DirectionType.TAB_FORWARD;
-      /*if (!this.actor.navigate_focus(null, direction, false))
-         this.actor.grab_key_focus();*/
-
-      PopupMenu.PopupMenu.prototype.open.call(this);
-   },
-
-   _updateCopyItem: function() {
-      this.selection = this._entry.clutter_text.get_selection();
-      this._copyItem.setSensitive(this.selection && this.selection != '');
-      this._deleteItem.setSensitive(this.selection && this.selection != '');
-      this.selectBounds = this._entry.clutter_text.get_selection_bound();
-   },
-
-   _updatePasteItem: function() {
-      this._clipboard.get_text(Lang.bind(this,
-         function(clipboard, text) {
-            this._pasteItem.setSensitive(text && text != '');
-         }));
-    },
-
-    _onCopyActivated: function() {
-       //let selection = this._entry.clutter_text.get_selection();
-       this._clipboard.set_text(this.selection);
-    },
-
-    _onPasteActivated: function() {
-       this._clipboard.get_text(Lang.bind(this,
-          function(clipboard, text) {
-             if (!text)
-                return;
-             this._entry.clutter_text.delete_selection();
-             let pos = this._entry.clutter_text.get_cursor_position();
-             this._entry.clutter_text.insert_text(text, pos);
-          }));
-    },
-
-    _onDeleteActivated: function() {
-      // this._entry.clutter_text.delete_selection();
-       this._entry.clutter_text.delete_text(this.selectBounds - this.selection.length, this.selectBounds);
-    }
-};
 
 function MyDesklet(metadata, desklet_id){
    this._init(metadata, desklet_id);
@@ -140,25 +58,52 @@ MyDesklet.prototype = {
       Desklet.Desklet.prototype._init.call(this, metadata, desklet_id);
 
       this.metadata = metadata;
+      this.uuid = this.metadata["uuid"];
       this.instance_id = desklet_id;
+      this.execInstallLanguage();
+      _ = imports.gettext.domain(this.uuid).gettext;
+      imports.gettext.bindtextdomain(this.uuid, GLib.get_home_dir() + "/.local/share/locale");
       this.setHeader(_("Sticky Notes"));
 
-      this.helpFile = GLib.get_home_dir() + "/.local/share/cinnamon/desklets/"+this.metadata["uuid"]+"/" + _("README");
-      this._menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());		
+      this._clipboard = St.Clipboard.get_default();
+
+      this.helpFile = GLib.get_home_dir() + "/.local/share/cinnamon/desklets/"+this.metadata["uuid"]+"/locale/" + _("README");
+		
       this._menu.addAction(_("Help"), Lang.bind(this, function() {
          Util.spawnCommandLine("xdg-open " + this.helpFile);
       }));
-      this._menu.addAction(_("Web Site"), Lang.bind(this, function() {
-         Util.spawnCommandLine("xdg-open " + "http://github.com/lestcape/Notes");
+      this._menu.addAction(_("Website"), Lang.bind(this, function() {
+         Util.spawnCommandLine("xdg-open http://github.com/lestcape/Notes");
       }));
+       this._menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
+      this.copyMenuItem = new PopupMenu.PopupMenuItem(_("Copy"));
+      this.copyMenuItem.connect('activate', Lang.bind(this, this._onCopyActivated));
+      this._menu.addMenuItem(this.copyMenuItem);
+
+      this.pasteMenuItem = new PopupMenu.PopupMenuItem(_("Paste"));
+      this.pasteMenuItem.connect('activate', Lang.bind(this, this._onPasteActivated));
+      this._menu.addMenuItem(this.pasteMenuItem);
+
+      this._menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+
+      this.deleteMenuItem = new PopupMenu.PopupMenuItem(_("Delete"));
+      this.deleteMenuItem.connect('activate', Lang.bind(this, this._onDeleteActivated));
+      this._menu.addMenuItem(this.deleteMenuItem);
+
+      this._menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+
+      this._entryActiveMenu = false;
+      this._menu.connect('open-state-changed', Lang.bind(this, this._updateMenu));
+
+      this._themeName = "None";
       this._text = "";
       this.noteCurrent = 0;
       this._boxColor = "#000000";
       this._transparency = 50;
       this._borderBoxWidth = 1;
       this._borderBoxColor = "#ffffff";
-      this._textSize = 9;
+      this._textSize = 12;
       this._fontFamily = ""; //Default Font family
       this._fontColor= "#ffffff";
       this._fWidth = false;
@@ -168,12 +113,11 @@ MyDesklet.prototype = {
       try {
          this._initDeskletContruction();
          this.notesList = this.readNotesFromFile();
-         this._initSettings();
-         this.clutterText.connect('button-press-event', Lang.bind(this, this._onButtonPress));        
-
-         this._createMenu();
+         this.clutterText.connect('button-press-event', Lang.bind(this, this._onButtonPress));
+         this.clutterText.connect('button-release-event', Lang.bind(this, this._onButtonRelease));
 
          this.setContent(this.mainBox);
+         this._initSettings();
       } catch(e) {
          this.showErrorMessage(e.message);
       }
@@ -410,13 +354,66 @@ MyDesklet.prototype = {
 
    setStyle: function() {
       let _color = (this._boxColor.replace(')',',' + this._transparency + ')')).replace('rgb','rgba');
-      this.mainBox.set_style('padding: 4px; border: '+ this._borderBoxWidth + 'px solid ' + this._borderBoxColor +
+      if(this._themeStaples != "None") {
+         this.mainBox.set_style('');
+         this.rootBox.set_style('padding: 4px, 4px; background-color: ' + _color + '; color: ' +
+                                 this._fontColor + '; text-shadow: 1px 1px 2px #000; font-weight: bold;');
+         let imageG = GLib.get_home_dir() + "/.local/share/cinnamon/desklets/" + this.uuid + "/staples/"+ this._themeStaples +"/";
+         this.transpBox.set_style('background-image: url(\'' + imageG + '1.png\');' +
+                                  'background-repeat: repeat; padding: 0px; margin: 0px; background-position: left top;');
+         this.transpBox.set_width(17);
+         this.endBox.set_style('background-image: url(\'' + imageG + '2.png\');' +
+                               'background-repeat: repeat; padding: 0px; margin: 0px; background-position: left top; background-color: ' +
+                             _color);
+
+         this.endBox.set_width(35);
+      } else {
+         this.rootBox.set_style('');
+         this.endBox.set_width(0);
+         this.transpBox.set_width(0);
+         this.mainBox.set_style('padding: 4px; border: '+ this._borderBoxWidth + 'px solid ' + this._borderBoxColor +
                              '; background-color: ' + _color + '; border-radius: 12px; color: ' + this._fontColor +
                              '; text-shadow: 1px 1px 2px #000; font-weight: bold;');
+      }
       let fontTag = '';
       if((this._fontFamily)&&(this._fontFamily != ""))
          fontTag = 'font-family: ' + this._fontFamily + ';';
-      this.entry.set_style('font-size: ' + this._textSize + 'pt; color: ' + this._fontColor + '; font-weight: normal; ' + fontTag);
+
+     // desc.set_family("Monospace"); 13
+     // desc.set_family("UnPilgi"); 13
+     // desc.set_family("Times New Roman"); 14
+
+      this.entry.set_style('font-size: ' + this._textSize + 'pt; color: ' + this._fontColor +
+                           '; font-weight: normal; ' + fontTag);
+
+
+      if(this._themeStripe != "None") {
+         let image = GLib.get_home_dir() + "/.local/share/cinnamon/desklets/" + this.uuid + "/stripe/" + this._themeStripe + "/";
+         let textHeight = this._getTextHeight();
+         let imageNumber = Math.floor(textHeight);
+         let suported = true;
+         if(imageNumber != textHeight) {
+            let newVal = this._textSize*imageNumber/textHeight;
+            this.entry.set_style('font-size: ' + newVal + 'pt; color: ' + this._fontColor +
+                                 '; font-weight: normal; ' + fontTag);
+            textHeight = this._getTextHeight();
+         }
+         if((imageNumber < 5)||(imageNumber > 30)||(imageNumber != textHeight)) {
+            this.showErrorMessage(_("Unsupported text size '%s'  to use the font '%s' in this theme.").format(this._textSize, this._fontFamily));
+            this.textBox.set_style('');
+         } else
+            this.textBox.set_style('background-image: url(\'' + image + imageNumber + '.png\');' +
+                                   'background-repeat: repeat; padding: 0px; margin: 0px; background-position: left top;');
+      } else
+         this.textBox.set_style('');
+   },
+
+   _getTextHeight: function() {
+      let context = this.entry.get_pango_context();
+      let themeNode = this.entry.get_theme_node();
+      let font = themeNode.get_font();
+      let metrics = context.get_metrics(font, context.get_language());
+      return Pango.units_to_double(metrics.get_ascent() + metrics.get_descent())/2;
    },
 
    fixWidth: function(fix) {
@@ -443,12 +440,14 @@ MyDesklet.prototype = {
    },
 
    _initDeskletContruction: function() {
-      this.mainBox = new St.BoxLayout({vertical:true});
+      this.mainBox = new St.BoxLayout({vertical:false});
+      this.rootBox = new St.BoxLayout({vertical:true});
+      this.themeBox = new St.BoxLayout({vertical:false});
       let buttonBanner = new St.BoxLayout({vertical:false});
       let leftBox = new St.BoxLayout({vertical:false});
       let centerBox = new St.BoxLayout({vertical:false});
       let rightBox = new St.BoxLayout({vertical:false}); 
-      let textBox = new St.BoxLayout({vertical:false});
+      this.textBox = new St.BoxLayout({vertical:true});
 
       let addButton = this._buttonCreation('list-add', _("Add new Note"));
       addButton.connect('clicked', Lang.bind(this, this._onAddNote));
@@ -484,28 +483,38 @@ MyDesklet.prototype = {
       buttonBanner.add(centerBox, {x_fill: false, expand: true, x_align: St.Align.MIDDLE});
       buttonBanner.add(rightBox, {x_fill: true, x_align: St.Align.END});
 
-      this.entry = new St.Entry({ name: 'noteEntry', hint_text: _("Type to your note..."), track_hover: false, can_focus: true });
+      this.entry = new St.Entry({ name: 'noteEntry', hint_text: _("Type to your note..."), track_hover: false, can_focus: true});
+      this.textBox.add(this.entry, {x_fill: true, y_fill: true, x_align: St.Align.START, y_align: St.Align.START});
 
-      this.mainBox.add(buttonBanner, {x_fill: true, expand: true, x_align: St.Align.START});
-      this.mainBox.add(this.entry, {x_fill: true, y_fill: true, x_align: St.Align.START});
-      //this.mainBox.add(textBox, {x_fill: true, y_fill: true, x_align: St.Align.START});
+      this.rootBox.add(buttonBanner, {x_fill: true, expand: true, x_align: St.Align.START});
+      //this.rootBox.add(this.entry, {x_fill: true, y_fill: true, x_align: St.Align.START});
+      this.rootBox.add(this.textBox, {x_fill: true, y_fill: true, x_align: St.Align.START});
 
+      this.transpBox = new St.BoxLayout({vertical:true});
+      this.endBox = new St.BoxLayout({vertical:true});
+      this.themeBox.add(this.transpBox, {x_fill: true, expand: true, x_align: St.Align.START});
+      this.themeBox.add(this.endBox, {x_fill: true, expand: true, x_align: St.Align.START});
+
+      this.mainBox.add(this.themeBox, {x_fill: true, expand: true, x_align: St.Align.START});
+      this.mainBox.add(this.rootBox, {x_fill: true, expand: true, x_align: St.Align.START});
 
       this.clutterText = this.entry.clutter_text;
       this.clutterText.set_single_line_mode(false);
       this.clutterText.set_activatable(false);
       this.clutterText.set_line_wrap(true);
-      this.clutterText.set_line_wrap_mode(imports.gi.Pango.WrapMode.WORD_CHAR);
+      //this.clutterText.set_line_wrap_mode(imports.gi.Pango.WrapMode.WORD_CHAR);
+      this.clutterText.set_line_wrap_mode(imports.gi.Pango.WrapMode.CHAR);
+      this.clutterText.set_selectable(true);
       this.clutterText.set_selected_text_color(new Clutter.Color({red : 0, blue : 155, green : 0, alpha : 255}));
-/*      textBox.add(this.entry, {x_fill: true, y_fill: false, expand: true, x_align: St.Align.START, y_align: St.Align.START});
+/*      this.textBox.add(this.entry, {x_fill: true, y_fill: false, expand: true, x_align: St.Align.START, y_align: St.Align.START});
       
       this._scrollArea = new St.ScrollView({ name: 'note-scrollview', vscrollbar_policy: Gtk.PolicyType.AUTOMATIC,
                                              hscrollbar_policy: Gtk.PolicyType.NEVER, style_class: 'vfade' });
       this._scrollArea.add_actor(this.entry);
       let scrollBox = new St.BoxLayout({vertical:false});
             scrollBox.set_height(50);
-      textBox.add_actor(scrollBox, { expand: false, y_fill: false, x_align: St.Align.START, x_fill: true });
-      textBox.add(this.entry, {x_fill: true, y_fill: false, expand: true, x_align: St.Align.START, y_align: St.Align.START});
+      this.textBox.add_actor(scrollBox, { expand: false, y_fill: false, x_align: St.Align.START, x_fill: true });
+      this.textBox.add(this.entry, {x_fill: true, y_fill: false, expand: true, x_align: St.Align.START, y_align: St.Align.START});
       scrollBox.add_actor(this._scrollArea, { expand: false, y_fill: false, y_align: St.Align.START, x_fill: true });
       scrollBox.connect('scroll-event', Lang.bind(this, this._scrollFilter));
       this.enableScrolling(true);*/
@@ -556,7 +565,7 @@ MyDesklet.prototype = {
    },
 
    _onFocusOut: function(actor, event) {
-       try {
+      try {
          if(this.focusIDSignal > 0)
             this.clutterText.disconnect(this.focusIDSignal);
          this.focusIDSignal = 0;
@@ -572,33 +581,97 @@ MyDesklet.prototype = {
 
    _onButtonPress: function(actor, event) {
       try {
+         if (event.get_button() == 1) {
+            global.set_stage_input_mode(Cinnamon.StageInputMode.FOCUSED);
+            global.set_stage_input_mode(Cinnamon.StageInputMode.NORMAL);
+            this.fixWidth(this._fWidth);
+         }
+         else if (event.get_button() == 3) {
+            this._entryActiveMenu = true;
+            this._updateCopyItem();
+            this._updatePasteItem();
+         }
          if(this.focusIDSignal == 0)
             this.focusIDSignal = this.clutterText.connect('key-focus-out', Lang.bind(this, this._onFocusOut));
          if(this.keyPressIDSignal == 0)
             this.keyPressIDSignal = this.clutterText.connect('key-press-event', Lang.bind(this, this._onKeyPress));
-         if (event.get_button() == 1) {
-            this._menu.close();
-            this.entry._menu.close();
-            global.set_stage_input_mode(Cinnamon.StageInputMode.FOCUSED);
-            global.set_stage_input_mode(Cinnamon.StageInputMode.NORMAL);
-            
-            this.fixWidth(this._fWidth);
-         }
-         else if (event.get_button() == 3) {
-            this._menu.close();
-            this.entry._menu.open();
-         }
       } catch(e) {
          this.showErrorMessage(e.message);
       }
    },
 
-   _createMenu: function() {
-      this.entry._menu = new _EntryMenu(this.entry);
-      this.entry._menuManager = new PopupMenu.PopupMenuManager({ actor: this.entry });
-      this.entry._menuManager.addMenu(this.entry._menu);
-      //CinnamonEntry.addContextMenu(this.entry);
+   _onButtonRelease: function(actor, event) {
+      if(this._entryActiveMenu) {
+          this._onButtonReleaseEvent(this.actor, event);
+          if(this.selection) {
+            let len = this.selection.length;
+            let lenClutter = this.clutterText.text.length;
+            if((len > 0)&&(this.selectBounds >= 0)&&(this.selectBounds <= lenClutter))
+               this.clutterText.set_selection(this.selectBounds - this.selection.length, this.selectBounds);
+         }
+      } 
+      else if(this._menu.isOpen)
+         this._onButtonReleaseEvent(this.actor, event);
+      this._entryActiveMenu = false;
    },
+/*
+   _deleteSelection: function(actor, event) {
+      this.selection = "";
+      this.selectBounds = 0;
+      this.clutterText.set_selection(0,0);
+   },
+*/
+   _updateMenu: function(menu, open) {
+      if(open) {
+         if(!this._entryActiveMenu) {
+            this._updateCopyItem();
+            this._updatePasteItem();
+         }
+      }
+   },
+
+   _updateCopyItem: function() {
+      this.selectBounds = this.clutterText.get_selection_bound();
+      this.cursorPosition = this.clutterText.get_cursor_position();
+      this.selection = this.clutterText.get_selection();
+      this.copyMenuItem.setSensitive(this.selection && this.selection != '');
+
+      let len = this.clutterText.text.length;
+      if(this.selectBounds == -1)
+        this.selectBounds = len;
+      if(this.cursorPosition == -1)
+         this.selectBounds = this.selectBounds + this.selection.length;
+      else if(this.selectBounds < this.cursorPosition)
+         this.selectBounds = this.selectBounds + this.selection.length;
+      this.deleteMenuItem.setSensitive(this.selection && this.selection != '' && this.selectBounds);
+   },
+
+   _updatePasteItem: function() {
+      this._clipboard.get_text(Lang.bind(this,
+         function(clipboard, text) {
+            this.pasteMenuItem.setSensitive(text && text != '' && this.clutterText.text != '' && this._isActivated());
+         }));
+    },
+
+   _onCopyActivated: function() {
+       this._clipboard.set_text(this.selection);
+    },
+
+    _onPasteActivated: function() {
+       this._clipboard.get_text(Lang.bind(this,
+          function(clipboard, text) {
+             if (!text)
+                return;
+             this.clutterText.delete_selection();
+             let pos = this.clutterText.get_cursor_position();
+             this.clutterText.insert_text(text, pos);
+          }));
+    },
+
+    _onDeleteActivated: function() {
+      // this._entry.clutter_text.delete_selection();
+       this.clutterText.delete_text(this.selectBounds - this.selection.length, this.selectBounds);
+    },
 
    // the entry does not show the hint
    _isActivated: function() {
@@ -643,6 +716,8 @@ MyDesklet.prototype = {
       "description": "Text current note:",
       "tooltip": "The current note."
        },*/
+         this.settings.bindProperty(Settings.BindingDirection.IN, "stripe", "_themeStripe", this._onStyleChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "staples", "_themeStaples", this._onStyleChange, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "boxColor", "_boxColor", this._onStyleChange, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "fontColor", "_fontColor", this._onStyleChange, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "textSize", "_textSize", this._onStyleChange, null);
@@ -653,11 +728,46 @@ MyDesklet.prototype = {
          this.settings.bindProperty(Settings.BindingDirection.IN, "fixWidth", "_fWidth", this._onFixWidth, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "width", "_width", this._onFixWidth, null);
 
-         this._onStyleChange();
          this._onFixWidth();
+         Mainloop.idle_add(Lang.bind(this, this._onStyleChange));
       } catch (e) {
          this.showErrorMessage(e.message);
          global.logError(e);
+      }
+   },
+
+   execInstallLanguage: function() {
+      try {
+         let _shareFolder = GLib.get_home_dir() + "/.local/share/";
+         let _localeFolder = Gio.file_new_for_path(_shareFolder + "locale/");
+         let _moFolder = Gio.file_new_for_path(_shareFolder + "cinnamon/desklets/" + this.uuid + "/locale/mo/");
+
+         let children = _moFolder.enumerate_children('standard::name,standard::type',
+                                          Gio.FileQueryInfoFlags.NONE, null);
+         let info, child, _moFile, _moLocale, _moPath;
+                   
+         while ((info = children.next_file(null)) != null) {
+            let type = info.get_file_type();
+            if (type == Gio.FileType.REGULAR) {
+               _moFile = info.get_name();
+               if (_moFile.substring(_moFile.lastIndexOf(".")) == ".mo") {
+                  _moLocale = _moFile.substring(0, _moFile.lastIndexOf("."));
+                  _moPath = _localeFolder.get_path() + "/" + _moLocale + "/LC_MESSAGES/";
+                  let src = Gio.file_new_for_path(String(_moFolder.get_path() + "/" + _moFile));
+                  let dest = Gio.file_new_for_path(String(_moPath + this.uuid + ".mo"));
+                  try {
+                     //if(!this.equalsFile(dest.get_path(), src.get_path())) {
+                        this._makeDirectoy(dest.get_parent());
+                        src.copy(dest, Gio.FileCopyFlags.OVERWRITE, null, null);
+                     //}
+                  } catch(e) {
+                     Main.notifyError(_("Error:"), e.message);
+                  }
+               }
+            }
+         }
+      } catch(e) {
+         this.showErrorMessage(e.message);
       }
    }
 };
