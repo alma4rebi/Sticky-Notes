@@ -37,6 +37,8 @@ Installation Instructions:
 
 Change Log:
 --------------
+0.3- Beta
+   - Moved the staple themes to vertical position due a bug in St.Entry.
 
 0.2- Beta
    - Added support for language.

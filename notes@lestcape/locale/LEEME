@@ -1,4 +1,4 @@
-Desklet : Sticky Notes           Version            : v0.2-Beta
+Desklet : Sticky Notes           Version            : v0.3-Beta
 S.O.    : Cinnamon               Release Date       : 11 Noviembre de 2013.
 Author  : Lester Carballo Pérez  Correo electrónico : lestcape@gmail.com
 
@@ -25,6 +25,8 @@ Instrucciones de instalación:
 
 Registro de cambios:
 --------------
+0.3- Beta
+   - Movidos los temas de grapas a la posición vertical debido a un problema de St.Entry.
 
 0.2-Beta
    - Añadido soporte para el idioma.

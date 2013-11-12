@@ -1,5 +1,5 @@
-// Desklet : Sticky Notes           Version      : v0.1-Beta
-// O.S.    : Cinnamon               Release Date : 07 November 2013.
+// Desklet : Sticky Notes           Version      : v0.3-Beta
+// O.S.    : Cinnamon               Release Date : 11 November 2013.
 // Author  : Lester Carballo Pérez  Email        : lestcape@gmail.com
 //
 // Website : https://github.com/lestcape/Notes
@@ -39,7 +39,6 @@ const Settings = imports.ui.settings;
 const Pango = imports.gi.Pango;
 const Mainloop = imports.mainloop;
 const Gtk = imports.gi.Gtk;
-//const CinnamonEntry = imports.ui.cinnamonEntry;
 const Util = imports.misc.util;
 
 
@@ -355,23 +354,21 @@ MyDesklet.prototype = {
    setStyle: function() {
       let _color = (this._boxColor.replace(')',',' + this._transparency + ')')).replace('rgb','rgba');
       if(this._themeStaples != "None") {
-         this.mainBox.set_style('');
          this.rootBox.set_style('padding: 4px, 4px; background-color: ' + _color + '; color: ' +
                                  this._fontColor + '; text-shadow: 1px 1px 2px #000; font-weight: bold;');
          let imageG = GLib.get_home_dir() + "/.local/share/cinnamon/desklets/" + this.uuid + "/staples/"+ this._themeStaples +"/";
          this.transpBox.set_style('background-image: url(\'' + imageG + '1.png\');' +
                                   'background-repeat: repeat; padding: 0px; margin: 0px; background-position: left top;');
-         this.transpBox.set_width(17);
+         this.transpBox.set_height(17);
          this.endBox.set_style('background-image: url(\'' + imageG + '2.png\');' +
                                'background-repeat: repeat; padding: 0px; margin: 0px; background-position: left top; background-color: ' +
                              _color);
 
-         this.endBox.set_width(35);
+         this.endBox.set_height(25);
       } else {
-         this.rootBox.set_style('');
-         this.endBox.set_width(0);
-         this.transpBox.set_width(0);
-         this.mainBox.set_style('padding: 4px; border: '+ this._borderBoxWidth + 'px solid ' + this._borderBoxColor +
+         this.endBox.set_height(0);
+         this.transpBox.set_height(0);
+         this.rootBox.set_style('padding: 4px; border: '+ this._borderBoxWidth + 'px solid ' + this._borderBoxColor +
                              '; background-color: ' + _color + '; border-radius: 12px; color: ' + this._fontColor +
                              '; text-shadow: 1px 1px 2px #000; font-weight: bold;');
       }
@@ -440,9 +437,9 @@ MyDesklet.prototype = {
    },
 
    _initDeskletContruction: function() {
-      this.mainBox = new St.BoxLayout({vertical:false});
+      this.mainBox = new St.BoxLayout({vertical:true});
       this.rootBox = new St.BoxLayout({vertical:true});
-      this.themeBox = new St.BoxLayout({vertical:false});
+      this.themeBox = new St.BoxLayout({vertical:true});
       let buttonBanner = new St.BoxLayout({vertical:false});
       let leftBox = new St.BoxLayout({vertical:false});
       let centerBox = new St.BoxLayout({vertical:false});
@@ -495,7 +492,7 @@ MyDesklet.prototype = {
       this.themeBox.add(this.transpBox, {x_fill: true, expand: true, x_align: St.Align.START});
       this.themeBox.add(this.endBox, {x_fill: true, expand: true, x_align: St.Align.START});
 
-      this.mainBox.add(this.themeBox, {x_fill: true, expand: true, x_align: St.Align.START});
+      this.mainBox.add(this.themeBox, {x_fill: true, x_align: St.Align.START});
       this.mainBox.add(this.rootBox, {x_fill: true, expand: true, x_align: St.Align.START});
 
       this.clutterText = this.entry.clutter_text;

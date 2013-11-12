@@ -1,7 +1,7 @@
 {
-    "uuid": "notes@lestcape",
-    "name": "Sticky Note",
-    "description": "A sticky note desklet",
-    "prevent-decorations": false,
-    "last-edited": "1371648230"
+    "last-edited": "1384182051", 
+    "description": "A sticky note desklet", 
+    "prevent-decorations": false, 
+    "uuid": "notes@lestcape", 
+    "name": "Sticky Note"
 }
