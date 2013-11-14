@@ -32,6 +32,7 @@ const GLib = imports.gi.GLib;
 const Clutter = imports.gi.Clutter;
 const Cinnamon = imports.gi.Cinnamon;
 const Desklet = imports.ui.desklet;
+const DeskletManager = imports.ui.deskletManager;
 const PopupMenu = imports.ui.popupMenu;
 const Main = imports.ui.main;
 const Tooltips = imports.ui.tooltips;
@@ -53,12 +54,12 @@ function MyDesklet(metadata, desklet_id){
 MyDesklet.prototype = {
    __proto__: Desklet.Desklet.prototype,
 
-   _init: function(metadata, desklet_id){
+   _init: function(metadata, desklet_id) {
       Desklet.Desklet.prototype._init.call(this, metadata, desklet_id);
-
       this.metadata = metadata;
       this.uuid = this.metadata["uuid"];
       this.instance_id = desklet_id;
+     // this.renderFontFamily();
       this.execInstallLanguage();
       _ = imports.gettext.domain(this.uuid).gettext;
       imports.gettext.bindtextdomain(this.uuid, GLib.get_home_dir() + "/.local/share/locale");
@@ -66,7 +67,7 @@ MyDesklet.prototype = {
 
       this._clipboard = St.Clipboard.get_default();
 
-      this.helpFile = GLib.get_home_dir() + "/.local/share/cinnamon/desklets/"+this.metadata["uuid"]+"/locale/" + _("README");
+      this.helpFile = GLib.get_home_dir() + "/.local/share/cinnamon/desklets/"+this.uuid+"/locale/" + _("README");
 		
       this._menu.addAction(_("Help"), Lang.bind(this, function() {
          Util.spawnCommandLine("xdg-open " + this.helpFile);
@@ -74,7 +75,8 @@ MyDesklet.prototype = {
       this._menu.addAction(_("Website"), Lang.bind(this, function() {
          Util.spawnCommandLine("xdg-open http://github.com/lestcape/Notes");
       }));
-       this._menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+
+      this._menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
       this.copyMenuItem = new PopupMenu.PopupMenuItem(_("Copy"));
       this.copyMenuItem.connect('activate', Lang.bind(this, this._onCopyActivated));
@@ -92,6 +94,12 @@ MyDesklet.prototype = {
 
       this._menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
+      this.multInstanceMenuItem = new PopupMenu.PopupSwitchMenuItem(_("Multiple Instances"), false);
+      this.multInstanceMenuItem.connect('activate', Lang.bind(this, this._onMultInstanceActivated));
+      this._menu.addMenuItem(this.multInstanceMenuItem);
+
+      this._menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+
       this._entryActiveMenu = false;
       this._menu.connect('open-state-changed', Lang.bind(this, this._updateMenu));
 
@@ -106,37 +114,210 @@ MyDesklet.prototype = {
       this._fontFamily = ""; //Default Font family
       this._fontColor= "#ffffff";
       this._fWidth = false;
-      this._width = 170;
+      this._width = 200;
       this.focusIDSignal = 0;
       this.keyPressIDSignal = 0;
+      this._multInstance = false;
       try {
+         this.settingsExt = Gio.Settings.new("org.cinnamon");
+         this._initSettings();
+         this.multInstanceMenuItem._switch.setToggleState(this._multInstance);
          this._initDeskletContruction();
-         this.notesList = this.readNotesFromFile();
+         this.setContent(this.mainBox);
+
+         this.notesList = this.findNotesFromFile();
+         if(this._multInstance) {
+            let numberInstance = this.getInstanceNumber();
+            if((numberInstance == 0)&&(this.notesList.length > 1)) {
+               let file = Gio.file_new_for_path(GLib.get_home_dir() + "/.local/share/cinnamon/desklets/" + this.uuid +"/.loock");
+               if((!file.query_exists(null))&&(this.getCountInstance() == 1)) {
+                  Mainloop.idle_add(Lang.bind(this, this.multInstanceUpdate));
+               }
+            }
+            if(numberInstance < this.notesList.length) {
+               this.readNoteFromFile(numberInstance);
+               this.loadNote(numberInstance);
+            } else {
+               this.notesList.push([this.maxValueNote() + 1, ""]);
+               this.noteCurrent = numberInstance + 1;
+               this.reset();
+            }
+         }
+         else {
+            this.readNotesFromFile();
+            this.loadNote(0);
+         }
+
+         this._keyFocusNotifyId = global.stage.connect('notify::key-focus', Lang.bind(this, this._onKeyFocusChanged));
+
          this.clutterText.connect('button-press-event', Lang.bind(this, this._onButtonPress));
          this.clutterText.connect('button-release-event', Lang.bind(this, this._onButtonRelease));
 
-         this.setContent(this.mainBox);
-         this._initSettings();
+         this._onFixWidth();
+         Mainloop.idle_add(Lang.bind(this, this._onStyleChange));
       } catch(e) {
          this.showErrorMessage(e.message);
       }
+      this._trackMouse();
+   },
+
+   _onKeyFocusChanged: function() {
+      let focusedActor = global.stage.get_key_focus();
+      if((focusedActor)&&(this.entry.contains(focusedActor))&&(this.focusIDSignal == 0))
+         global.stage.set_key_focus(null);
    },
 
    showErrorMessage: function(menssage) {
       Main.notifyError(_("Error"), menssage);
    },
 
+   multInstanceUpdate: function() {
+      try {
+         let enabledDesklets = this.settingsExt.get_strv("enabled-desklets");
+         let def, id;
+         for(idPos in enabledDesklets) {
+            def = this._getDeskletDefinition(enabledDesklets[idPos]);
+            if((def)&&(def.uuid == this.uuid)) {
+               let id = parseInt(def.desklet_id);
+               if(id != parseInt(this.instance_id))
+                  DeskletManager.removeDesklet(this.uuid, id);
+            }
+         }
+         DeskletManager.removeDesklet(this.uuid, this.instance_id);
+         if(this._multInstance) {
+            this._loock(true);
+            let listDesklet = this.findNotesFromFile();
+            for(index in listDesklet)
+               this.createNewInstance();
+            if(listDesklet.length == 0)
+               this.createNewInstance();
+            this._loock(false);
+         } else
+            this.createNewInstance();
+      } catch(e) {
+         this.showErrorMessage(e.message);
+      }
+   },
+
+   createNewInstance: function() {
+      try {
+         let newDeskletID = this.settingsExt.get_int("next-desklet-id");
+         this.settingsExt.set_int("next-desklet-id", newDeskletID + 1);
+         let deskletDef;
+         if(this._multInstance) {
+            let monitor = Main.layoutManager.focusMonitor;
+            let countMaxDesklet = monitor.width/this.mainBox.get_width();
+            let numberInstance = this.getCountInstance();
+            let posY = 100*Math.floor(numberInstance/countMaxDesklet);
+            if(posY > monitor.height)
+               posY = 100;
+            let posX = Math.floor(numberInstance % countMaxDesklet)*this.mainBox.get_width();
+            deskletDef = ('notes@lestcape:%s:%s:%s').format(newDeskletID, posX, posY);
+         }
+         else {
+            deskletDef = ('notes@lestcape:%s:0:100').format(newDeskletID);
+         }
+         let enabledDesklets = this.settingsExt.get_strv("enabled-desklets");
+         enabledDesklets.push(deskletDef);
+         this.settingsExt.set_strv("enabled-desklets", enabledDesklets);
+         
+      } catch (e) {
+         this.showErrorMessage(e.message);
+      }
+   },
+
+   getInstanceNumber: function() {
+      let currentInstance = parseInt(this.instance_id);
+      let resultNumber = 0;
+      try {
+         let enabledDesklets = this.settingsExt.get_strv("enabled-desklets");
+         let def, id;
+         for(idPos in enabledDesklets) {
+            def = this._getDeskletDefinition(enabledDesklets[idPos]);
+            if((def)&&(def.uuid == this.uuid)) {
+               let id = parseInt(def.desklet_id);
+               if(id < currentInstance)
+                  resultNumber++;
+            }
+         }
+      } catch (e) {
+         this.showErrorMessage(e.message);
+         resultNumber = -1;
+      }
+      return resultNumber;
+   },
+
+   getCountInstance: function() {
+      let resultNumber = 0;
+      try {
+         let enabledDesklets = this.settingsExt.get_strv("enabled-desklets");
+         let def, id;
+         for(idPos in enabledDesklets) {
+            def = this._getDeskletDefinition(enabledDesklets[idPos]);
+            if((def)&&(def.uuid == this.uuid)) {
+               resultNumber++;
+            }
+         }
+      } catch (e) {
+         this.showErrorMessage(e.message);
+         resultNumber = -1;
+      }
+      return resultNumber;
+   },
+
+   getMasterInstance: function() {
+      let currentInstance = parseInt(this.instance_id);
+      try {
+         let enabledDesklets = this.settingsExt.get_strv("enabled-desklets");
+         let def, id;
+         for(idPos in enabledDesklets) {
+            def = this._getDeskletDefinition(enabledDesklets[idPos]);
+            if((def)&&(def.uuid == this.uuid)) {
+               let id = parseInt(def.desklet_id);
+               if(id < currentInstance)
+                  currentInstance = id;
+            }
+         }
+      } catch (e) {
+         this.showErrorMessage(e.message);
+      }
+      return currentInstance;
+   },
+
+   _getDeskletDefinition: function(definition) {
+      let elements = definition.split(":");
+      if(elements.length == 4) {
+         return {
+            uuid: elements[0],
+            desklet_id: elements[1],
+            x: elements[2],
+            y: elements[3]
+         };
+      } else {
+         global.logError("Bad desklet definition: " + definition);
+         return null;
+      }
+   },
+
+   _loock: function(loock) {
+      try {
+         let file = Gio.file_new_for_path(GLib.get_home_dir() + "/.local/share/cinnamon/desklets/" + this.uuid +"/.loock");
+         if(loock) {   
+            let fstream = file.replace("", false, Gio.FileCreateFlags.NONE, null);
+            fstream.close(null);
+         } else {
+            file.delete(null);
+         }
+      } catch(e) {
+         this.showErrorMessage(e.message);
+      }
+   },
+
    newNote: function(noteMessage) {
       if((noteMessage)&&(noteMessage != "")&&(noteMessage != _("Type to your note..."))) {
          if((this.notesList.length == 0)||(this.noteCurrent > this.notesList.length)) {
             try {
-               let maxValue = 0;
-               let currValue, textVal;
-               for(pos in this.notesList) {
-                  currValue = parseInt(this.notesList[pos][0]);
-                  if(currValue > maxValue)
-                     maxValue = currValue;
-               }
+               let maxValue = this.maxValueNote();
                this.noteCurrent = this.notesList.length;
                let strinName = (maxValue + 1).toString();
                this.notesList.push([strinName, noteMessage]);
@@ -147,11 +328,39 @@ MyDesklet.prototype = {
             } catch(e) {
                this.showErrorMessage(e.message);
             }
-         } else if(this.notesList[this.noteCurrent - 1][1] != noteMessage) {
-            this.notesList[this.noteCurrent - 1][1] = noteMessage;
-            this.writeNoteToFile(this.noteCurrent - 1);
+         } else {
+            if(this.noteCurrent == 0)
+               this.noteCurrent++;
+            if(this.notesList[this.noteCurrent - 1][1] != noteMessage) {
+               this.notesList[this.noteCurrent - 1][1] = noteMessage;
+               this.writeNoteToFile(this.noteCurrent - 1);
+            }
          }
       }
+   },
+
+   maxValueNote: function(noteMessage) {
+      let maxValue = 0;
+      let currValue;
+      for(let pos in this.notesList) {
+         currValue = parseInt(this.notesList[pos][0]);
+         if(currValue > maxValue)
+            maxValue = currValue;
+      }
+      return maxValue;
+   },
+
+   loadNote: function(pos) {
+      if((pos < 0)&&(pos > this.notesList.length)) {
+         this.noteCurrent = 1;
+         this.reset();
+      } else {
+         this.noteCurrent = pos + 1;
+         this.entry.text = this.notesList[pos][1];
+      }
+      this.numberNote.set_text(this.notesList.length.toString());
+      this.currentNote.set_text(this.noteCurrent.toString());
+      this._text = this.entry.text; 
    },
 
    writeNoteToFile: function(pos) {
@@ -170,7 +379,6 @@ MyDesklet.prototype = {
             this.showErrorMessage(e.message);
          }
       }
-      
    },
 
    deleteNote: function(pos) {
@@ -183,90 +391,122 @@ MyDesklet.prototype = {
    },
 
    readNotesFromFile: function() {
-      let notes = this.findNotesFromFile();
-      try {   
-         for(pos in notes) {
-            let file = Gio.file_new_for_path(GLib.get_home_dir() + "/.local/share/notes/" + notes[pos][0] + ".note");
-            if(file.query_exists(null))
-            {
-               try {
-                  let fstream = file.read(null);
-                  let dstream = new Gio.DataInputStream.new(fstream);
-                  let data = dstream.read_until("", null);
-                  fstream.close(null);
-                  notes[pos][1] = data[0];
-               } catch(e) {
-                  this.showErrorMessage(e.message);
-               }
-            } else
-               this.showErrorMessage(e.message);
-         }
-         this.noteCurrent = 0;
-         this.currentNote.set_text("1");
-         this.numberNote.set_text(notes.length.toString());
-         if(notes.length > 0) {
-            notes = this._sorting(notes);
-            this.noteCurrent = 1;
-            this.currentNote.set_text("1");
-            this.entry.text = notes[0][1];
-            this._text = this.entry.text; 
+      try {
+         for(let pos in this.notesList) {
+            this.readNoteFromFile(pos);
          }
       } catch(e) {
          this.showErrorMessage(e.message);
       }
+   },
+
+   readNoteFromFile: function(pos) {
+      if((pos > -1)&&(pos < this.notesList.length)) {
+         let file = Gio.file_new_for_path(GLib.get_home_dir() + "/.local/share/notes/" + this.notesList[pos][0] + ".note");
+         if(file.query_exists(null))
+         {
+            try {
+               let fstream = file.read(null);
+               let dstream = new Gio.DataInputStream.new(fstream);
+               let data = dstream.read_until("", null);
+               fstream.close(null);
+               if(data[0])
+                  this.notesList[pos][1] = data[0];
+               else
+                  this.notesList[pos][1] = "";
+            } catch(e) {
+               this.showErrorMessage(e.message);
+            }
+         } else
+            this.showErrorMessage(e.message);
+      }
+   },
+
+   findNotesFromFile: function() {
+      let notes = new Array();
+      try {
+         let notesFolder = Gio.file_new_for_path(GLib.get_home_dir() + "/.local/share/notes");
+         if(!this._isDirectory(notesFolder)) {
+            return notes;
+         }
+         let children = notesFolder.enumerate_children('standard::name,standard::type',
+                                                       Gio.FileQueryInfoFlags.NONE, null);
+         let info, nameFile, lastIndex;
+         while((info = children.next_file(null)) != null) {
+            if(info.get_file_type() == Gio.FileType.REGULAR) {
+               nameFile = info.get_name();
+               lastIndex = nameFile.lastIndexOf(".");
+               if(nameFile.substring(lastIndex) == ".note") {
+                  notes.push([nameFile.substring(0, lastIndex), ""]);
+               }
+            }
+         }
+      } catch(e) {
+         this.showErrorMessage(e.message);
+      }
+      return this._sorting(notes);
+   },
+
+   _sorting: function(notes) {
+      let valueL, valueF, tempSwap;
+      for(let posF=0; posF < notes.length - 1; posF++) {
+         valueF = parseInt(notes[posF][0]);
+         for(let posL=posF + 1; posL < notes.length; posL++) {
+            valueL = parseInt(notes[posL][0]);
+            if(valueL < valueF) {
+               tempSwap = notes[posL];
+               notes[posL] = notes[posF];
+               notes[posF] = tempSwap;
+            }
+         }
+      }
       return notes;
    },
 
-    _sorting: function(notes) {
-       let valueL, valueF, tempSwap;
-       for(let posF=0; posF < notes.length - 1; posF++) {
-          valueF = parseInt(notes[posF][0]);
-          for(let posL=posF + 1; posL < notes.length; posL++) {
-             valueL = parseInt(notes[posL][0]);
-             if(valueL < valueF) {
-                tempSwap = notes[posL];
-                notes[posL] = notes[posF];
-                notes[posF] = tempSwap;
-             }
-          }
-       }
-       return notes;
-    },
-
    _onAddNote: function() {
-      this.reset();
-      this.noteCurrent = this.notesList.length + 1;
-      this.currentNote.set_text(this.noteCurrent.toString());
+      if(this._multInstance) {
+        this.createNewInstance();
+      }
+      else {
+         this.reset();
+         this.noteCurrent = this.notesList.length + 1;
+         this.currentNote.set_text(this.noteCurrent.toString());
+      }
    },
 
    _onRemoveNote: function() {
       try {
-         if(this.notesList.length > 1) { 
-            if((this.noteCurrent != 0)&&(this.noteCurrent <= this.notesList.length)) {
-               if(this.deleteNote(this.noteCurrent - 1)) {
-                  this.notesList.splice(this.noteCurrent - 1, 1);
-                  this.numberNote.set_text(this.notesList.length.toString());
-                  if(this.noteCurrent > this.notesList.length) {
-                     this.noteCurrent = this.notesList.length;
-                     this.currentNote.set_text(this.noteCurrent.toString());
-                     this.entry.text = this.notesList[this.noteCurrent - 1][1];
-                  } else
+         if(this._multInstance) {
+            this.deleteNote(this.noteCurrent - 1);
+            DeskletManager.removeDesklet(this.uuid, this.instance_id);
+         } else {
+            if(this.notesList.length > 1) { 
+               if((this.noteCurrent != 0)&&(this.noteCurrent <= this.notesList.length)) {
+                  if(this.deleteNote(this.noteCurrent - 1)) {
+                     this.notesList.splice(this.noteCurrent - 1, 1);
+                     this.numberNote.set_text(this.notesList.length.toString());
+                     if(this.noteCurrent > this.notesList.length) {
+                        this.noteCurrent = this.notesList.length;
+                        this.currentNote.set_text(this.noteCurrent.toString());
+                        this.entry.text = this.notesList[this.noteCurrent - 1][1];
+                     } else
+                        this.entry.text = this.notesList[this.noteCurrent][1];
+                  }
+               } else if(this.noteCurrent == 0) {
+                  if(this.deleteNote(this.noteCurrent)) {
+                     this.notesList.splice(this.noteCurrent, 1);
                      this.entry.text = this.notesList[this.noteCurrent][1];
+                     this.numberNote.set_text(this.notesList.length.toString());
+                  }
                }
-            } else if(this.noteCurrent == 0) {
-               if(this.deleteNote(this.noteCurrent)) {
-                  this.notesList.splice(this.noteCurrent, 1);
-                  this.entry.text = this.notesList[this.noteCurrent][1];
-                  this.numberNote.set_text(this.notesList.length.toString());
+            } else if(this.notesList.length == 1) {
+               if(this.deleteNote(0)) {
+                  this.noteCurrent = 1;
+                  this.notesList.splice(0, 1);
+                  this.numberNote.set_text("0");
+                  this.currentNote.set_text("1");
+                  this.reset();
                }
-            }
-         } else if(this.notesList.length == 1) {
-            if(this.deleteNote(0)) {
-               this.noteCurrent = 1;
-               this.notesList.splice(0, 1);
-               this.numberNote.set_text("0");
-               this.currentNote.set_text("1");
-               this.reset();
             }
          }
         // this.showErrorMessage("noteCurrent: " + this.noteCurrent + " lengh:" + this.notesList.length);
@@ -313,27 +553,6 @@ MyDesklet.prototype = {
       }
    },
 
-   findNotesFromFile: function() {
-      let notes = new Array();
-      let notesFolder = Gio.file_new_for_path(GLib.get_home_dir() + "/.local/share/notes");
-      if(!this._isDirectory(notesFolder)) {
-         return notes;
-      }
-      let children = notesFolder.enumerate_children('standard::name,standard::type',
-                                          Gio.FileQueryInfoFlags.NONE, null);
-      let info, nameFile, lastIndex;
-      while ((info = children.next_file(null)) != null) {
-         if (info.get_file_type() == Gio.FileType.REGULAR) {
-            nameFile = info.get_name();
-            lastIndex = nameFile.lastIndexOf(".");
-            if (nameFile.substring(lastIndex) == ".note") {
-               notes.push([nameFile.substring(0, lastIndex), ""]);
-            }
-         }
-      }
-      return notes;
-   },
-
    _isDirectory: function(fDir) {
       try {
          let info = fDir.query_filesystem_info("standard::type", null);
@@ -354,17 +573,17 @@ MyDesklet.prototype = {
    setStyle: function() {
       let _color = (this._boxColor.replace(')',',' + this._transparency + ')')).replace('rgb','rgba');
       if(this._themeStaples != "None") {
-         this.rootBox.set_style('padding: 4px, 4px; background-color: ' + _color + '; color: ' +
+         this.rootBox.set_style('padding: 4px; background-color: ' + _color + '; color: ' +
                                  this._fontColor + '; text-shadow: 1px 1px 2px #000; font-weight: bold;');
          let imageG = GLib.get_home_dir() + "/.local/share/cinnamon/desklets/" + this.uuid + "/staples/"+ this._themeStaples +"/";
          this.transpBox.set_style('background-image: url(\'' + imageG + '1.png\');' +
                                   'background-repeat: repeat; padding: 0px; margin: 0px; background-position: left top;');
-         this.transpBox.set_height(17);
+         this.transpBox.set_height(10);
          this.endBox.set_style('background-image: url(\'' + imageG + '2.png\');' +
                                'background-repeat: repeat; padding: 0px; margin: 0px; background-position: left top; background-color: ' +
                              _color);
 
-         this.endBox.set_height(25);
+         this.endBox.set_height(15);
       } else {
          this.endBox.set_height(0);
          this.transpBox.set_height(0);
@@ -395,12 +614,12 @@ MyDesklet.prototype = {
                                  '; font-weight: normal; ' + fontTag);
             textHeight = this._getTextHeight();
          }
-         if((imageNumber < 5)||(imageNumber > 30)||(imageNumber != textHeight)) {
+         if((imageNumber < 10)||(imageNumber > 60)||(imageNumber != textHeight)) {
             this.showErrorMessage(_("Unsupported text size '%s'  to use the font '%s' in this theme.").format(this._textSize, this._fontFamily));
             this.textBox.set_style('');
          } else
             this.textBox.set_style('background-image: url(\'' + image + imageNumber + '.png\');' +
-                                   'background-repeat: repeat; padding: 0px; margin: 0px; background-position: left top;');
+                                   'background-repeat: repeat; background-position: 0px 0px;'); 
       } else
          this.textBox.set_style('');
    },
@@ -410,7 +629,7 @@ MyDesklet.prototype = {
       let themeNode = this.entry.get_theme_node();
       let font = themeNode.get_font();
       let metrics = context.get_metrics(font, context.get_language());
-      return Pango.units_to_double(metrics.get_ascent() + metrics.get_descent())/2;
+      return Pango.units_to_double(metrics.get_ascent() + metrics.get_descent());
    },
 
    fixWidth: function(fix) {
@@ -429,9 +648,11 @@ MyDesklet.prototype = {
       if(this.keyPressIDSignal == 0)
          this.clutterText.disconnect(this.keyPressIDSignal);
       this.keyPressIDSignal = 0;
+      this.settings.finalize();
    },
 
    reset: function () {
+      this._getTextHeight();
       this.entry.text = "";
       global.stage.set_key_focus(null);
    },
@@ -465,11 +686,13 @@ MyDesklet.prototype = {
       let nextButton = this._buttonCreation('edit-redo', _("Next Note"));
       nextButton.connect('clicked', Lang.bind(this, this._onNextNote));
 
-      centerBox.add(backButton, {x_fill: true, x_align: St.Align.MIDDLE});
-      centerBox.add(this.currentNote, {x_fill: true, x_align: St.Align.MIDDLE});
-      centerBox.add(separator, {x_fill: true, x_align: St.Align.MIDDLE});
-      centerBox.add(this.numberNote, {x_fill: true, x_align: St.Align.MIDDLE});
-      centerBox.add(nextButton, {x_fill: true, x_align: St.Align.MIDDLE});      
+      if(!this._multInstance) {
+         centerBox.add(backButton, {x_fill: true, x_align: St.Align.MIDDLE});
+         centerBox.add(this.currentNote, {x_fill: true, x_align: St.Align.MIDDLE});
+         centerBox.add(separator, {x_fill: true, x_align: St.Align.MIDDLE});
+         centerBox.add(this.numberNote, {x_fill: true, x_align: St.Align.MIDDLE});
+         centerBox.add(nextButton, {x_fill: true, x_align: St.Align.MIDDLE});      
+      }
 
       let deleteButton = this._buttonCreation('window-close', _("Remove Note"));
       deleteButton.connect('clicked', Lang.bind(this, this._onRemoveNote));
@@ -571,6 +794,7 @@ MyDesklet.prototype = {
          this.keyPressIDSignal = 0;
          this.newNote(this.entry.text);
          this._text = this.entry.text;
+         global.stage.set_key_focus(null);
       } catch(e) {
          this.showErrorMessage(e.message);
       }
@@ -654,21 +878,25 @@ MyDesklet.prototype = {
        this._clipboard.set_text(this.selection);
     },
 
-    _onPasteActivated: function() {
-       this._clipboard.get_text(Lang.bind(this,
-          function(clipboard, text) {
-             if (!text)
-                return;
-             this.clutterText.delete_selection();
-             let pos = this.clutterText.get_cursor_position();
-             this.clutterText.insert_text(text, pos);
-          }));
-    },
+   _onPasteActivated: function() {
+      this._clipboard.get_text(Lang.bind(this,
+         function(clipboard, text) {
+            if (!text)
+               return;
+            this.clutterText.delete_selection();
+            let pos = this.clutterText.get_cursor_position();
+            this.clutterText.insert_text(text, pos);
+         }));
+   },
 
-    _onDeleteActivated: function() {
-      // this._entry.clutter_text.delete_selection();
-       this.clutterText.delete_text(this.selectBounds - this.selection.length, this.selectBounds);
-    },
+   _onDeleteActivated: function() {
+      this.clutterText.delete_text(this.selectBounds - this.selection.length, this.selectBounds);
+   },
+
+   _onMultInstanceActivated: function() {
+      this._multInstance = this.multInstanceMenuItem._switch.state;
+      this.multInstanceUpdate();
+   },
 
    // the entry does not show the hint
    _isActivated: function() {
@@ -685,10 +913,17 @@ MyDesklet.prototype = {
       }
     /*  else if(symbol == Clutter.Paste) {
         this.entry.text = this.entry.text.replace(/.*\((.+)\)/, '$1');
-        Main.notify(this.entry.text);
+        this.showErrorMessage(this.entry.text);
         return true;
       }*/
       return false;
+    },
+
+    _onMultInstanceChange: function() {
+       if(this.instance_id ==  this.getMasterInstance()) {
+          this.multInstanceUpdate();
+          this.multInstanceMenuItem._switch.setToggleState(this._multInstance);
+       }
     },
 
     _onStyleChange: function() {
@@ -705,7 +940,8 @@ MyDesklet.prototype = {
 
     _initSettings: function() {
       try {
-         this.settings = new Settings.DeskletSettings(this, this.metadata["uuid"], this.instance_id);
+         this.settings = new Settings.DeskletSettings(this, this.uuid, this.instance_id);
+         this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "multInstance", "_multInstance", this._onMultInstanceChange, null);
          //this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "text", "_text", this._onTextSetting, null);
          /*"text": {
       "type": "entry",
@@ -724,12 +960,43 @@ MyDesklet.prototype = {
          this.settings.bindProperty(Settings.BindingDirection.IN, "borderBoxColor", "_borderBoxColor", this._onStyleChange, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "fixWidth", "_fWidth", this._onFixWidth, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "width", "_width", this._onFixWidth, null);
-
-         this._onFixWidth();
-         Mainloop.idle_add(Lang.bind(this, this._onStyleChange));
       } catch (e) {
          this.showErrorMessage(e.message);
          global.logError(e);
+      }
+   },
+
+   renderFontFamily: function() {
+      try {
+         let fontMap = Clutter.get_font_map();
+         let listFamily = fontMap.list_families();
+         let patch = GLib.get_home_dir() + "/.local/share/cinnamon/desklets/" + this.uuid + "/settings-schema.json";
+         let new_json = JSON.parse(Cinnamon.get_file_contents_utf8_sync(patch));
+         let fontItem, lengthItem, family;
+         for(let key in new_json) {
+            if((key == "fontFamily")&&(new_json[key]["type"] == "combobox")) {
+               fontItem = new_json[key]["options"];
+              // if((!fontItem)||(fontItem.length == 0)) {
+                  for(let fPos in listFamily) {
+                     family = listFamily[fPos].get_name();
+                     //if(GLib.utf8_validate("utf-8"))
+                       //  if(g_utf8_validate(family))
+                        new_json[key]["options"][family] = family;
+                  }
+              // }
+            }
+         }
+         let raw_file = JSON.stringify(new_json, null, 4);
+         let file = Gio.file_new_for_path(patch);
+         if(file.delete(null, null)) {
+            let fp = file.create(0, null);
+            fp.write(raw_file, null);
+            fp.close;
+         } else {
+            //global.logError("Failed gain write access to settings file for applet/desklet '" + this.uuid + "', instance ") + this.instanceId;
+         }
+      } catch(e) {
+         this.showErrorMessage(e.message);
       }
    },
 
@@ -758,7 +1025,7 @@ MyDesklet.prototype = {
                         src.copy(dest, Gio.FileCopyFlags.OVERWRITE, null, null);
                      //}
                   } catch(e) {
-                     Main.notifyError(_("Error:"), e.message);
+                     this.showErrorMessage(e.message);
                   }
                }
             }
