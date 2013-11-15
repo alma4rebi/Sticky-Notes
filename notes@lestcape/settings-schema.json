@@ -222,7 +222,7 @@
     "width": {
         "default": 200,
         "type": "spinbutton",
-        "min": 100,
+        "min": 144,
         "max": 1600,
         "description": "Width:",
         "units": "pixels",

@@ -121,38 +121,16 @@ MyDesklet.prototype = {
       try {
          this.settingsExt = Gio.Settings.new("org.cinnamon");
          this._initSettings();
-         this.multInstanceMenuItem._switch.setToggleState(this._multInstance);
          this._initDeskletContruction();
          this.setContent(this.mainBox);
 
-         this.notesList = this.findNotesFromFile();
-         if(this._multInstance) {
-            let numberInstance = this.getInstanceNumber();
-            if((numberInstance == 0)&&(this.notesList.length > 1)) {
-               let file = Gio.file_new_for_path(GLib.get_home_dir() + "/.local/share/cinnamon/desklets/" + this.uuid +"/.loock");
-               if((!file.query_exists(null))&&(this.getCountInstance() == 1)) {
-                  Mainloop.idle_add(Lang.bind(this, this.multInstanceUpdate));
-               }
-            }
-            if(numberInstance < this.notesList.length) {
-               this.readNoteFromFile(numberInstance);
-               this.loadNote(numberInstance);
-            } else {
-               this.notesList.push([this.maxValueNote() + 1, ""]);
-               this.noteCurrent = numberInstance + 1;
-               this.reset();
-            }
-         }
-         else {
-            this.readNotesFromFile();
-            this.loadNote(0);
-         }
+         this.initDeskletType();
 
          this._keyFocusNotifyId = global.stage.connect('notify::key-focus', Lang.bind(this, this._onKeyFocusChanged));
-
          this.clutterText.connect('button-press-event', Lang.bind(this, this._onButtonPress));
          this.clutterText.connect('button-release-event', Lang.bind(this, this._onButtonRelease));
 
+         this.multInstanceMenuItem._switch.setToggleState(this._multInstance);
          this._onFixWidth();
          Mainloop.idle_add(Lang.bind(this, this._onStyleChange));
       } catch(e) {
@@ -161,39 +139,36 @@ MyDesklet.prototype = {
       this._trackMouse();
    },
 
-   _onKeyFocusChanged: function() {
-      let focusedActor = global.stage.get_key_focus();
-      if((focusedActor)&&(this.entry.contains(focusedActor))&&(this.focusIDSignal == 0))
-         global.stage.set_key_focus(null);
-   },
-
    showErrorMessage: function(menssage) {
       Main.notifyError(_("Error"), menssage);
    },
 
+   initDeskletType: function() {
+      this.notesList = this.findNotesFromFile();
+      if(this._multInstance) {
+         let numberInstance = this.getInstanceNumber();
+         if((numberInstance == 0)&&(this.notesList.length > 1)&&(this.getCountInstance() == 1)) {
+            this.openAllMulInstance();
+         }
+         if(numberInstance < this.notesList.length) {
+            this.readNoteFromFile(numberInstance);
+            this.loadNote(numberInstance);
+         } else {
+            this.notesList.push([this.maxValueNote() + 1, ""]);
+            this.noteCurrent = numberInstance + 1;
+            this.reset();
+         }
+      }
+      else {
+         this.readNotesFromFile();
+         this.loadNote(0);
+      }
+   },
+
    multInstanceUpdate: function() {
       try {
-         let enabledDesklets = this.settingsExt.get_strv("enabled-desklets");
-         let def, id;
-         for(idPos in enabledDesklets) {
-            def = this._getDeskletDefinition(enabledDesklets[idPos]);
-            if((def)&&(def.uuid == this.uuid)) {
-               let id = parseInt(def.desklet_id);
-               if(id != parseInt(this.instance_id))
-                  DeskletManager.removeDesklet(this.uuid, id);
-            }
-         }
-         DeskletManager.removeDesklet(this.uuid, this.instance_id);
-         if(this._multInstance) {
-            this._loock(true);
-            let listDesklet = this.findNotesFromFile();
-            for(index in listDesklet)
-               this.createNewInstance();
-            if(listDesklet.length == 0)
-               this.createNewInstance();
-            this._loock(false);
-         } else
-            this.createNewInstance();
+         this.removeAllInstances();
+         this.createNewInstance();
       } catch(e) {
          this.showErrorMessage(e.message);
       }
@@ -215,13 +190,45 @@ MyDesklet.prototype = {
             deskletDef = ('notes@lestcape:%s:%s:%s').format(newDeskletID, posX, posY);
          }
          else {
-            deskletDef = ('notes@lestcape:%s:0:100').format(newDeskletID);
+            deskletDef = ('notes@lestcape:%s:0:0').format(newDeskletID);
          }
          let enabledDesklets = this.settingsExt.get_strv("enabled-desklets");
          enabledDesklets.push(deskletDef);
          this.settingsExt.set_strv("enabled-desklets", enabledDesklets);
          
       } catch (e) {
+         this.showErrorMessage(e.message);
+      }
+   },
+
+   removeAllInstances: function() {
+      let enabledDesklets = this.settingsExt.get_strv("enabled-desklets");
+      let def, id;
+      for(idPos in enabledDesklets) {
+         def = this._getDeskletDefinition(enabledDesklets[idPos]);
+         if((def)&&(def.uuid == this.uuid)) {
+            let id = parseInt(def.desklet_id);
+            if(id != parseInt(this.instance_id))
+               DeskletManager.removeDesklet(this.uuid, id);
+         }
+      }
+      DeskletManager.removeDesklet(this.uuid, this.instance_id);
+   },
+
+   openAllMulInstance: function() {
+      try {
+         if(this._multInstance) {
+            let enabledDesklets = this.settingsExt.get_strv("enabled-desklets");
+            let listDesklet = this.findNotesFromFile();
+            let initNumber = this.getCountInstance();
+            if(listDesklet.length == 0)
+               this.createNewInstance();
+            else {
+               for(let index = initNumber; index < listDesklet.length; index++)
+                  this.createNewInstance();
+            }
+         }
+      } catch(e) {
          this.showErrorMessage(e.message);
       }
    },
@@ -296,20 +303,6 @@ MyDesklet.prototype = {
       } else {
          global.logError("Bad desklet definition: " + definition);
          return null;
-      }
-   },
-
-   _loock: function(loock) {
-      try {
-         let file = Gio.file_new_for_path(GLib.get_home_dir() + "/.local/share/cinnamon/desklets/" + this.uuid +"/.loock");
-         if(loock) {   
-            let fstream = file.replace("", false, Gio.FileCreateFlags.NONE, null);
-            fstream.close(null);
-         } else {
-            file.delete(null);
-         }
-      } catch(e) {
-         this.showErrorMessage(e.message);
       }
    },
 
@@ -572,24 +565,30 @@ MyDesklet.prototype = {
 
    setStyle: function() {
       let _color = (this._boxColor.replace(')',',' + this._transparency + ')')).replace('rgb','rgba');
+      let _colorBanner = (this._boxColor.replace(')',',' + 0.1 + ')')).replace('rgb','rgba');
       if(this._themeStaples != "None") {
-         this.rootBox.set_style('padding: 4px; background-color: ' + _color + '; color: ' +
-                                 this._fontColor + '; text-shadow: 1px 1px 2px #000; font-weight: bold;');
+         this.rootBox.set_style('text-shadow: 1px 1px 2px #000; min-width: 144px; background-color: ' + _color +
+                                '; box-shadow: -4px 4px 2px rgba(0, 0, 0, 0.5); color: ' + this._fontColor + '; font-weight: bold;');
+         this.buttonBanner.set_style('padding: 4px; background-color: ' + _colorBanner + ';');
          let imageG = GLib.get_home_dir() + "/.local/share/cinnamon/desklets/" + this.uuid + "/staples/"+ this._themeStaples +"/";
          this.transpBox.set_style('background-image: url(\'' + imageG + '1.png\');' +
-                                  'background-repeat: repeat; padding: 0px; margin: 0px; background-position: left top;');
+                                  'background-repeat: repeat; background-position: 0px 0px;');
          this.transpBox.set_height(10);
          this.endBox.set_style('background-image: url(\'' + imageG + '2.png\');' +
-                               'background-repeat: repeat; padding: 0px; margin: 0px; background-position: left top; background-color: ' +
-                             _color);
-
+                               'background-repeat: repeat; background-position: 0px 0px; background-color: ' +
+                               _colorBanner);
          this.endBox.set_height(15);
       } else {
+         this.buttonBanner.set_style('padding: 4px; background-color: ' + _colorBanner + '; border-radius: 12px;');
          this.endBox.set_height(0);
          this.transpBox.set_height(0);
-         this.rootBox.set_style('padding: 4px; border: '+ this._borderBoxWidth + 'px solid ' + this._borderBoxColor +
-                             '; background-color: ' + _color + '; border-radius: 12px; color: ' + this._fontColor +
-                             '; text-shadow: 1px 1px 2px #000; font-weight: bold;');
+         this.rootBox.set_style('border: '+ this._borderBoxWidth + 'px solid ' + this._borderBoxColor +
+                                '; background-color: ' + _color + '; border-radius: 12px; color: ' + this._fontColor +
+                                '; text-shadow: 1px 1px 2px #000; font-weight: bold; min-width: 144px;');
+      /* this.rootBox.set_style('text-shadow: 1px 1px 2px #000; min-width: 144px; background-color: ' + _color +
+                                '; box-shadow: -4px 4px 2px rgba(0, 0, 0, 0.5); color: ' + this._fontColor + 
+                                '; border: '+ this._borderBoxWidth + 'px solid ' + this._borderBoxColor +
+                                '; border-radius: 12px; font-weight: bold;');*/
       }
       let fontTag = '';
       if((this._fontFamily)&&(this._fontFamily != ""))
@@ -601,7 +600,6 @@ MyDesklet.prototype = {
 
       this.entry.set_style('font-size: ' + this._textSize + 'pt; color: ' + this._fontColor +
                            '; font-weight: normal; ' + fontTag);
-
 
       if(this._themeStripe != "None") {
          let image = GLib.get_home_dir() + "/.local/share/cinnamon/desklets/" + this.uuid + "/stripe/" + this._themeStripe + "/";
@@ -617,9 +615,15 @@ MyDesklet.prototype = {
          if((imageNumber < 10)||(imageNumber > 60)||(imageNumber != textHeight)) {
             this.showErrorMessage(_("Unsupported text size '%s'  to use the font '%s' in this theme.").format(this._textSize, this._fontFamily));
             this.textBox.set_style('');
-         } else
-            this.textBox.set_style('background-image: url(\'' + image + imageNumber + '.png\');' +
-                                   'background-repeat: repeat; background-position: 0px 0px;'); 
+         } else {
+            if(this._themeStaples != "None") {
+               this.textBox.set_style('padding: 4px; background-image: url(\'' + image + imageNumber + '.png\');' +
+                                      'background-repeat: repeat; background-position: 0px 0px;'); 
+            } else {
+               this.textBox.set_style('padding: 4px; background-image: url(\'' + image + imageNumber + '.png\');' +
+                                      'background-repeat: repeat; background-position: 0px 0px; border-radius: 12px;'); 
+            }
+         }
       } else
          this.textBox.set_style('');
    },
@@ -639,17 +643,6 @@ MyDesklet.prototype = {
       else
          this.entry.set_width(-1);
    },
- 
-   on_desklet_removed: function() {
-      this.reset();
-      if(this.focusIDSignal > 0)
-         this.clutterText.disconnect(this.focusIDSignal);
-      this.focusIDSignal = 0;
-      if(this.keyPressIDSignal == 0)
-         this.clutterText.disconnect(this.keyPressIDSignal);
-      this.keyPressIDSignal = 0;
-      this.settings.finalize();
-   },
 
    reset: function () {
       this._getTextHeight();
@@ -660,8 +653,7 @@ MyDesklet.prototype = {
    _initDeskletContruction: function() {
       this.mainBox = new St.BoxLayout({vertical:true});
       this.rootBox = new St.BoxLayout({vertical:true});
-      this.themeBox = new St.BoxLayout({vertical:true});
-      let buttonBanner = new St.BoxLayout({vertical:false});
+      this.buttonBanner = new St.BoxLayout({vertical:false});
       let leftBox = new St.BoxLayout({vertical:false});
       let centerBox = new St.BoxLayout({vertical:false});
       let rightBox = new St.BoxLayout({vertical:false}); 
@@ -699,23 +691,24 @@ MyDesklet.prototype = {
       
       rightBox.add(deleteButton, {x_fill: true, x_align: St.Align.END});
 
-      buttonBanner.add(leftBox, {x_fill: true, x_align: St.Align.START});
-      buttonBanner.add(centerBox, {x_fill: false, expand: true, x_align: St.Align.MIDDLE});
-      buttonBanner.add(rightBox, {x_fill: true, x_align: St.Align.END});
+      this.buttonBanner.add(leftBox, {x_fill: true, x_align: St.Align.START});
+      this.buttonBanner.add(centerBox, {x_fill: false, expand: true, x_align: St.Align.MIDDLE});
+      this.buttonBanner.add(rightBox, {x_fill: true, x_align: St.Align.END});
 
       this.entry = new St.Entry({ name: 'noteEntry', hint_text: _("Type to your note..."), track_hover: false, can_focus: true});
       this.textBox.add(this.entry, {x_fill: true, y_fill: true, x_align: St.Align.START, y_align: St.Align.START});
 
-      this.rootBox.add(buttonBanner, {x_fill: true, expand: true, x_align: St.Align.START});
-      //this.rootBox.add(this.entry, {x_fill: true, y_fill: true, x_align: St.Align.START});
-      this.rootBox.add(this.textBox, {x_fill: true, y_fill: true, x_align: St.Align.START});
 
       this.transpBox = new St.BoxLayout({vertical:true});
       this.endBox = new St.BoxLayout({vertical:true});
-      this.themeBox.add(this.transpBox, {x_fill: true, expand: true, x_align: St.Align.START});
-      this.themeBox.add(this.endBox, {x_fill: true, expand: true, x_align: St.Align.START});
 
-      this.mainBox.add(this.themeBox, {x_fill: true, x_align: St.Align.START});
+      this.rootBox.add(this.endBox, {x_fill: true, expand: true, x_align: St.Align.START});
+      this.rootBox.add(this.buttonBanner, {x_fill: true, expand: true, x_align: St.Align.START});
+      this.rootBox.add(this.textBox, {x_fill: true, y_fill: true, x_align: St.Align.START});
+
+
+
+      this.mainBox.add(this.transpBox, {x_fill: true, x_align: St.Align.START});
       this.mainBox.add(this.rootBox, {x_fill: true, expand: true, x_align: St.Align.START});
 
       this.clutterText = this.entry.clutter_text;
@@ -769,6 +762,20 @@ MyDesklet.prototype = {
          this._scrollArea.vscrollbar_policy = Gtk.PolicyType.AUTOMATIC;
    },
 */
+   on_desklet_removed: function() {
+      this.reset();
+      if(this._keyFocusNotifyId > 0)
+         this.clutterText.disconnect(this._keyFocusNotifyId);
+      this._keyFocusNotifyId = 0;
+      if(this.focusIDSignal > 0)
+         this.clutterText.disconnect(this.focusIDSignal);
+      this.focusIDSignal = 0;
+      if(this.keyPressIDSignal == 0)
+         this.clutterText.disconnect(this.keyPressIDSignal);
+      this.keyPressIDSignal = 0;
+      this.settings.finalize();
+   },
+
    _buttonCreation: function(icon, toolTip) {    
       let bttIcon = new St.Icon({ icon_name: icon,
 	                          icon_type: St.IconType.SYMBOLIC,
@@ -782,6 +789,12 @@ MyDesklet.prototype = {
       }));
       let bttTooltip = new Tooltips.Tooltip(btt, toolTip);
       return btt;
+   },
+
+   _onKeyFocusChanged: function() {
+      let focusedActor = global.stage.get_key_focus();
+      if((focusedActor)&&(this.entry.contains(focusedActor))&&(this.focusIDSignal == 0)&&(!this._entryActiveMenu))
+         global.stage.set_key_focus(null);
    },
 
    _onFocusOut: function(actor, event) {
