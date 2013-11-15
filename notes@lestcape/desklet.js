@@ -546,6 +546,10 @@ MyDesklet.prototype = {
       }
    },
 
+   _onConfigNote: function() {
+      Util.spawn(['cinnamon-settings', 'desklets', this.uuid]);
+   },
+
    _isDirectory: function(fDir) {
       try {
          let info = fDir.query_filesystem_info("standard::type", null);
@@ -686,9 +690,13 @@ MyDesklet.prototype = {
          centerBox.add(nextButton, {x_fill: true, x_align: St.Align.MIDDLE});      
       }
 
+      let configButton = this._buttonCreation('preferences-system', _("Settings"));
+      configButton.connect('clicked', Lang.bind(this, this._onConfigNote));
+
       let deleteButton = this._buttonCreation('window-close', _("Remove Note"));
       deleteButton.connect('clicked', Lang.bind(this, this._onRemoveNote));
       
+      rightBox.add(configButton, {x_fill: true, x_align: St.Align.END});
       rightBox.add(deleteButton, {x_fill: true, x_align: St.Align.END});
 
       this.buttonBanner.add(leftBox, {x_fill: true, x_align: St.Align.START});
