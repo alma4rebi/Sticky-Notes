@@ -21,7 +21,7 @@
         "type": "combobox",
         "description": "Selected theme of staples:",
         "default": "None",
-        "tooltip": "Select theme of staples.",
+        "tooltip": "Select theme of staples to show in Notes.",
         "options": {
             "None": "None",
             "Double Staple": "doublestaple",
@@ -34,6 +34,23 @@
             "Tack Staple": "tackstaple",
             "White Staple": "whitestaple"
         }
+    },
+    "pencil": {
+        "type": "combobox",
+        "description": "Selected theme of pencil:",
+        "default": "bluepencil",
+        "tooltip": "Select a theme of pencil to show in Notes.",
+        "options": {
+            "None": "None",
+            "Blue Pencil": "bluepencil",
+            "Yellow Pencil": "yellowpencil"
+        }
+    },
+    "autoHideButtons": {
+        "default": true,
+        "description": "Auto hide buttons.",
+        "type": "checkbox",
+        "tooltip": "Check this if you want to autohide the action buttons when mouse is outside of the desklet."
     },
     "boxColor": {
         "type": "colorchooser",

@@ -103,7 +103,7 @@ MyDesklet.prototype = {
       this._entryActiveMenu = false;
       this._menu.connect('open-state-changed', Lang.bind(this, this._updateMenu));
 
-      this._themeName = "None";
+     // this._themeName = _("None");
       this._text = "";
       this.noteCurrent = 0;
       this._boxColor = "#000000";
@@ -117,6 +117,7 @@ MyDesklet.prototype = {
       this._width = 200;
       this.focusIDSignal = 0;
       this.keyPressIDSignal = 0;
+      this.autoHideButtonsIDSignal = 0
       this._multInstance = false;
       try {
          this.settingsExt = Gio.Settings.new("org.cinnamon");
@@ -126,12 +127,13 @@ MyDesklet.prototype = {
 
          this.initDeskletType();
 
-         this._keyFocusNotifyId = global.stage.connect('notify::key-focus', Lang.bind(this, this._onKeyFocusChanged));
+         this._keyFocusNotifyIDSignal = global.stage.connect('notify::key-focus', Lang.bind(this, this._onKeyFocusChanged));
          this.clutterText.connect('button-press-event', Lang.bind(this, this._onButtonPress));
          this.clutterText.connect('button-release-event', Lang.bind(this, this._onButtonRelease));
 
-         this.multInstanceMenuItem._switch.setToggleState(this._multInstance);
          this._onFixWidth();
+         this._onAutoHideButtons();
+         this.multInstanceMenuItem._switch.setToggleState(this._multInstance);
          Mainloop.idle_add(Lang.bind(this, this._onStyleChange));
       } catch(e) {
          this.showErrorMessage(e.message);
@@ -353,7 +355,8 @@ MyDesklet.prototype = {
       }
       this.numberNote.set_text(this.notesList.length.toString());
       this.currentNote.set_text(this.noteCurrent.toString());
-      this._text = this.entry.text; 
+      this._text = this.entry.text;
+      this.titleNote.set_text(this.entry.text);
    },
 
    writeNoteToFile: function(pos) {
@@ -467,6 +470,18 @@ MyDesklet.prototype = {
       }
    },
 
+   _onVisibleNoteChange: function(actor) {
+      this.leftBox.remove_actor(actor);
+      if(this.minimizeButton == actor) {
+         this.leftBox.add(this.maximizeButton, {x_fill: true, x_align: St.Align.END});
+         this.textBox.visible = false;
+      }
+      else {
+         this.leftBox.add(this.minimizeButton, {x_fill: true, x_align: St.Align.END});
+         this.textBox.visible = true;
+      }
+   },
+
    _onRemoveNote: function() {
       try {
          if(this._multInstance) {
@@ -570,10 +585,10 @@ MyDesklet.prototype = {
    setStyle: function() {
       let _color = (this._boxColor.replace(')',',' + this._transparency + ')')).replace('rgb','rgba');
       let _colorBanner = (this._boxColor.replace(')',',' + 0.1 + ')')).replace('rgb','rgba');
-      if(this._themeStaples != "None") {
+      if(this._themeStaples != _("None")) {
          this.rootBox.set_style('text-shadow: 1px 1px 2px #000; min-width: 144px; background-color: ' + _color +
                                 '; box-shadow: -4px 4px 2px rgba(0, 0, 0, 0.5); color: ' + this._fontColor + '; font-weight: bold;');
-         this.buttonBanner.set_style('padding: 4px; background-color: ' + _colorBanner + ';');
+         this.bannerBox.set_style('padding: 4px; background-color: ' + _colorBanner + ';');
          let imageG = GLib.get_home_dir() + "/.local/share/cinnamon/desklets/" + this.uuid + "/staples/"+ this._themeStaples +"/";
          this.transpBox.set_style('background-image: url(\'' + imageG + '1.png\');' +
                                   'background-repeat: repeat; background-position: 0px 0px;');
@@ -583,7 +598,7 @@ MyDesklet.prototype = {
                                _colorBanner);
          this.endBox.set_height(15);
       } else {
-         this.buttonBanner.set_style('padding: 4px; background-color: ' + _colorBanner + '; border-radius: 12px;');
+         this.bannerBox.set_style('padding: 4px; background-color: ' + _colorBanner + '; border-radius: 12px;');
          this.endBox.set_height(0);
          this.transpBox.set_height(0);
          this.rootBox.set_style('border: '+ this._borderBoxWidth + 'px solid ' + this._borderBoxColor +
@@ -605,7 +620,7 @@ MyDesklet.prototype = {
       this.entry.set_style('font-size: ' + this._textSize + 'pt; color: ' + this._fontColor +
                            '; font-weight: normal; ' + fontTag);
 
-      if(this._themeStripe != "None") {
+      if(this._themeStripe != _("None")) {
          let image = GLib.get_home_dir() + "/.local/share/cinnamon/desklets/" + this.uuid + "/stripe/" + this._themeStripe + "/";
          let textHeight = this._getTextHeight();
          let imageNumber = Math.floor(textHeight);
@@ -620,7 +635,7 @@ MyDesklet.prototype = {
             this.showErrorMessage(_("Unsupported text size '%s'  to use the font '%s' in this theme.").format(this._textSize, this._fontFamily));
             this.textBox.set_style('');
          } else {
-            if(this._themeStaples != "None") {
+            if(this._themeStaples != _("None")) {
                this.textBox.set_style('padding: 4px; background-image: url(\'' + image + imageNumber + '.png\');' +
                                       'background-repeat: repeat; background-position: 0px 0px;'); 
             } else {
@@ -630,6 +645,15 @@ MyDesklet.prototype = {
          }
       } else
          this.textBox.set_style('');
+   },
+
+   setPencil: function(activePencil) {
+      if((this._themePencil != _("None"))&&(activePencil)) {
+         let image = GLib.get_home_dir() + "/.local/share/cinnamon/desklets/" + this.uuid + "/pencil/" + this._themePencil + ".png";
+         this.pencilBox.set_style('width: 100px; background-image: url(\'' + image + '\');');
+      } else {
+         this.pencilBox.set_style('width: 100px;');
+      }
    },
 
    _getTextHeight: function() {
@@ -651,21 +675,30 @@ MyDesklet.prototype = {
    reset: function () {
       this._getTextHeight();
       this.entry.text = "";
+      this.setPencil(false);
       global.stage.set_key_focus(null);
    },
 
    _initDeskletContruction: function() {
-      this.mainBox = new St.BoxLayout({vertical:true});
+      this.mainBox = new St.BoxLayout({vertical:true, reactive: true, track_hover: true });
       this.rootBox = new St.BoxLayout({vertical:true});
+      this.bannerBox = new St.BoxLayout({vertical:true});
       this.buttonBanner = new St.BoxLayout({vertical:false});
-      let leftBox = new St.BoxLayout({vertical:false});
+      this.leftBox = new St.BoxLayout({vertical:false});
       let centerBox = new St.BoxLayout({vertical:false});
+      this.pencilBox = new St.BoxLayout({vertical:true});
       let rightBox = new St.BoxLayout({vertical:false}); 
       this.textBox = new St.BoxLayout({vertical:true});
 
       let addButton = this._buttonCreation('list-add', _("Add new Note"));
       addButton.connect('clicked', Lang.bind(this, this._onAddNote));
-      leftBox.add(addButton, {x_fill: true, x_align: St.Align.END});
+      this.leftBox.add(addButton, {x_fill: true, x_align: St.Align.END});
+
+      this.minimizeButton = this._buttonCreation('go-up', _("Minimize Note"));
+      this.minimizeButton.connect('clicked', Lang.bind(this, this._onVisibleNoteChange));
+      this.maximizeButton = this._buttonCreation('go-down', _("Maximize Note"));
+      this.maximizeButton.connect('clicked', Lang.bind(this, this._onVisibleNoteChange));
+      this.leftBox.add(this.minimizeButton, {x_fill: true, x_align: St.Align.END});
 
       this.currentNote = new St.Label();
       this.currentNote.set_text("1");
@@ -676,6 +709,9 @@ MyDesklet.prototype = {
       let separator = new St.Label();
       separator.set_text("/");
 
+      this.titleNote = new St.Label();
+      this.titleNote.set_text("");
+
       let backButton = this._buttonCreation('edit-undo', _("Back Note"));
       backButton.connect('clicked', Lang.bind(this, this._onBackNote));
 
@@ -683,14 +719,18 @@ MyDesklet.prototype = {
       nextButton.connect('clicked', Lang.bind(this, this._onNextNote));
 
       if(!this._multInstance) {
-         centerBox.add(backButton, {x_fill: true, x_align: St.Align.MIDDLE});
-         centerBox.add(this.currentNote, {x_fill: true, x_align: St.Align.MIDDLE});
-         centerBox.add(separator, {x_fill: true, x_align: St.Align.MIDDLE});
-         centerBox.add(this.numberNote, {x_fill: true, x_align: St.Align.MIDDLE});
-         centerBox.add(nextButton, {x_fill: true, x_align: St.Align.MIDDLE});      
-      }
+         centerBox.add(backButton, {x_fill: false, expand: true, x_align: St.Align.MIDDLE});
+         centerBox.add(this.currentNote, {x_fill: false, expand: true, x_align: St.Align.MIDDLE});
+         centerBox.add(separator, {x_fill: false, expand: true, x_align: St.Align.MIDDLE});
+         centerBox.add(this.numberNote, {x_fill: false, expand: true, x_align: St.Align.MIDDLE});
+         centerBox.add(nextButton, {x_fill: false, expand: true, x_align: St.Align.MIDDLE});      
+      } else
+         centerBox.add(this.titleNote, {x_fill: true, expand: true, x_align: St.Align.MIDDLE});
+      centerBox.set_width(70);
+      this.pencilBox.add(centerBox, {x_fill: false, expand: true, x_align: St.Align.MIDDLE});
+      this.setPencil(false);
 
-      let configButton = this._buttonCreation('preferences-system', _("Settings"));
+      let configButton = this._buttonCreation('preferences-system', _("Configure..."));
       configButton.connect('clicked', Lang.bind(this, this._onConfigNote));
 
       let deleteButton = this._buttonCreation('window-close', _("Remove Note"));
@@ -699,22 +739,21 @@ MyDesklet.prototype = {
       rightBox.add(configButton, {x_fill: true, x_align: St.Align.END});
       rightBox.add(deleteButton, {x_fill: true, x_align: St.Align.END});
 
-      this.buttonBanner.add(leftBox, {x_fill: true, x_align: St.Align.START});
-      this.buttonBanner.add(centerBox, {x_fill: false, expand: true, x_align: St.Align.MIDDLE});
+      this.buttonBanner.add(this.leftBox, {x_fill: true, x_align: St.Align.START});
+      this.buttonBanner.add(this.pencilBox, {x_fill: false, expand: true, x_align: St.Align.MIDDLE});
       this.buttonBanner.add(rightBox, {x_fill: true, x_align: St.Align.END});
+      this.bannerBox.set_height(20);
+      this.bannerBox.add(this.buttonBanner, {x_fill: true, x_align: St.Align.MIDDLE});
 
       this.entry = new St.Entry({ name: 'noteEntry', hint_text: _("Type to your note..."), track_hover: false, can_focus: true});
       this.textBox.add(this.entry, {x_fill: true, y_fill: true, x_align: St.Align.START, y_align: St.Align.START});
-
 
       this.transpBox = new St.BoxLayout({vertical:true});
       this.endBox = new St.BoxLayout({vertical:true});
 
       this.rootBox.add(this.endBox, {x_fill: true, expand: true, x_align: St.Align.START});
-      this.rootBox.add(this.buttonBanner, {x_fill: true, expand: true, x_align: St.Align.START});
+      this.rootBox.add(this.bannerBox, {x_fill: true, x_align: St.Align.START});
       this.rootBox.add(this.textBox, {x_fill: true, y_fill: true, x_align: St.Align.START});
-
-
 
       this.mainBox.add(this.transpBox, {x_fill: true, x_align: St.Align.START});
       this.mainBox.add(this.rootBox, {x_fill: true, expand: true, x_align: St.Align.START});
@@ -772,15 +811,18 @@ MyDesklet.prototype = {
 */
    on_desklet_removed: function() {
       this.reset();
-      if(this._keyFocusNotifyId > 0)
-         this.clutterText.disconnect(this._keyFocusNotifyId);
-      this._keyFocusNotifyId = 0;
+      if(this._keyFocusNotifyIDSignal > 0)
+         global.stage.disconnect(this._keyFocusNotifyIDSignal);
+      this._keyFocusNotifyIDSignal = 0;
       if(this.focusIDSignal > 0)
          this.clutterText.disconnect(this.focusIDSignal);
       this.focusIDSignal = 0;
-      if(this.keyPressIDSignal == 0)
+      if(this.keyPressIDSignal > 0)
          this.clutterText.disconnect(this.keyPressIDSignal);
       this.keyPressIDSignal = 0;
+      if(this.autoHideButtonsIDSignal > 0)
+         this.mainBox.disconnect(this.autoHideButtonsIDSignal);
+      this.autoHideButtonsIDSignal = 0;
       this.settings.finalize();
    },
 
@@ -801,8 +843,10 @@ MyDesklet.prototype = {
 
    _onKeyFocusChanged: function() {
       let focusedActor = global.stage.get_key_focus();
-      if((focusedActor)&&(this.entry.contains(focusedActor))&&(this.focusIDSignal == 0)&&(!this._entryActiveMenu))
+      if((focusedActor)&&(this.entry.contains(focusedActor))&&(this.focusIDSignal == 0)&&(!this._entryActiveMenu)) {
+         this.setPencil(false);
          global.stage.set_key_focus(null);
+      }
    },
 
    _onFocusOut: function(actor, event) {
@@ -815,6 +859,8 @@ MyDesklet.prototype = {
          this.keyPressIDSignal = 0;
          this.newNote(this.entry.text);
          this._text = this.entry.text;
+         this.titleNote.set_text(this.entry.text);
+         this.setPencil(false);
          global.stage.set_key_focus(null);
       } catch(e) {
          this.showErrorMessage(e.message);
@@ -823,6 +869,7 @@ MyDesklet.prototype = {
 
    _onButtonPress: function(actor, event) {
       try {
+         this.setPencil(true);
          if (event.get_button() == 1) {
             global.set_stage_input_mode(Cinnamon.StageInputMode.FOCUSED);
             global.set_stage_input_mode(Cinnamon.StageInputMode.NORMAL);
@@ -957,6 +1004,26 @@ MyDesklet.prototype = {
 
     _onTextSetting: function() {
        this.entry.text = this._text;
+       this.titleNote.set_text(this.entry.text);
+    },
+
+    _onThemePencilChange: function() {
+    },
+
+    _onAutoHideButtons: function() {
+       if(this._autohideButtons) {
+          this.buttonBanner.visible = false;
+          if(this.autoHideButtonsIDSignal == 0) {
+             this.autoHideButtonsIDSignal = this.mainBox.connect('notify::hover', Lang.bind(this, function(actor) {
+                this.buttonBanner.visible = actor.get_hover();
+             }));
+          }
+       } else {
+          if(this.autoHideButtonsIDSignal > 0)
+             this.mainBox.disconnect(this.autoHideButtonsIDSignal);
+          this.autoHideButtonsIDSignal = 0;
+          this.buttonBanner.visible = true;
+       }
     },
 
     _initSettings: function() {
@@ -972,6 +1039,8 @@ MyDesklet.prototype = {
        },*/
          this.settings.bindProperty(Settings.BindingDirection.IN, "stripe", "_themeStripe", this._onStyleChange, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "staples", "_themeStaples", this._onStyleChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "pencil", "_themePencil", this._onThemePencilChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "autoHideButtons", "_autohideButtons", this._onAutoHideButtons, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "boxColor", "_boxColor", this._onStyleChange, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "fontColor", "_fontColor", this._onStyleChange, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "textSize", "_textSize", this._onStyleChange, null);
