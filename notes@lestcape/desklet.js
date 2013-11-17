@@ -724,7 +724,7 @@ MyDesklet.prototype = {
 
       this.titleNote = new St.Label();
       this.titleNote.set_text("");
-      this.titleNote.set_height(18);
+      this.titleNote.set_height(16);
 
       let backButton = this._buttonCreation('edit-undo', _("Back Note"));
       backButton.connect('clicked', Lang.bind(this, this._onBackNote));
