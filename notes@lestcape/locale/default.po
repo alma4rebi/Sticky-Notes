@@ -212,6 +212,30 @@ msgstr ""
 msgid "Increase or decrease the desklet width."
 msgstr ""
 
+#. notes@lestcape->settings-schema.json->fixHeight->description
+msgid "Fixed height."
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->fixHeight->tooltip
+msgid "Check this if you want to control the height of Note."
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->height->description
+msgid "Height:"
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->height->tooltip
+msgid "Increase or decrease the Note height."
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->scrollVisible->description
+msgid "Scroll visible."
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->scrollVisible->tooltip
+msgid "Check this if you want to put scroll visible or not."
+msgstr ""
+
 #. #-#-#-#-#  default.pot (PACKAGE VERSION)  #-#-#-#-#
 #. notes@lestcape->settings-schema.json->stripe->combobox->None
 #. #-#-#-#-#  default.pot (PACKAGE VERSION)  #-#-#-#-#

@@ -1,5 +1,5 @@
-// Desklet : Sticky Notes           Version      : v0.3-Beta
-// O.S.    : Cinnamon               Release Date : 11 November 2013.
+// Desklet : Sticky Notes           Version      : v0.6-Beta
+// O.S.    : Cinnamon               Release Date : 17 November 2013.
 // Author  : Lester Carballo Pérez  Email        : lestcape@gmail.com
 //
 // Website : https://github.com/lestcape/Notes
@@ -103,7 +103,9 @@ MyDesklet.prototype = {
       this._entryActiveMenu = false;
       this._menu.connect('open-state-changed', Lang.bind(this, this._updateMenu));
 
-     // this._themeName = _("None");
+      this._themeStaples = "none";
+      this._themeStripe = "none";
+      this._themePencil = "bluepencil";
       this._text = "";
       this.noteCurrent = 0;
       this._boxColor = "#000000";
@@ -113,11 +115,15 @@ MyDesklet.prototype = {
       this._textSize = 12;
       this._fontFamily = ""; //Default Font family
       this._fontColor= "#ffffff";
-      this._fWidth = false;
+      this._fWidth = true;
       this._width = 200;
+      this._fHeight = true;
+      this._height = 50;
+      this._scrollVisible = true;
       this.focusIDSignal = 0;
       this.keyPressIDSignal = 0;
-      this.autoHideButtonsIDSignal = 0
+      this.autoHideButtonsIDSignal = 0;
+      this.scrollIDSignal = 0;
       this._multInstance = false;
       try {
          this.settingsExt = Gio.Settings.new("org.cinnamon");
@@ -130,8 +136,12 @@ MyDesklet.prototype = {
          this._keyFocusNotifyIDSignal = global.stage.connect('notify::key-focus', Lang.bind(this, this._onKeyFocusChanged));
          this.clutterText.connect('button-press-event', Lang.bind(this, this._onButtonPress));
          this.clutterText.connect('button-release-event', Lang.bind(this, this._onButtonRelease));
+         this.textBox.connect('button-press-event', Lang.bind(this, this._onButtonPress));
+         this.textBox.connect('button-release-event', Lang.bind(this, this._onButtonRelease));
+         this.endBoxBackGround.connect('allocation_changed', Lang.bind(this, this._onAllocationChanged));
 
          this._onFixWidth();
+         this._onFixHeight();
          this._onAutoHideButtons();
          this.multInstanceMenuItem._switch.setToggleState(this._multInstance);
          Mainloop.idle_add(Lang.bind(this, this._onStyleChange));
@@ -346,7 +356,7 @@ MyDesklet.prototype = {
    },
 
    loadNote: function(pos) {
-      if((pos < 0)&&(pos > this.notesList.length)) {
+      if((this.notesList.length == 0)||(pos < 0)||(pos > this.notesList.length)) {
          this.noteCurrent = 1;
          this.reset();
       } else {
@@ -585,8 +595,8 @@ MyDesklet.prototype = {
    setStyle: function() {
       let _color = (this._boxColor.replace(')',',' + this._transparency + ')')).replace('rgb','rgba');
       let _colorBanner = (this._boxColor.replace(')',',' + 0.1 + ')')).replace('rgb','rgba');
-      if(this._themeStaples != _("None")) {
-         this.rootBox.set_style('text-shadow: 1px 1px 2px #000; min-width: 144px; background-color: ' + _color +
+      if(this._themeStaples != "none") {
+         this.rootBox.set_style('text-shadow: 1px 1px 2px #000; min-width: 170px; background-color: ' + _color +
                                 '; box-shadow: -4px 4px 2px rgba(0, 0, 0, 0.5); color: ' + this._fontColor + '; font-weight: bold;');
          this.bannerBox.set_style('padding: 4px; background-color: ' + _colorBanner + ';');
          let imageG = GLib.get_home_dir() + "/.local/share/cinnamon/desklets/" + this.uuid + "/staples/"+ this._themeStaples +"/";
@@ -594,8 +604,8 @@ MyDesklet.prototype = {
                                   'background-repeat: repeat; background-position: 0px 0px;');
          this.transpBox.set_height(10);
          this.endBox.set_style('background-image: url(\'' + imageG + '2.png\');' +
-                               'background-repeat: repeat; background-position: 0px 0px; background-color: ' +
-                               _colorBanner);
+                               'background-repeat: repeat; background-position: 0px 0px;');
+         this.endBoxBackGround.set_style('background-color: ' + _colorBanner);
          this.endBox.set_height(15);
       } else {
          this.bannerBox.set_style('padding: 4px; background-color: ' + _colorBanner + '; border-radius: 12px;');
@@ -603,8 +613,8 @@ MyDesklet.prototype = {
          this.transpBox.set_height(0);
          this.rootBox.set_style('border: '+ this._borderBoxWidth + 'px solid ' + this._borderBoxColor +
                                 '; background-color: ' + _color + '; border-radius: 12px; color: ' + this._fontColor +
-                                '; text-shadow: 1px 1px 2px #000; font-weight: bold; min-width: 144px;');
-      /* this.rootBox.set_style('text-shadow: 1px 1px 2px #000; min-width: 144px; background-color: ' + _color +
+                                '; text-shadow: 1px 1px 2px #000; font-weight: bold; min-width: 170px;');
+      /* this.rootBox.set_style('text-shadow: 1px 1px 2px #000; min-width: 170px; background-color: ' + _color +
                                 '; box-shadow: -4px 4px 2px rgba(0, 0, 0, 0.5); color: ' + this._fontColor + 
                                 '; border: '+ this._borderBoxWidth + 'px solid ' + this._borderBoxColor +
                                 '; border-radius: 12px; font-weight: bold;');*/
@@ -620,7 +630,7 @@ MyDesklet.prototype = {
       this.entry.set_style('font-size: ' + this._textSize + 'pt; color: ' + this._fontColor +
                            '; font-weight: normal; ' + fontTag);
 
-      if(this._themeStripe != _("None")) {
+      if(this._themeStripe != "none") {
          let image = GLib.get_home_dir() + "/.local/share/cinnamon/desklets/" + this.uuid + "/stripe/" + this._themeStripe + "/";
          let textHeight = this._getTextHeight();
          let imageNumber = Math.floor(textHeight);
@@ -633,22 +643,22 @@ MyDesklet.prototype = {
          }
          if((imageNumber < 10)||(imageNumber > 60)||(imageNumber != textHeight)) {
             this.showErrorMessage(_("Unsupported text size '%s'  to use the font '%s' in this theme.").format(this._textSize, this._fontFamily));
-            this.textBox.set_style('');
+            this.textBox.set_style('padding: 4px;');
          } else {
-            if(this._themeStaples != _("None")) {
+            if(this._themeStaples != "none") {
                this.textBox.set_style('padding: 4px; background-image: url(\'' + image + imageNumber + '.png\');' +
-                                      'background-repeat: repeat; background-position: 0px 0px;'); 
+                                      'background-repeat: repeat; background-position: 0px 0px;');
             } else {
                this.textBox.set_style('padding: 4px; background-image: url(\'' + image + imageNumber + '.png\');' +
-                                      'background-repeat: repeat; background-position: 0px 0px; border-radius: 12px;'); 
+                                      'background-repeat: repeat; background-position: 0px 0px; border-radius: 12px;');
             }
          }
       } else
-         this.textBox.set_style('');
+         this.textBox.set_style('padding: 4px;');
    },
 
    setPencil: function(activePencil) {
-      if((this._themePencil != _("None"))&&(activePencil)) {
+      if((this._themePencil != "none")&&(activePencil)) {
          let image = GLib.get_home_dir() + "/.local/share/cinnamon/desklets/" + this.uuid + "/pencil/" + this._themePencil + ".png";
          this.pencilBox.set_style('width: 100px; background-image: url(\'' + image + '\');');
       } else {
@@ -664,14 +674,6 @@ MyDesklet.prototype = {
       return Pango.units_to_double(metrics.get_ascent() + metrics.get_descent());
    },
 
-   fixWidth: function(fix) {
-      this._fWidth = fix;
-      if(fix)
-         this.entry.set_width(this._width);
-      else
-         this.entry.set_width(-1);
-   },
-
    reset: function () {
       this._getTextHeight();
       this.entry.text = "";
@@ -680,7 +682,7 @@ MyDesklet.prototype = {
    },
 
    _initDeskletContruction: function() {
-      this.mainBox = new St.BoxLayout({vertical:true, reactive: true, track_hover: true });
+      this.mainBox = new St.BoxLayout({vertical:true, reactive: true, track_hover: true});
       this.rootBox = new St.BoxLayout({vertical:true});
       this.bannerBox = new St.BoxLayout({vertical:true});
       this.buttonBanner = new St.BoxLayout({vertical:false});
@@ -688,7 +690,7 @@ MyDesklet.prototype = {
       let centerBox = new St.BoxLayout({vertical:false});
       this.pencilBox = new St.BoxLayout({vertical:true});
       let rightBox = new St.BoxLayout({vertical:false}); 
-      this.textBox = new St.BoxLayout({vertical:true});
+      this.textBox = new St.BoxLayout({vertical:true, reactive: true});
 
       let addButton = this._buttonCreation('list-add', _("Add new Note"));
       addButton.connect('clicked', Lang.bind(this, this._onAddNote));
@@ -749,66 +751,102 @@ MyDesklet.prototype = {
       this.textBox.add(this.entry, {x_fill: true, y_fill: true, x_align: St.Align.START, y_align: St.Align.START});
 
       this.transpBox = new St.BoxLayout({vertical:true});
-      this.endBox = new St.BoxLayout({vertical:true});
+      this.endBoxBackGround = new St.BoxLayout({vertical:true});
+      this.endBox = new St.BoxLayout({vertical:false});
+      this.endBoxBackGround.add(this.endBox, {x_fill: false, x_align: St.Align.MIDDLE});
 
-      this.rootBox.add(this.endBox, {x_fill: true, expand: true, x_align: St.Align.START});
+      this.rootBox.add(this.endBoxBackGround, {x_fill: true, expand: true, x_align: St.Align.MIDDLE});
       this.rootBox.add(this.bannerBox, {x_fill: true, x_align: St.Align.START});
-      this.rootBox.add(this.textBox, {x_fill: true, y_fill: true, x_align: St.Align.START});
 
-      this.mainBox.add(this.transpBox, {x_fill: true, x_align: St.Align.START});
+      this.mainBox.add(this.transpBox, {x_fill: false, x_align: St.Align.MIDDLE});
       this.mainBox.add(this.rootBox, {x_fill: true, expand: true, x_align: St.Align.START});
 
       this.clutterText = this.entry.clutter_text;
       this.clutterText.set_single_line_mode(false);
       this.clutterText.set_activatable(false);
       this.clutterText.set_line_wrap(true);
-      //this.clutterText.set_line_wrap_mode(imports.gi.Pango.WrapMode.WORD_CHAR);
-      this.clutterText.set_line_wrap_mode(imports.gi.Pango.WrapMode.CHAR);
+      this.clutterText.set_line_wrap_mode(imports.gi.Pango.WrapMode.WORD_CHAR);
       this.clutterText.set_selectable(true);
       this.clutterText.set_selected_text_color(new Clutter.Color({red : 0, blue : 155, green : 0, alpha : 255}));
-/*      this.textBox.add(this.entry, {x_fill: true, y_fill: false, expand: true, x_align: St.Align.START, y_align: St.Align.START});
-      
-      this._scrollArea = new St.ScrollView({ name: 'note-scrollview', vscrollbar_policy: Gtk.PolicyType.AUTOMATIC,
-                                             hscrollbar_policy: Gtk.PolicyType.NEVER, style_class: 'vfade' });
-      this._scrollArea.add_actor(this.entry);
-      let scrollBox = new St.BoxLayout({vertical:false});
-            scrollBox.set_height(50);
-      this.textBox.add_actor(scrollBox, { expand: false, y_fill: false, x_align: St.Align.START, x_fill: true });
-      this.textBox.add(this.entry, {x_fill: true, y_fill: false, expand: true, x_align: St.Align.START, y_align: St.Align.START});
-      scrollBox.add_actor(this._scrollArea, { expand: false, y_fill: false, y_align: St.Align.START, x_fill: true });
-      scrollBox.connect('scroll-event', Lang.bind(this, this._scrollFilter));
-      this.enableScrolling(true);*/
+//scroll
+      this.scrollArea = new St.ScrollView({ name: 'note-scrollview', vscrollbar_policy: Gtk.PolicyType.AUTOMATIC,
+                                            hscrollbar_policy: Gtk.PolicyType.NEVER, style_class: 'vfade' });
+
+      this.scrollBox = new St.BoxLayout({vertical:false});
+      this.scrollBox.add_actor(this.scrollArea, { expand: false, y_fill: false, y_align: St.Align.START, x_fill: true });
+      this.finichBox = new St.BoxLayout({height: 10});
    },
 
-/*
    _scrollFilter: function(actor, event) {
-      let direction = event.get_scroll_direction();
-      if (direction == Clutter.ScrollDirection.UP)
-         this._selectCategory(Math.max(this._currentCategory - 1, -1))
-      else if (direction == Clutter.ScrollDirection.DOWN)
-         this._selectCategory(Math.min(this._currentCategory + 1, this._sections.length - 1));
+      let heightNew = this.entry.get_height();
+      if(!this._heightEntry)
+         this._heightEntry = heightNew;
+      if((heightNew != this._heightEntry)&&(this.symbol != Clutter.Delete)) {
+         let newValue = this.scrollArea.vscroll.get_adjustment().value + heightNew - this._heightEntry;
+         this.scrollArea.vscroll.get_adjustment().set_value(newValue);
+      }
+      this._heightEntry = heightNew;
    },
 
-    _createScrollArea: function() {
-       this._table.add_style_class_name('multi-line-notification');
-       this._scrollArea = new St.ScrollView({ name: 'notification-scrollview', vscrollbar_policy: this._scrollPolicy,
-            hscrollbar_policy: Gtk.PolicyType.NEVER, style_class: 'vfade' });
-       //this._table.add(this._scrollArea, { row: 1, col: 2 });
-       //this._updateLastColumnSettings();
-       this._contentArea = new St.BoxLayout({ name: 'notification-body', vertical: true });
-       this._scrollArea.add_actor(this._contentArea);
-       // If we know the notification will be expandable, we need to add
-       // the banner text to the body as the first element.
-      this._addBannerBody();
-    },
+   enableScrolling: function(scrolling) {
+      this.scrollBox.remove_actor(this.textBox);
+      this.rootBox.remove_actor(this.textBox);
+      this.rootBox.remove_actor(this.scrollBox);
+      //this.rootBox.remove_actor(this.finichBox);
 
-
-   enableScrolling: function(enableScrolling) {
-      this._scrollPolicy = enableScrolling ? Gtk.PolicyType.AUTOMATIC : Gtk.PolicyType.NEVER;
-      if(this._scrollArea)
-         this._scrollArea.vscrollbar_policy = Gtk.PolicyType.AUTOMATIC;
+      this.scrollArea.remove_actor(this.textBox);
+      if(scrolling) {
+         this.scrollArea.add_actor(this.textBox);
+         this.scrollBox.add_actor(this.textBox, {x_fill: true, y_fill: false, expand: true, x_align: St.Align.START});
+         this.rootBox.add(this.scrollBox, {x_fill: true, y_fill: true, expand: true, x_align: St.Align.START});
+         if(this.scrollIDSignal == 0)
+            this.scrollIDSignal = this.scrollBox.connect('event', Lang.bind(this, this._scrollFilter));
+      } else {
+         this.rootBox.add(this.textBox, {x_fill: true, y_fill: false, expand: true, x_align: St.Align.START});
+         if(this.scrollIDSignal > 0)
+            this.scrollBox.disconnect(this.scrollIDSignal);
+         this.scrollIDSignal = 0;
+      }
+     // this.rootBox.add(this.finichBox, {x_fill: true, y_fill: true, x_align: St.Align.START});
    },
-*/
+
+   fixHeight: function(fix) {
+      this._fHeight = fix;
+      if(fix) {
+         if(this._scrollVisible) {
+            this.scrollArea.set_height(this._height);
+            this.textBox.set_height(-1);
+         } else {
+            this.scrollArea.set_height(-1);
+            this.textBox.set_height(this._height);
+         }
+      }
+      else {
+         this.scrollArea.set_height(-1);
+         this.textBox.set_height(-1);
+      }
+      this.enableScrolling(fix);
+   },
+
+   fixWidth: function(fix) {
+      this._fWidth = fix;
+      if(fix)
+         this.entry.set_width(this._width);
+      else {
+         this.entry.set_width(-1);
+         //this.transpBox.set_width(-1);
+      }
+   },
+
+   _onAllocationChanged: function() {
+      let availWidth = this.entry.get_width();
+      let diff = (availWidth % 18);
+     // Main.notifyError("Width: " + availWidth + " diff: " + diff);
+      this.transpBox.set_width(availWidth - diff);
+      this.endBox.set_width(availWidth - diff);
+      //this.endBoxBackGround.set_width(availWidth - diff);
+   },
+
    on_desklet_removed: function() {
       this.reset();
       if(this._keyFocusNotifyIDSignal > 0)
@@ -823,6 +861,9 @@ MyDesklet.prototype = {
       if(this.autoHideButtonsIDSignal > 0)
          this.mainBox.disconnect(this.autoHideButtonsIDSignal);
       this.autoHideButtonsIDSignal = 0;
+      if(this.scrollIDSignal > 0)
+         this.scrollBox.disconnect(this.scrollIDSignal);
+      this.scrollIDSignal = 0;
       this.settings.finalize();
    },
 
@@ -862,6 +903,7 @@ MyDesklet.prototype = {
          this.titleNote.set_text(this.entry.text);
          this.setPencil(false);
          global.stage.set_key_focus(null);
+         this._onAutoHideButtons();
       } catch(e) {
          this.showErrorMessage(e.message);
       }
@@ -869,7 +911,12 @@ MyDesklet.prototype = {
 
    _onButtonPress: function(actor, event) {
       try {
+         if(this.focusIDSignal == 0)
+            this.focusIDSignal = this.clutterText.connect('key-focus-out', Lang.bind(this, this._onFocusOut));
+         if(this.keyPressIDSignal == 0)
+            this.keyPressIDSignal = this.clutterText.connect('key-press-event', Lang.bind(this, this._onKeyPress));
          this.setPencil(true);
+         global.stage.set_key_focus(this.clutterText);
          if (event.get_button() == 1) {
             global.set_stage_input_mode(Cinnamon.StageInputMode.FOCUSED);
             global.set_stage_input_mode(Cinnamon.StageInputMode.NORMAL);
@@ -880,10 +927,6 @@ MyDesklet.prototype = {
             this._updateCopyItem();
             this._updatePasteItem();
          }
-         if(this.focusIDSignal == 0)
-            this.focusIDSignal = this.clutterText.connect('key-focus-out', Lang.bind(this, this._onFocusOut));
-         if(this.keyPressIDSignal == 0)
-            this.keyPressIDSignal = this.clutterText.connect('key-press-event', Lang.bind(this, this._onKeyPress));
       } catch(e) {
          this.showErrorMessage(e.message);
       }
@@ -972,18 +1015,27 @@ MyDesklet.prototype = {
    },
 
    _onKeyPress: function(entry, event) {
-      let symbol = event.get_key_symbol();
-      if(symbol == Clutter.Escape) {
+      this.symbol = event.get_key_symbol();
+      if(this.symbol == Clutter.Escape) {
          if(this._isActivated()) {
             this.reset();
             return true;
          }
       }
-    /*  else if(symbol == Clutter.Paste) {
-        this.entry.text = this.entry.text.replace(/.*\((.+)\)/, '$1');
-        this.showErrorMessage(this.entry.text);
-        return true;
-      }*/
+      if(this.symbol == Clutter.Down) {
+         let newValue = this.scrollArea.vscroll.get_adjustment().value + this._getTextHeight();
+         if(newValue < this.scrollArea.vscroll.get_adjustment().upper)
+            this.scrollArea.vscroll.get_adjustment().set_value(newValue);
+         return false;
+      }
+      if(this.symbol == Clutter.Up) {
+         let newValue = this.scrollArea.vscroll.get_adjustment().value - this._getTextHeight();
+         if(newValue >= 0)
+            this.scrollArea.vscroll.get_adjustment().set_value(newValue);
+         else
+            this.scrollArea.vscroll.get_adjustment().set_value(0);
+         return false;
+      }
       return false;
     },
 
@@ -1002,6 +1054,10 @@ MyDesklet.prototype = {
        this.fixWidth(this._fWidth);
     },
 
+    _onFixHeight: function() {
+       this.fixHeight(this._fHeight);
+    },
+
     _onTextSetting: function() {
        this.entry.text = this._text;
        this.titleNote.set_text(this.entry.text);
@@ -1015,7 +1071,11 @@ MyDesklet.prototype = {
           this.buttonBanner.visible = false;
           if(this.autoHideButtonsIDSignal == 0) {
              this.autoHideButtonsIDSignal = this.mainBox.connect('notify::hover', Lang.bind(this, function(actor) {
-                this.buttonBanner.visible = actor.get_hover();
+                let focusedActor = global.stage.get_key_focus();
+                if((focusedActor)&&(this.entry.contains(focusedActor)))
+                   this.buttonBanner.visible = true;
+                else
+                   this.buttonBanner.visible = actor.get_hover();
              }));
           }
        } else {
@@ -1050,6 +1110,9 @@ MyDesklet.prototype = {
          this.settings.bindProperty(Settings.BindingDirection.IN, "borderBoxColor", "_borderBoxColor", this._onStyleChange, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "fixWidth", "_fWidth", this._onFixWidth, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "width", "_width", this._onFixWidth, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "fixHeight", "_fHeight", this._onFixHeight, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "height", "_height", this._onFixHeight, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "scrollVisible", "_scrollVisible", this._onFixHeight, null);
       } catch (e) {
          this.showErrorMessage(e.message);
          global.logError(e);

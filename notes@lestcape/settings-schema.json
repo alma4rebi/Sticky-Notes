@@ -8,10 +8,10 @@
     "stripe": {
         "type": "combobox",
         "description": "Selected theme of paper sheet:",
-        "default": "None",
+        "default": "none",
         "tooltip": "Select a theme of paper sheet to show in Notes.",
         "options": {
-            "None": "None",
+            "None": "none",
             "Simple Stripe": "simplestripe",
             "Double Stripe": "doublestripe",
             "Gridded Stripe": "griddedstripe"
@@ -20,10 +20,10 @@
     "staples": {
         "type": "combobox",
         "description": "Selected theme of staples:",
-        "default": "None",
+        "default": "none",
         "tooltip": "Select theme of staples to show in Notes.",
         "options": {
-            "None": "None",
+            "None": "none",
             "Double Staple": "doublestaple",
             "Border Staple": "borderstaple",
             "Bright Staple": "brightstaple",
@@ -41,7 +41,7 @@
         "default": "bluepencil",
         "tooltip": "Select a theme of pencil to show in Notes.",
         "options": {
-            "None": "None",
+            "None": "none",
             "Blue Pencil": "bluepencil",
             "Yellow Pencil": "yellowpencil"
         }
@@ -239,7 +239,7 @@
     "width": {
         "default": 200,
         "type": "spinbutton",
-        "min": 144,
+        "min": 170,
         "max": 1600,
         "description": "Width:",
         "units": "pixels",
@@ -247,5 +247,31 @@
         "indent": true,
         "dependency": "fixWidth",
         "tooltip": "Increase or decrease the desklet width."
+    },
+   "fixHeight": {
+        "default": true,
+        "description": "Fixed height.",
+        "type": "checkbox",
+        "tooltip": "Check this if you want to control the height of Note."
+    },
+    "height": {
+        "default": 50,
+        "type": "spinbutton",
+        "min": 50,
+        "max": 500,
+        "description": "Height:",
+        "units": "pixels",
+        "step": 10,
+        "indent": true,
+        "dependency": "fixHeight",
+        "tooltip": "Increase or decrease the Note height."
+    },
+   "scrollVisible": {
+        "default": true,
+        "description": "Scroll visible.",
+        "type": "checkbox",
+        "indent": true,
+        "dependency": "fixHeight",
+        "tooltip": "Check this if you want to put scroll visible or not."
     }
 }

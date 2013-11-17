@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Sticky-Notes 0.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-11-08 21:29-0600\n"
-"PO-Revision-Date: 2013-11-15 01:49-0600\n"
+"PO-Revision-Date: 2013-11-17 04:58-0600\n"
 "Last-Translator: Lester Carballo Pérez <lestcape@gmail.com>\n"
 "Language-Team: lestcape <lestcape@gmail.com>\n"
 "MIME-Version: 1.0\n"
@@ -211,6 +211,30 @@ msgstr "Width:"
 #. notes@lestcape->settings-schema.json->width->tooltip
 msgid "Increase or decrease the desklet width."
 msgstr "Increase or decrease the desklet width."
+
+#. notes@lestcape->settings-schema.json->fixHeight->description
+msgid "Fixed height."
+msgstr "Fixed height."
+
+#. notes@lestcape->settings-schema.json->fixHeight->tooltip
+msgid "Check this if you want to control the height of Note."
+msgstr "Check this if you want to control the height of Note."
+
+#. notes@lestcape->settings-schema.json->height->description
+msgid "Height:"
+msgstr "Height:"
+
+#. notes@lestcape->settings-schema.json->height->tooltip
+msgid "Increase or decrease the Note height."
+msgstr "Increase or decrease the Note height."
+
+#. notes@lestcape->settings-schema.json->scrollVisible->description
+msgid "Scroll visible."
+msgstr "Scroll visible."
+
+#. notes@lestcape->settings-schema.json->scrollVisible->tooltip
+msgid "Check this if you want to put scroll visible or not."
+msgstr "Check this if you want to put scroll visible or not."
 
 #. #-#-#-#-#  default.pot (PACKAGE VERSION)  #-#-#-#-#
 #. notes@lestcape->settings-schema.json->stripe->combobox->None

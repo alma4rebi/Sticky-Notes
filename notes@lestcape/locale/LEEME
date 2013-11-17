@@ -1,5 +1,5 @@
-Desklet : Sticky Notes           Version            : v0.4-Beta
-S.O.    : Cinnamon               Release Date       : 15 Noviembre de 2013.
+Desklet : Sticky Notes           Version            : v0.6-Beta
+S.O.    : Cinnamon               Release Date       : 17 Noviembre de 2013.
 Author  : Lester Carballo Pérez  Correo electrónico : lestcape@gmail.com
 
 Sitio Web : https://github.com/lestcape/Notes
@@ -25,6 +25,14 @@ Instrucciones de instalación:
 
 Registro de cambios:
 --------------
+0.6- Beta
+   - Se a arreglado un error que impedía iniciar el desklet.
+   - Ahora se puede controlar el alto de la nota usando el scroll.
+   - Ya no se corta la imagen en el tema de las grapas.
+
+0.5- Beta
+   - Se a arreglado un error que aparecía cuando usted no tenía ninguna nota.
+
 0.4- Beta
    - Agregada la opción para instancias múltiples.
    - Añadido lápiz para marcar la nota en edición.

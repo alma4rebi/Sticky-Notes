@@ -1,11 +1,11 @@
 Sticky Notes
 =====
 
-Desklet: Sticky Notes Version: v0.4-Beta
+Desklet: Sticky Notes Version: v0.6-Beta
 
 O.S.: Cinnamon 
 
-Release Date: 15 November 2013
+Release Date: 17 November 2013
 
 Author: Lester Carballo Pérez
 
@@ -37,6 +37,14 @@ Installation Instructions:
 
 Change Log:
 --------------
+0.6- Beta
+   - Fixed a bug in the desklet start.
+   - Now you can control the height of the note using the scroll.
+   - No longer cuts the image in the theme of the staples.
+
+0.5- Beta
+   - Was fixed a bug that appear when you don't have any notes.
+
 0.4- Beta
    - Option for multiple instances was added.
    - Pencil to mark the edition of current note was  added.
