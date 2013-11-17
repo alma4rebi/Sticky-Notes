@@ -484,11 +484,22 @@ MyDesklet.prototype = {
       this.leftBox.remove_actor(actor);
       if(this.minimizeButton == actor) {
          this.leftBox.add(this.maximizeButton, {x_fill: true, x_align: St.Align.END});
-         this.textBox.visible = false;
+         if(this._fHeight) {
+            this.scrollArea.set_height(-1);
+            this.textBox.set_height(-1);
+            this.scrollBox.visible = false;
+         }
+         else
+            this.textBox.visible = false;
       }
       else {
          this.leftBox.add(this.minimizeButton, {x_fill: true, x_align: St.Align.END});
-         this.textBox.visible = true;
+         if(this._fHeight) {
+            this.fixHeight(true);
+            this.scrollBox.visible = true;
+         }
+         else
+            this.textBox.visible = true;
       }
    },
 
@@ -643,18 +654,18 @@ MyDesklet.prototype = {
          }
          if((imageNumber < 10)||(imageNumber > 60)||(imageNumber != textHeight)) {
             this.showErrorMessage(_("Unsupported text size '%s'  to use the font '%s' in this theme.").format(this._textSize, this._fontFamily));
-            this.textBox.set_style('padding: 4px;');
+            this.textBox.set_style('padding: 4px; min-width: 160px;');
          } else {
             if(this._themeStaples != "none") {
                this.textBox.set_style('padding: 4px; background-image: url(\'' + image + imageNumber + '.png\');' +
-                                      'background-repeat: repeat; background-position: 0px 0px;');
+                                      'background-repeat: repeat; background-position: 0px 0px; min-width: 160px;');
             } else {
                this.textBox.set_style('padding: 4px; background-image: url(\'' + image + imageNumber + '.png\');' +
-                                      'background-repeat: repeat; background-position: 0px 0px; border-radius: 12px;');
+                                      'background-repeat: repeat; background-position: 0px 0px; border-radius: 12px; min-width: 160px;');
             }
          }
       } else
-         this.textBox.set_style('padding: 4px;');
+         this.textBox.set_style('padding: 4px; min-width: 160px;');
    },
 
    setPencil: function(activePencil) {
@@ -748,7 +759,7 @@ MyDesklet.prototype = {
       this.bannerBox.add(this.buttonBanner, {x_fill: true, x_align: St.Align.MIDDLE});
 
       this.entry = new St.Entry({ name: 'noteEntry', hint_text: _("Type to your note..."), track_hover: false, can_focus: true});
-      this.textBox.add(this.entry, {x_fill: true, y_fill: true, x_align: St.Align.START, y_align: St.Align.START});
+      this.textBox.add(this.entry, {x_fill: true, y_fill: false, expand: true, x_align: St.Align.START, y_align: St.Align.START});
 
       this.transpBox = new St.BoxLayout({vertical:true});
       this.endBoxBackGround = new St.BoxLayout({vertical:true});
@@ -773,8 +784,8 @@ MyDesklet.prototype = {
                                             hscrollbar_policy: Gtk.PolicyType.NEVER, style_class: 'vfade' });
 
       this.scrollBox = new St.BoxLayout({vertical:false});
-      this.scrollBox.add_actor(this.scrollArea, { expand: false, y_fill: false, y_align: St.Align.START, x_fill: true });
-      this.finichBox = new St.BoxLayout({height: 10});
+      this.scrollBox.add(this.scrollArea, {x_fill: false, y_fill: false, x_align: St.Align.END, y_align: St.Align.START});
+    //  this.finichBox = new St.BoxLayout({height: 10});
    },
 
    _scrollFilter: function(actor, event) {
@@ -793,16 +804,15 @@ MyDesklet.prototype = {
       this.rootBox.remove_actor(this.textBox);
       this.rootBox.remove_actor(this.scrollBox);
       //this.rootBox.remove_actor(this.finichBox);
-
       this.scrollArea.remove_actor(this.textBox);
       if(scrolling) {
          this.scrollArea.add_actor(this.textBox);
-         this.scrollBox.add_actor(this.textBox, {x_fill: true, y_fill: false, expand: true, x_align: St.Align.START});
-         this.rootBox.add(this.scrollBox, {x_fill: true, y_fill: true, expand: true, x_align: St.Align.START});
+         this.scrollBox.add_actor(this.textBox, {x_fill: true, y_fill: true, expand: true, x_align: St.Align.START, y_align: St.Align.START});
+         this.rootBox.add(this.scrollBox, {x_fill: true, y_fill: true, expand: true, x_align: St.Align.START, y_align: St.Align.START});
          if(this.scrollIDSignal == 0)
             this.scrollIDSignal = this.scrollBox.connect('event', Lang.bind(this, this._scrollFilter));
       } else {
-         this.rootBox.add(this.textBox, {x_fill: true, y_fill: false, expand: true, x_align: St.Align.START});
+         this.rootBox.add(this.textBox, {x_fill: true, y_fill: true, expand: true, x_align: St.Align.START});
          if(this.scrollIDSignal > 0)
             this.scrollBox.disconnect(this.scrollIDSignal);
          this.scrollIDSignal = 0;
@@ -826,7 +836,13 @@ MyDesklet.prototype = {
          this.textBox.set_height(-1);
       }
       this.enableScrolling(fix);
+      this.leftBox.remove_actor(this.minimizeButton);
+      this.leftBox.remove_actor(this.maximizeButton);
+      this.leftBox.add(this.minimizeButton, {x_fill: true, x_align: St.Align.END});
    },
+
+
+
 
    fixWidth: function(fix) {
       this._fWidth = fix;
@@ -1026,6 +1042,8 @@ MyDesklet.prototype = {
          let newValue = this.scrollArea.vscroll.get_adjustment().value + this._getTextHeight();
          if(newValue < this.scrollArea.vscroll.get_adjustment().upper)
             this.scrollArea.vscroll.get_adjustment().set_value(newValue);
+         else
+            this.scrollArea.vscroll.get_adjustment().set_value(this.scrollArea.vscroll.get_adjustment().upper);
          return false;
       }
       if(this.symbol == Clutter.Up) {
