@@ -724,6 +724,7 @@ MyDesklet.prototype = {
 
       this.titleNote = new St.Label();
       this.titleNote.set_text("");
+      this.titleNote.set_height(12);
 
       let backButton = this._buttonCreation('edit-undo', _("Back Note"));
       backButton.connect('clicked', Lang.bind(this, this._onBackNote));
@@ -738,7 +739,7 @@ MyDesklet.prototype = {
          centerBox.add(this.numberNote, {x_fill: false, expand: true, x_align: St.Align.MIDDLE});
          centerBox.add(nextButton, {x_fill: false, expand: true, x_align: St.Align.MIDDLE});      
       } else
-         centerBox.add(this.titleNote, {x_fill: true, expand: true, x_align: St.Align.MIDDLE});
+         centerBox.add(this.titleNote, {x_fill: true, y_fill: false, expand: true, x_align: St.Align.MIDDLE});
       centerBox.set_width(70);
       this.pencilBox.add(centerBox, {x_fill: false, expand: true, x_align: St.Align.MIDDLE});
       this.setPencil(false);
