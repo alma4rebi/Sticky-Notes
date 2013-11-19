@@ -1,0 +1,303 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Sticky-Notes 0.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2013-11-08 21:29-0600\n"
+"PO-Revision-Date: 2013-11-17 04:58-0600\n"
+"Last-Translator: Lester Carballo Pérez <lestcape@gmail.com>\n"
+"Language-Team: lestcape <lestcape@gmail.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: \n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Poedit-Language: Spanish\n"
+
+#: desklet.js:63
+msgid "Copy"
+msgstr "Copiar"
+
+#: desklet.js:68
+msgid "Paste"
+msgstr "Pegar"
+
+#: desklet.js:76
+msgid "Delete"
+msgstr "Eliminar"
+
+#: desklet.js:100
+msgid "Multiple Instances"
+msgstr "Instancias Múltiples"
+
+#: desklet.js:144
+msgid "Sticky Notes"
+msgstr "Sticky Notes"
+
+#: desklet.js:146
+msgid "README"
+msgstr "LEEME"
+
+#: desklet.js:148
+msgid "Help"
+msgstr "Ayuda"
+
+#: desklet.js:151
+msgid "Website"
+msgstr "Sitio Web"
+
+#: desklet.js:183
+msgid "Error"
+msgstr "Error"
+
+#: desklet.js:187
+#: desklet.js:487
+msgid "Type to your note..."
+msgstr "Escriba su nota..."
+
+#: desklet.js:402
+msgid "Unsupported text size '%s'  to use the font '%s' in this theme."
+msgstr "El tamaño '%s' del texto no está soportado para ser usado en el tipo de letra '%s' para este tema."
+
+#: desklet.js:453
+msgid "Add new Note"
+msgstr "Añadir una Nota"
+
+#: desklet.js:459
+msgid "Minimize Note"
+msgstr "Minimizar Nota"
+
+#: desklet.js:461
+msgid "Maximize Note"
+msgstr "Maximizar Nota"
+
+#: desklet.js:466
+msgid "Back Note"
+msgstr "Nota anterior"
+
+#: desklet.js:469
+msgid "Next Note"
+msgstr "Nota siguiente"
+
+#: desklet.js:474
+msgid "Configure..."
+msgstr "Configurar..."
+
+#: desklet.js:478
+msgid "Remove Note"
+msgstr "Eliminar Nota"
+
+#. #-#-#-#-#  default.pot (PACKAGE VERSION)  #-#-#-#-#
+#. notes@lestcape->settings-schema.json->borderBoxWidth->units
+#. #-#-#-#-#  default.pot (PACKAGE VERSION)  #-#-#-#-#
+#. notes@lestcape->settings-schema.json->textSize->units
+#. #-#-#-#-#  default.pot (PACKAGE VERSION)  #-#-#-#-#
+#. notes@lestcape->settings-schema.json->width->units
+msgid "pixels"
+msgstr "píxeles"
+
+#. notes@lestcape->settings-schema.json->multInstance->description
+msgid "Multiple Instances."
+msgstr "Instancias Múltiples."
+
+#. notes@lestcape->settings-schema.json->multInstance->tooltip
+msgid "Check this if you want to have different instances of this desklet for for each note."
+msgstr "Seleccione esto si usted quiere tener diferentes instancias de este desklet para cada nota."
+
+#. notes@lestcape->settings-schema.json->stripe->description
+msgid "Selected theme of paper sheet:"
+msgstr "Tema de la hoja de papel:"
+
+#. notes@lestcape->settings-schema.json->stripe->tooltip
+msgid "Select a theme of paper sheet to show in Notes."
+msgstr "Seleccione un tema de la hoja de papel para mostrar en las Notas."
+
+#. notes@lestcape->settings-schema.json->staples->description
+msgid "Selected theme of staples:"
+msgstr "Tema para las grapas:"
+
+#. notes@lestcape->settings-schema.json->staples->tooltip
+msgid "Select theme of staples to show in Notes."
+msgstr "Seleccione un tema de grapas para mostrar en las Notas."
+
+#. notes@lestcape->settings-schema.json->pencil->description
+msgid "Selected theme of pencil:"
+msgstr "Tema para el lápiz:"
+
+#. notes@lestcape->settings-schema.json->pencil->tooltip
+msgid "Select a theme of pencil to show in Notes."
+msgstr "Seleccione un tema de lápiz para mostrar en las Notas."
+
+#. notes@lestcape->settings-schema.json->autoHideButtons->description
+msgid "Auto hide buttons."
+msgstr "Auto ocultar botones."
+
+#. notes@lestcape->settings-schema.json->autoHideButtons->tooltip
+msgid "Check this if you want to autohide the action buttons when mouse is outside of the desklet."
+msgstr "Seleccione si usted quiere que los botones de acciones se auto oculten cuando el cursor está afuera del área del desklet."
+
+#. notes@lestcape->settings-schema.json->boxColor->description
+msgid "Box color:"
+msgstr "Color de la caja:"
+
+#. notes@lestcape->settings-schema.json->boxColor->tooltip
+msgid "Set the custom box's color."
+msgstr "Seleccione el color para usar en la caja."
+
+#. notes@lestcape->settings-schema.json->fontColor->description
+msgid "Font color:"
+msgstr "Color del text:"
+
+#. notes@lestcape->settings-schema.json->fontColor->tooltip
+msgid "Set the custom text color."
+msgstr "Seleccione el color del texto."
+
+#. notes@lestcape->settings-schema.json->textSize->description
+msgid "Font size:"
+msgstr "Tamaño de la fuente:"
+
+#. notes@lestcape->settings-schema.json->textSize->tooltip
+msgid "Increase or decrease the font size of Note text."
+msgstr "Incrementar o disminuir el tamaño de la fuente en la Nota."
+
+#. notes@lestcape->settings-schema.json->fontFamily->description
+msgid "Font family:"
+msgstr "Tipo de fuente:"
+
+#. notes@lestcape->settings-schema.json->fontFamily->tooltip
+msgid "Select a Font family to use in Notes."
+msgstr "Seleccione el tipo de fuente a usar en la nota."
+
+#. notes@lestcape->settings-schema.json->transparency->description
+msgid "Opacity:"
+msgstr "Opacidad:"
+
+#. notes@lestcape->settings-schema.json->transparency->tooltip
+msgid "Select a opacity percent."
+msgstr "Seleccione el porciento de opacidad."
+
+#. notes@lestcape->settings-schema.json->borderBoxWidth->description
+msgid "Border's box width:"
+msgstr "Tamaño de los bordes de la caja:"
+
+#. notes@lestcape->settings-schema.json->borderBoxWidth->tooltip
+msgid "Increase or decrease the border's box width."
+msgstr "Incrementar o disminuir el tamaño de los bordes de las cajas."
+
+#. notes@lestcape->settings-schema.json->borderBoxColor->description
+msgid "Border's box color:"
+msgstr "Color de los bordes de la caja:"
+
+#. notes@lestcape->settings-schema.json->borderBoxColor->tooltip
+msgid "Set the custom border box's color."
+msgstr "Seleccione el color por defecto de los bordes de la caja."
+
+#. notes@lestcape->settings-schema.json->fixWidth->description
+msgid "Fixed width."
+msgstr "Ajustar el ancho."
+
+#. notes@lestcape->settings-schema.json->fixWidth->tooltip
+msgid "Check this if you want to control the width of desklet."
+msgstr "Seleccione esto si usted quiere tener el control sobre el ancho del Desklet."
+
+#. notes@lestcape->settings-schema.json->width->description
+msgid "Width:"
+msgstr "Ancho:"
+
+#. notes@lestcape->settings-schema.json->width->tooltip
+msgid "Increase or decrease the desklet width."
+msgstr "Incrementar o disminuir el ancho del Desklet."
+
+#. notes@lestcape->settings-schema.json->fixHeight->description
+msgid "Fixed height."
+msgstr "Ajustar el alto."
+
+#. notes@lestcape->settings-schema.json->fixHeight->tooltip
+msgid "Check this if you want to control the height of Note."
+msgstr "Seleccione esto si usted quiere tener el control sobre el alto de la Nota."
+
+#. notes@lestcape->settings-schema.json->height->description
+msgid "Height:"
+msgstr "Alto:"
+
+#. notes@lestcape->settings-schema.json->height->tooltip
+msgid "Increase or decrease the Note height."
+msgstr "Incrementar o disminuir el alto de la Nota."
+
+#. notes@lestcape->settings-schema.json->scrollVisible->description
+msgid "Scroll visible."
+msgstr "Scroll visible."
+
+#. notes@lestcape->settings-schema.json->scrollVisible->tooltip
+msgid "Check this if you want to put scroll visible or not."
+msgstr "Seleccione esto si usted quiere poner el scroll visible o no."
+
+#. #-#-#-#-#  default.pot (PACKAGE VERSION)  #-#-#-#-#
+#. notes@lestcape->settings-schema.json->stripe->combobox->None
+#. #-#-#-#-#  default.pot (PACKAGE VERSION)  #-#-#-#-#
+#. notes@lestcape->settings-schema.json->staples->combobox->None
+#. #-#-#-#-#  default.pot (PACKAGE VERSION)  #-#-#-#-#
+#. notes@lestcape->settings-schema.json->pencil->combobox->None
+msgid "None"
+msgstr "Ninguno"
+
+#. notes@lestcape->settings-schema.json->stripe->combobox->simplestripe
+msgid "Simple Stripe"
+msgstr "Raya Simple"
+
+#. notes@lestcape->settings-schema.json->stripe->combobox->doublestripe
+msgid "Double Stripe"
+msgstr "Raya Doble"
+
+#. notes@lestcape->settings-schema.json->stripe->combobox->griddedstripe
+msgid "Gridded Stripe"
+msgstr "Cuadriculado"
+
+#. notes@lestcape->settings-schema.json->staples->combobox->doublestaple
+msgid "Double Staple"
+msgstr "Grapa Doble"
+
+#. notes@lestcape->settings-schema.json->staples->combobox->borderstaple
+msgid "Border Staple"
+msgstr "Grapa de Bordes"
+
+#. notes@lestcape->settings-schema.json->staples->combobox->brightstaple
+msgid "Bright Staple"
+msgstr "Grapa Luminosa"
+
+#. notes@lestcape->settings-schema.json->staples->combobox->chainstaple
+msgid "Chain Staple"
+msgstr "Grapa de Cadena"
+
+#. notes@lestcape->settings-schema.json->staples->combobox->clampstaple
+msgid "Clamp Staple"
+msgstr "Grapa Sujetadora"
+
+#. notes@lestcape->settings-schema.json->staples->combobox->clipstaple
+msgid "Clip Staple"
+msgstr "Grapa de Presilla"
+
+#. notes@lestcape->settings-schema.json->staples->combobox->offhandedstaple
+msgid "Offhanded Staple"
+msgstr "Grapa Común"
+
+#. notes@lestcape->settings-schema.json->staples->combobox->tackstaple
+msgid "Tack Staple"
+msgstr "Grapa de Tachuela"
+
+#. notes@lestcape->settings-schema.json->staples->combobox->whitestaple
+msgid "White Staple"
+msgstr "Grapa Blanca"
+
+#. notes@lestcape->settings-schema.json->pencil->combobox->bluepencil
+msgid "Blue Pencil"
+msgstr "Lápiz Azul"
+
+#. notes@lestcape->settings-schema.json->pencil->combobox->yellowpencil
+msgid "Yellow Pencil"
+msgstr "Lápiz Amarillo"
+
