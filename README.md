@@ -1,11 +1,11 @@
 Sticky Notes
 =====
 
-Desklet: Sticky Notes Version: v0.7-Beta
+Desklet: Sticky Notes Version: v0.8-Beta
 
 O.S.: Cinnamon 
 
-Release Date: 18 November 2013
+Release Date: 20 November 2013
 
 Author: Lester Carballo Pérez
 
@@ -17,7 +17,14 @@ Website: https://github.com/lestcape/Sticky-Notes
 
 This is a simple desklet to add notes in the desktop.
 
+Based on: https://github.com/linuxmint/Cinnamon/pull/2119
+
+Thanks for the visual aspect ideas to:
+https://github.com/zagortenay333
+
 ![Alt text](/stickyNotes@lestcape/Capture.png)
+
+
 
 This program is free software:
 --------------
@@ -37,6 +44,9 @@ Installation Instructions:
 
 Change Log:
 --------------
+0.8- Beta
+   - The buttons now react visually.
+
 0.7- Beta
    - Changed the UUID.
    - Update some images.

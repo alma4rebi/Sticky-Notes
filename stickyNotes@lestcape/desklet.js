@@ -1,5 +1,5 @@
-// Desklet : Sticky Notes           Version      : v0.7-Beta
-// O.S.    : Cinnamon               Release Date : 18 November 2013.
+// Desklet : Sticky Notes           Version      : v0.8-Beta
+// O.S.    : Cinnamon               Release Date : 20 November 2013.
 // Author  : Lester Carballo Pérez  Email        : lestcape@gmail.com
 //
 // Website : https://github.com/lestcape/Sticky-Notes
@@ -613,7 +613,7 @@ MyDesklet.prototype = {
       let _color = (this._boxColor.replace(')',',' + this._transparency + ')')).replace('rgb','rgba');
       let _colorBanner = (this._boxColor.replace(')',',' + 0.1 + ')')).replace('rgb','rgba');
       if(this._themeStaples != "none") {
-         this.rootBox.set_style('text-shadow: 1px 1px 2px #000; min-width: 200px; background-color: ' + _color +
+         this.rootBox.set_style('text-shadow: 1px 1px 2px #000; background-color: ' + _color +
                                 '; box-shadow: -4px 4px 2px rgba(0, 0, 0, 0.5); color: ' + this._fontColor + '; font-weight: bold;');
          this.bannerBox.set_style('padding: 4px; background-color: ' + _colorBanner + ';');
          let imageG = GLib.get_home_dir() + "/.local/share/cinnamon/desklets/" + this.uuid + "/staples/"+ this._themeStaples +"/";
@@ -630,8 +630,8 @@ MyDesklet.prototype = {
          this.transpBox.set_height(0);
          this.rootBox.set_style('border: '+ this._borderBoxWidth + 'px solid ' + this._borderBoxColor +
                                 '; background-color: ' + _color + '; border-radius: 12px; color: ' + this._fontColor +
-                                '; text-shadow: 1px 1px 2px #000; font-weight: bold; min-width: 200px;');
-      /* this.rootBox.set_style('text-shadow: 1px 1px 2px #000; min-width: 170px; background-color: ' + _color +
+                                '; text-shadow: 1px 1px 2px #000; font-weight: bold;');
+      /* this.rootBox.set_style('text-shadow: 1px 1px 2px #000; background-color: ' + _color +
                                 '; box-shadow: -4px 4px 2px rgba(0, 0, 0, 0.5); color: ' + this._fontColor + 
                                 '; border: '+ this._borderBoxWidth + 'px solid ' + this._borderBoxColor +
                                 '; border-radius: 12px; font-weight: bold;');*/
@@ -664,7 +664,7 @@ MyDesklet.prototype = {
          } else {
             if(this._themeStaples != "none") {
                this.textBox.set_style('padding: 4px; background-image: url(\'' + image + imageNumber + '.png\');' +
-                                      'background-repeat: repeat; background-position: 0px 0px; min-width: 180px;');
+                                      'background-repeat: repeat; background-position: 0px 0px; min-width: 160px;');
             } else {
                this.textBox.set_style('padding: 4px; background-image: url(\'' + image + imageNumber + '.png\');' +
                                       'background-repeat: repeat; background-position: 0px 0px; border-radius: 12px; min-width: 180px;');
@@ -677,9 +677,9 @@ MyDesklet.prototype = {
    setPencil: function(activePencil) {
       if((this._themePencil != "none")&&(activePencil)) {
          let image = GLib.get_home_dir() + "/.local/share/cinnamon/desklets/" + this.uuid + "/pencil/" + this._themePencil + ".png";
-         this.pencilBox.set_style('width: 120px; background-image: url(\'' + image + '\');');
+         this.pencilBox.set_style('background-image: url(\'' + image + '\');');
       } else {
-         this.pencilBox.set_style('width: 120px;');
+         this.pencilBox.set_style('');
       }
    },
 
@@ -720,15 +720,12 @@ MyDesklet.prototype = {
       this.leftBox.add(this.minimizeButton, {x_fill: true, x_align: St.Align.END});
 
       this.currentNote = new St.Label();
-    //  this.currentNote.set_height(24);
       this.currentNote.set_text("1");
 
       this.numberNote = new St.Label();
-     // this.numberNote.set_height(24);
       this.numberNote.set_text("0");
 
       let separator = new St.Label();
-    //  separator.set_height(24);
       separator.set_text("/");
 
       this.titleNote = new St.Label();
@@ -749,7 +746,7 @@ MyDesklet.prototype = {
          centerBox.add(nextButton, {x_fill: false, y_fill: false, expand: true, x_align: St.Align.MIDDLE});      
       } else
          centerBox.add(this.titleNote, {x_fill: false, y_fill: false, expand: true, x_align: St.Align.MIDDLE});
-      centerBox.set_width(90);
+      centerBox.set_width(80);
       this.pencilBox.add(centerBox, {x_fill: false, y_fill: false, expand: true, x_align: St.Align.MIDDLE});
       this.setPencil(false);
 
@@ -864,8 +861,8 @@ MyDesklet.prototype = {
 
    _onAllocationChanged: function() {
       let availWidth = this.entry.get_width();
-      if(availWidth < 180)
-         availWidth = 180;
+      if(availWidth < 160)
+         availWidth = 160;
       let diff = (availWidth % 18);
      // Main.notifyError("Width: " + availWidth + " diff: " + diff);
       this.transpBox.set_width(availWidth - diff);
@@ -908,7 +905,7 @@ MyDesklet.prototype = {
          }
       }));
       btt.set_style_class_name('menu-category-button');
-      btt.set_style('padding: 2px;');
+      btt.set_style('padding: 0px;');
       let bttTooltip = new Tooltips.Tooltip(btt, toolTip);
       return btt;
    },

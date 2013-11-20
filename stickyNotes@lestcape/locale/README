@@ -1,10 +1,13 @@
-Desklet : Sticky Notes           Version      : v0.7-Beta
-O.S.    : Cinnamon               Release Date : 18 November 2013.
+Desklet : Sticky Notes           Version      : v0.8-Beta
+O.S.    : Cinnamon               Release Date : 20 November 2013.
 Author  : Lester Carballo Pérez  Email        : lestcape@gmail.com
 
 Website : https://github.com/lestcape/Sticky-Notes
 
 Based on: https://github.com/linuxmint/Cinnamon/pull/2119
+
+Thanks for the visual aspect ideas to:
+https://github.com/zagortenay333
 
 This is a simple desklet to add sticky notes in the desktop.
 The sticky notes will be saved when a focus of the text editor was lost.
@@ -34,6 +37,9 @@ Installation Instructions:
 
 Change Log:
 --------------
+0.8- Beta
+   - The buttons now react visually.
+
 0.7- Beta
    - Changed the UUID.
    - Update some images.
