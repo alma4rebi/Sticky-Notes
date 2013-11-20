@@ -42,6 +42,7 @@ const Mainloop = imports.mainloop;
 const Gtk = imports.gi.Gtk;
 const Util = imports.misc.util;
 const Tweener = imports.ui.tweener;
+const MIN_WIDTH = 170;
 
 
 function _(str) {
@@ -660,18 +661,20 @@ MyDesklet.prototype = {
          }
          if((imageNumber < 10)||(imageNumber > 60)||(imageNumber != textHeight)) {
             this.showErrorMessage(_("Unsupported text size '%s'  to use the font '%s' in this theme.").format(this._textSize, this._fontFamily));
-            this.textBox.set_style('padding: 4px; min-width: 180px;');
+            this.textBox.set_style('padding: 4px; min-width:' + MIN_WIDTH + 'px;');
          } else {
             if(this._themeStaples != "none") {
                this.textBox.set_style('padding: 4px; background-image: url(\'' + image + imageNumber + '.png\');' +
-                                      'background-repeat: repeat; background-position: 0px 0px; min-width: 160px;');
+                                      'background-repeat: repeat; background-position: 0px 0px; min-width: ' +
+                                       MIN_WIDTH + 'px;');
             } else {
                this.textBox.set_style('padding: 4px; background-image: url(\'' + image + imageNumber + '.png\');' +
-                                      'background-repeat: repeat; background-position: 0px 0px; border-radius: 12px; min-width: 180px;');
+                                      'background-repeat: repeat; background-position: 0px 0px; border-radius: 12px; min-width: ' +
+                                       MIN_WIDTH + 'px;');
             }
          }
       } else
-         this.textBox.set_style('padding: 4px; min-width: 180px;');
+         this.textBox.set_style('padding: 4px; min-width: ' + MIN_WIDTH + 'px;');
    },
 
    setPencil: function(activePencil) {
@@ -762,7 +765,7 @@ MyDesklet.prototype = {
       this.buttonBanner.add(this.leftBox, {x_fill: true, x_align: St.Align.START});
       this.buttonBanner.add(this.pencilBox, {x_fill: false, expand: true, x_align: St.Align.MIDDLE});
       this.buttonBanner.add(rightBox, {x_fill: true, x_align: St.Align.END});
-      this.bannerBox.set_height(22);
+      this.bannerBox.set_height(20);
       this.bannerBox.add(this.buttonBanner, {x_fill: true, x_align: St.Align.MIDDLE});
 
       this.entry = new St.Entry({ name: 'noteEntry', hint_text: _("Type to your note..."), track_hover: false, can_focus: true});
@@ -861,8 +864,8 @@ MyDesklet.prototype = {
 
    _onAllocationChanged: function() {
       let availWidth = this.entry.get_width();
-      if(availWidth < 160)
-         availWidth = 160;
+      if(availWidth < MIN_WIDTH)
+         availWidth = MIN_WIDTH;
       let diff = (availWidth % 18);
      // Main.notifyError("Width: " + availWidth + " diff: " + diff);
       this.transpBox.set_width(availWidth - diff);
