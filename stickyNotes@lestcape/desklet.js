@@ -660,18 +660,18 @@ MyDesklet.prototype = {
          }
          if((imageNumber < 10)||(imageNumber > 60)||(imageNumber != textHeight)) {
             this.showErrorMessage(_("Unsupported text size '%s'  to use the font '%s' in this theme.").format(this._textSize, this._fontFamily));
-            this.textBox.set_style('padding: 4px; min-width: 160px;');
+            this.textBox.set_style('padding: 4px; min-width: 180px;');
          } else {
             if(this._themeStaples != "none") {
                this.textBox.set_style('padding: 4px; background-image: url(\'' + image + imageNumber + '.png\');' +
-                                      'background-repeat: repeat; background-position: 0px 0px; min-width: 160px;');
+                                      'background-repeat: repeat; background-position: 0px 0px; min-width: 180px;');
             } else {
                this.textBox.set_style('padding: 4px; background-image: url(\'' + image + imageNumber + '.png\');' +
-                                      'background-repeat: repeat; background-position: 0px 0px; border-radius: 12px; min-width: 160px;');
+                                      'background-repeat: repeat; background-position: 0px 0px; border-radius: 12px; min-width: 180px;');
             }
          }
       } else
-         this.textBox.set_style('padding: 4px; min-width: 160px;');
+         this.textBox.set_style('padding: 4px; min-width: 180px;');
    },
 
    setPencil: function(activePencil) {
@@ -864,6 +864,8 @@ MyDesklet.prototype = {
 
    _onAllocationChanged: function() {
       let availWidth = this.entry.get_width();
+      if(availWidth < 180)
+         availWidth = 180;
       let diff = (availWidth % 18);
      // Main.notifyError("Width: " + availWidth + " diff: " + diff);
       this.transpBox.set_width(availWidth - diff);
