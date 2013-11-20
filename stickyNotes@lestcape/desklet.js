@@ -765,7 +765,7 @@ MyDesklet.prototype = {
       this.buttonBanner.add(this.leftBox, {x_fill: true, x_align: St.Align.START});
       this.buttonBanner.add(this.pencilBox, {x_fill: false, expand: true, x_align: St.Align.MIDDLE});
       this.buttonBanner.add(rightBox, {x_fill: true, x_align: St.Align.END});
-      this.bannerBox.set_height(28);
+      this.bannerBox.set_height(22);
       this.bannerBox.add(this.buttonBanner, {x_fill: true, x_align: St.Align.MIDDLE});
 
       this.entry = new St.Entry({ name: 'noteEntry', hint_text: _("Type to your note..."), track_hover: false, can_focus: true});
