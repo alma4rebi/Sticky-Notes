@@ -41,6 +41,7 @@ const Pango = imports.gi.Pango;
 const Mainloop = imports.mainloop;
 const Gtk = imports.gi.Gtk;
 const Util = imports.misc.util;
+const Tweener = imports.ui.tweener;
 
 
 function _(str) {
@@ -469,7 +470,8 @@ MyDesklet.prototype = {
       return notes;
    },
 
-   _onAddNote: function() {
+   _onAddNote: function(actor) {
+      this._effectIcon(actor, 0.2);
       if(this._multInstance) {
         this.createNewInstance();
       }
@@ -503,8 +505,9 @@ MyDesklet.prototype = {
       }
    },
 
-   _onRemoveNote: function() {
+   _onRemoveNote: function(actor) {
       try {
+         this._effectIcon(actor, 0.2);
          if(this._multInstance) {
             this.deleteNote(this.noteCurrent - 1);
             DeskletManager.removeDesklet(this.uuid, this.instance_id);
@@ -544,8 +547,9 @@ MyDesklet.prototype = {
       }
    },
 
-   _onBackNote: function() {
+   _onBackNote: function(actor) {
       if(this.notesList.length != 0) {
+         this._effectIcon(actor, 0.2);
          if((this.noteCurrent == 0)||(this.noteCurrent == 1)) {
             this.noteCurrent = this.notesList.length;
             this.entry.text = this.notesList[this.noteCurrent - 1][1];
@@ -559,8 +563,9 @@ MyDesklet.prototype = {
       }
    },
 
-   _onNextNote: function() {
+   _onNextNote: function(actor) {
       if(this.notesList.length != 0) {
+         this._effectIcon(actor, 0.2);
          if(this.noteCurrent == 0) {
             if(this.notesList.length != 1) {
                this.noteCurrent = 2;
@@ -582,7 +587,8 @@ MyDesklet.prototype = {
       }
    },
 
-   _onConfigNote: function() {
+   _onConfigNote: function(actor) {
+      this._effectIcon(actor, 0.2);
       Util.spawn(['cinnamon-settings', 'desklets', this.uuid]);
    },
 
@@ -607,7 +613,7 @@ MyDesklet.prototype = {
       let _color = (this._boxColor.replace(')',',' + this._transparency + ')')).replace('rgb','rgba');
       let _colorBanner = (this._boxColor.replace(')',',' + 0.1 + ')')).replace('rgb','rgba');
       if(this._themeStaples != "none") {
-         this.rootBox.set_style('text-shadow: 1px 1px 2px #000; min-width: 170px; background-color: ' + _color +
+         this.rootBox.set_style('text-shadow: 1px 1px 2px #000; min-width: 200px; background-color: ' + _color +
                                 '; box-shadow: -4px 4px 2px rgba(0, 0, 0, 0.5); color: ' + this._fontColor + '; font-weight: bold;');
          this.bannerBox.set_style('padding: 4px; background-color: ' + _colorBanner + ';');
          let imageG = GLib.get_home_dir() + "/.local/share/cinnamon/desklets/" + this.uuid + "/staples/"+ this._themeStaples +"/";
@@ -624,7 +630,7 @@ MyDesklet.prototype = {
          this.transpBox.set_height(0);
          this.rootBox.set_style('border: '+ this._borderBoxWidth + 'px solid ' + this._borderBoxColor +
                                 '; background-color: ' + _color + '; border-radius: 12px; color: ' + this._fontColor +
-                                '; text-shadow: 1px 1px 2px #000; font-weight: bold; min-width: 170px;');
+                                '; text-shadow: 1px 1px 2px #000; font-weight: bold; min-width: 200px;');
       /* this.rootBox.set_style('text-shadow: 1px 1px 2px #000; min-width: 170px; background-color: ' + _color +
                                 '; box-shadow: -4px 4px 2px rgba(0, 0, 0, 0.5); color: ' + this._fontColor + 
                                 '; border: '+ this._borderBoxWidth + 'px solid ' + this._borderBoxColor +
@@ -671,9 +677,9 @@ MyDesklet.prototype = {
    setPencil: function(activePencil) {
       if((this._themePencil != "none")&&(activePencil)) {
          let image = GLib.get_home_dir() + "/.local/share/cinnamon/desklets/" + this.uuid + "/pencil/" + this._themePencil + ".png";
-         this.pencilBox.set_style('width: 100px; background-image: url(\'' + image + '\');');
+         this.pencilBox.set_style('width: 120px; background-image: url(\'' + image + '\');');
       } else {
-         this.pencilBox.set_style('width: 100px;');
+         this.pencilBox.set_style('width: 120px;');
       }
    },
 
@@ -714,12 +720,15 @@ MyDesklet.prototype = {
       this.leftBox.add(this.minimizeButton, {x_fill: true, x_align: St.Align.END});
 
       this.currentNote = new St.Label();
+    //  this.currentNote.set_height(24);
       this.currentNote.set_text("1");
 
       this.numberNote = new St.Label();
+     // this.numberNote.set_height(24);
       this.numberNote.set_text("0");
 
       let separator = new St.Label();
+    //  separator.set_height(24);
       separator.set_text("/");
 
       this.titleNote = new St.Label();
@@ -733,15 +742,15 @@ MyDesklet.prototype = {
       nextButton.connect('clicked', Lang.bind(this, this._onNextNote));
 
       if(!this._multInstance) {
-         centerBox.add(backButton, {x_fill: false, expand: true, x_align: St.Align.MIDDLE});
-         centerBox.add(this.currentNote, {x_fill: false, expand: true, x_align: St.Align.MIDDLE});
-         centerBox.add(separator, {x_fill: false, expand: true, x_align: St.Align.MIDDLE});
-         centerBox.add(this.numberNote, {x_fill: false, expand: true, x_align: St.Align.MIDDLE});
-         centerBox.add(nextButton, {x_fill: false, expand: true, x_align: St.Align.MIDDLE});      
+         centerBox.add(backButton, {x_fill: false, y_fill: false, expand: true, x_align: St.Align.MIDDLE});
+         centerBox.add(this.currentNote, {x_fill: false, y_fill: false, expand: true, x_align: St.Align.MIDDLE});
+         centerBox.add(separator, {x_fill: false, y_fill: false, expand: true, x_align: St.Align.MIDDLE});
+         centerBox.add(this.numberNote, {x_fill: false, y_fill: false, expand: true, x_align: St.Align.MIDDLE});
+         centerBox.add(nextButton, {x_fill: false, y_fill: false, expand: true, x_align: St.Align.MIDDLE});      
       } else
-         centerBox.add(this.titleNote, {x_fill: true, y_fill: false, expand: true, x_align: St.Align.MIDDLE});
-      centerBox.set_width(70);
-      this.pencilBox.add(centerBox, {x_fill: false, expand: true, x_align: St.Align.MIDDLE});
+         centerBox.add(this.titleNote, {x_fill: false, y_fill: false, expand: true, x_align: St.Align.MIDDLE});
+      centerBox.set_width(90);
+      this.pencilBox.add(centerBox, {x_fill: false, y_fill: false, expand: true, x_align: St.Align.MIDDLE});
       this.setPencil(false);
 
       let configButton = this._buttonCreation('preferences-system', _("Configure..."));
@@ -756,7 +765,7 @@ MyDesklet.prototype = {
       this.buttonBanner.add(this.leftBox, {x_fill: true, x_align: St.Align.START});
       this.buttonBanner.add(this.pencilBox, {x_fill: false, expand: true, x_align: St.Align.MIDDLE});
       this.buttonBanner.add(rightBox, {x_fill: true, x_align: St.Align.END});
-      this.bannerBox.set_height(20);
+      this.bannerBox.set_height(28);
       this.bannerBox.add(this.buttonBanner, {x_fill: true, x_align: St.Align.MIDDLE});
 
       this.entry = new St.Entry({ name: 'noteEntry', hint_text: _("Type to your note..."), track_hover: false, can_focus: true});
@@ -843,8 +852,6 @@ MyDesklet.prototype = {
    },
 
 
-
-
    fixWidth: function(fix) {
       this._fWidth = fix;
       if(fix)
@@ -885,18 +892,38 @@ MyDesklet.prototype = {
    },
 
    _buttonCreation: function(icon, toolTip) {    
-      let bttIcon = new St.Icon({ icon_name: icon,
-	                          icon_type: St.IconType.SYMBOLIC,
-				  style_class: 'popup-menu-icon' });
+      let bttIcon = new St.Icon({icon_name: icon, icon_type: St.IconType.SYMBOLIC,
+				 style_class: 'popup-menu-icon' });
       let btt = new St.Button({ child: bttIcon });
       btt.connect('notify::hover', Lang.bind(this, function(actor) {
-         if(actor.get_hover())
+         if(actor.get_hover()) {
             global.set_cursor(Cinnamon.Cursor.POINTING_HAND);
-         else
+            actor.set_style_class_name('menu-category-button-selected');
+         }
+         else {
             global.unset_cursor();
+            actor.set_style_class_name('menu-category-button');
+         }
       }));
+      btt.set_style_class_name('menu-category-button');
+      btt.set_style('padding: 2px;');
       let bttTooltip = new Tooltips.Tooltip(btt, toolTip);
       return btt;
+   },
+
+   _effectIcon: function(effectIcon, time) {
+      Tweener.addTween(effectIcon,
+      {  opacity: 0,
+         time: time,
+         transition: 'easeInSine',
+         onComplete: Lang.bind(this, function() {
+            Tweener.addTween(effectIcon,
+            {  opacity: 255,
+               time: time,
+               transition: 'easeInSine'
+            });
+         })
+      });
    },
 
    _onKeyFocusChanged: function() {
