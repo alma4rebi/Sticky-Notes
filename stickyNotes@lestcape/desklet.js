@@ -1,5 +1,5 @@
-// Desklet : Sticky Notes           Version      : v0.8-Beta
-// O.S.    : Cinnamon               Release Date : 20 November 2013.
+// Desklet : Sticky Notes           Version      : v0.9-Beta
+// O.S.    : Cinnamon               Release Date : 09 december 2013.
 // Author  : Lester Carballo Pérez  Email        : lestcape@gmail.com
 //
 // Website : https://github.com/lestcape/Sticky-Notes
@@ -42,6 +42,7 @@ const Mainloop = imports.mainloop;
 const Gtk = imports.gi.Gtk;
 const Util = imports.misc.util;
 const Tweener = imports.ui.tweener;
+const Keymap = imports.gi.Gdk.Keymap.get_default();
 const MIN_WIDTH = 170;
 
 
@@ -105,6 +106,7 @@ MyDesklet.prototype = {
       this._entryActiveMenu = false;
       this._menu.connect('open-state-changed', Lang.bind(this, this._updateMenu));
 
+      this.keyPress = 0;
       this._themeStaples = "none";
       this._themeStripe = "none";
       this._themePencil = "bluepencil";
@@ -124,6 +126,7 @@ MyDesklet.prototype = {
       this._scrollVisible = true;
       this.focusIDSignal = 0;
       this.keyPressIDSignal = 0;
+      this.textInsertIDSignal = 0;
       this.autoHideButtonsIDSignal = 0;
       this.scrollIDSignal = 0;
       this._multInstance = false;
@@ -884,6 +887,9 @@ MyDesklet.prototype = {
       if(this.keyPressIDSignal > 0)
          this.clutterText.disconnect(this.keyPressIDSignal);
       this.keyPressIDSignal = 0;
+      if(this.textInsertIDSignal > 0)
+         this.clutterText.disconnect(this.textInsertIDSignal);
+      this.textInsertIDSignal = 0;
       if(this.autoHideButtonsIDSignal > 0)
          this.mainBox.disconnect(this.autoHideButtonsIDSignal);
       this.autoHideButtonsIDSignal = 0;
@@ -944,6 +950,9 @@ MyDesklet.prototype = {
          if(this.keyPressIDSignal == 0)
             this.clutterText.disconnect(this.keyPressIDSignal);
          this.keyPressIDSignal = 0;
+         if(this.textInsertIDSignal == 0)
+            this.clutterText.disconnect(this.textInsertIDSignal);
+         this.textInsertIDSignal = 0;
          this.newNote(this.entry.text);
          this._text = this.entry.text;
          this.titleNote.set_text(this.entry.text);
@@ -961,6 +970,8 @@ MyDesklet.prototype = {
             this.focusIDSignal = this.clutterText.connect('key-focus-out', Lang.bind(this, this._onFocusOut));
          if(this.keyPressIDSignal == 0)
             this.keyPressIDSignal = this.clutterText.connect('key-press-event', Lang.bind(this, this._onKeyPress));
+         if(this.textInsertIDSignal == 0)
+            this.textInsertIDSignal = this.clutterText.connect('insert-text', Lang.bind(this, this._onInsertText));
          this.setPencil(true);
          global.stage.set_key_focus(this.clutterText);
          if (event.get_button() == 1) {
@@ -977,6 +988,8 @@ MyDesklet.prototype = {
          this.showErrorMessage(e.message);
       }
    },
+
+   
 
    _onButtonRelease: function(actor, event) {
       if(this._entryActiveMenu) {
@@ -1060,8 +1073,32 @@ MyDesklet.prototype = {
       return this.clutterText.text == this.entry.get_text();
    },
 
-   _onKeyPress: function(entry, event) {
+   _onKeyPress: function(actor, event) {
+      this.keyPress = new Date().getTime();
+      this.oldEntryText = actor.get_text();
       this.symbol = event.get_key_symbol();
+      if((Keymap.get_caps_lock_state())&&((event.get_state()) & (Clutter.ModifierType.CONTROL_MASK))) {
+         if((this.symbol == Clutter.KEY_c) || (this.symbol == Clutter.KEY_C)) {
+            // allow ctrl+c event to be handled by the clutter text.
+            this._clipboard.set_text(actor.get_selection());
+            return true;
+         }
+         if((this.symbol == Clutter.KEY_v) || (this.symbol == Clutter.KEY_V)) {
+            // allow ctrl+v event to be handled by the clutter text.
+            this._clipboard.get_text(Lang.bind(this,
+               function(clipboard, text) {
+                  if(!text)
+                     return;
+                  this.clutterText.delete_selection();
+                  let pos = this.clutterText.get_cursor_position();
+                  this.keyPress = 0;
+                  this.clutterText.insert_text(text, pos);
+            }));
+            return true;
+         }
+      }
+
+
       if(this.symbol == Clutter.Escape) {
          if(this._isActivated()) {
             this.reset();
@@ -1086,6 +1123,26 @@ MyDesklet.prototype = {
       }
       return false;
     },
+
+    _onInsertText: function(actor, newText, length) {
+      if((new Date().getTime() - this.keyPress < 50)&&(Keymap.get_caps_lock_state())) {
+         let position = -1;
+         let newEntryText = actor.get_text();
+         for(let i = 0; i < newEntryText.length; i++) {
+            if(this.oldEntryText.charAt(i) != newEntryText.charAt(i)) {
+               position = i;
+               break;
+            }
+         }
+         if(position != -1) {
+            //this.keyPress = false;
+            actor.delete_text(position, position + 1);
+            actor.insert_text(newText.toUpperCase(), position);
+         }
+      }
+      //this.keyPress = false;
+      return false;
+   },
 
     _onMultInstanceChange: function() {
        if(this.instance_id ==  this.getMasterInstance()) {

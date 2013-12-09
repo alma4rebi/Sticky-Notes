@@ -1,5 +1,5 @@
 Desklet : Sticky Notes           Version              : v0.8-Beta
-S.O.    : Cinnamon               Fecha de lanzamiento : 20 Noviembre de 2013.
+S.O.    : Cinnamon               Fecha de lanzamiento : 20 diciembre de 2013.
 Autor   : Lester Carballo Pérez  Correo electrónico   : lestcape@gmail.com
 
 Sitio Web : https://github.com/lestcape/Sticky-Notes
@@ -28,6 +28,9 @@ Instrucciones de instalación:
 
 Registro de cambios:
 --------------
+0.9- Beta
+   - Arreglado el error en el bloqueo de mayúsculas, con el componente St.Entry(ClutterText).
+
 0.8- Beta
    - Los botones ahora reacciona visualmente.
 
