@@ -1,11 +1,11 @@
 {
-    "multInstance": {
+    "multi-instance": {
         "default": false,
         "description": "Multiple Instances.",
         "type": "checkbox",
         "tooltip": "Check this if you want to have different instances of this desklet for for each note."
     },
-    "stripe": {
+    "stripe-layout": {
         "type": "combobox",
         "description": "Selected theme of paper sheet:",
         "default": "none",
@@ -17,7 +17,7 @@
             "Gridded Stripe": "griddedstripe"
         }
     },
-    "staples": {
+    "staples-layout": {
         "type": "combobox",
         "description": "Selected theme of staples:",
         "default": "none",
@@ -35,7 +35,7 @@
             "White Staple": "whitestaple"
         }
     },
-    "pencil": {
+    "pencil-layout": {
         "type": "combobox",
         "description": "Selected theme of pencil:",
         "default": "bluepencil",
@@ -46,25 +46,65 @@
             "Yellow Pencil": "yellowpencil"
         }
     },
-    "autoHideButtons": {
+    "auto-hide-buttons": {
         "default": true,
         "description": "Auto hide buttons.",
         "type": "checkbox",
         "tooltip": "Check this if you want to autohide the action buttons when mouse is outside of the desklet."
     },
-    "boxColor": {
-        "type": "colorchooser",
-        "default": "rgb(0,0,0)",
-        "description": "Box color:",
-        "tooltip": "Set the custom box's color."
+    "fix-width": {
+        "default": true,
+        "description": "Fixed width.",
+        "type": "checkbox",
+        "tooltip": "Check this if you want to control the width of desklet."
     },
-    "fontColor": {
-        "type": "colorchooser",
-        "default": "white",
-        "description": "Font color:",
-        "tooltip": "Set the custom text color."
+    "width": {
+        "default": 250,
+        "type": "spinbutton",
+        "min": 200,
+        "max": 1600,
+        "description": "Width:",
+        "units": "pixels",
+        "step": 10,
+        "indent": true,
+        "dependency": "fixWidth",
+        "tooltip": "Increase or decrease the desklet width."
     },
-    "textSize": {
+   "fix-height": {
+        "default": true,
+        "description": "Fixed height.",
+        "type": "checkbox",
+        "tooltip": "Check this if you want to control the height of Note."
+    },
+    "height": {
+        "default": 50,
+        "type": "spinbutton",
+        "min": 50,
+        "max": 500,
+        "description": "Height:",
+        "units": "pixels",
+        "step": 10,
+        "indent": true,
+        "dependency": "fixHeight",
+        "tooltip": "Increase or decrease the Note height."
+    },
+   "show-scroll": {
+        "default": true,
+        "description": "Show scrolling area.",
+        "type": "checkbox",
+        "indent": true,
+        "dependency": "fixHeight",
+        "tooltip": "Check this if you want to show the scrolling area or not."
+    },
+   "auto-scroll": {
+        "default": true,
+        "description": "Enable autoscrolling.",
+        "type": "checkbox",
+        "indent": true,
+        "dependency": "fixHeight",
+        "tooltip": "Check this if you want to enable smooth autoscrolling or not."
+    },
+    "text-size": {
         "default": 12,
         "type": "spinbutton",
         "min": 10,
@@ -74,7 +114,7 @@
         "step": 1,
         "tooltip": "Increase or decrease the font size of Note text."
     },
-    "fontFamily": {
+    "font-family": {
         "type": "combobox",
         "description": "Font family:",
         "default": "",
@@ -205,7 +245,7 @@
             "Monospace": "Monospace"
         }
     },
-    "transparency": {
+    "opacity": {
         "type": "scale",
         "default": 0.5,
         "min": 0,
@@ -214,64 +254,46 @@
         "description": "Opacity:",
         "tooltip": "Select a opacity percent."
     },
-    "borderBoxWidth": {
+   "override-theme": {
+        "default": false,
+        "description": "Override the Cinnamon theme properties.",
+        "type": "checkbox",
+        "tooltip": "Check this if you want to override the Cinnamon theme properties or not."
+    },
+    "box-color": {
+        "type": "colorchooser",
+        "default": "rgb(0,0,0)",
+        "description": "Box color:",
+        "indent": true,
+        "dependency": "override-theme",
+        "tooltip": "Set the custom box's color."
+    },
+    "font-color": {
+        "type": "colorchooser",
+        "default": "white",
+        "description": "Font color:",
+        "indent": true,
+        "dependency": "override-theme",
+        "tooltip": "Set the custom text color."
+    },
+    "border-box-width": {
         "default": 1,
         "type": "spinbutton",
         "min": 0,
         "max": 4,
-        "description": "Border's box width:",
         "units": "pixels",
         "step": 1,
+        "description": "Border's box width:",
+        "indent": true,
+        "dependency": "override-theme",
         "tooltip": "Increase or decrease the border's box width."
     },
-    "borderBoxColor": {
+    "border-box-color": {
         "type": "colorchooser",
         "default": "white",
         "description": "Border's box color:",
+        "indent": true,
+        "dependency": "override-theme",
         "tooltip": "Set the custom border box's color."
-    },
-    "fixWidth": {
-        "default": true,
-        "description": "Fixed width.",
-        "type": "checkbox",
-        "tooltip": "Check this if you want to control the width of desklet."
-    },
-    "width": {
-        "default": 200,
-        "type": "spinbutton",
-        "min": 170,
-        "max": 1600,
-        "description": "Width:",
-        "units": "pixels",
-        "step": 10,
-        "indent": true,
-        "dependency": "fixWidth",
-        "tooltip": "Increase or decrease the desklet width."
-    },
-   "fixHeight": {
-        "default": true,
-        "description": "Fixed height.",
-        "type": "checkbox",
-        "tooltip": "Check this if you want to control the height of Note."
-    },
-    "height": {
-        "default": 50,
-        "type": "spinbutton",
-        "min": 50,
-        "max": 500,
-        "description": "Height:",
-        "units": "pixels",
-        "step": 10,
-        "indent": true,
-        "dependency": "fixHeight",
-        "tooltip": "Increase or decrease the Note height."
-    },
-   "scrollVisible": {
-        "default": true,
-        "description": "Scroll visible.",
-        "type": "checkbox",
-        "indent": true,
-        "dependency": "fixHeight",
-        "tooltip": "Check this if you want to put scroll visible or not."
     }
 }

@@ -1,11 +1,11 @@
 Sticky Notes
 =====
 
-Desklet: Sticky Notes Version: v0.9-Beta
+Desklet: Sticky Notes Version: v0.9.1-Beta
 
 O.S.: Cinnamon 
 
-Release Date: 09 december 2013
+Release Date: 08 February 2014.
 
 Author: Lester Carballo Pérez
 
@@ -44,6 +44,11 @@ Installation Instructions:
 
 Change Log:
 --------------
+v0.9.1- Beta
+   - Added theme support.
+   - Allow auto scroll.
+   - Improve the code.
+
 0.9- Beta
    - Fixed the caps lock bug in St.Entry(ClutterText).
 

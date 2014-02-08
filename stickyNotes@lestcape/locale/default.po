@@ -100,107 +100,51 @@ msgstr ""
 msgid "pixels"
 msgstr ""
 
-#. notes@lestcape->settings-schema.json->multInstance->description
+#. notes@lestcape->settings-schema.json->multi-instance->description
 msgid "Multiple Instances."
 msgstr ""
 
-#. notes@lestcape->settings-schema.json->multInstance->tooltip
+#. notes@lestcape->settings-schema.json->multi-instance->tooltip
 msgid "Check this if you want to have different instances of this desklet for for each note."
 msgstr ""
 
-#. notes@lestcape->settings-schema.json->stripe->description
+#. notes@lestcape->settings-schema.json->stripe-layout->description
 msgid "Selected theme of paper sheet:"
 msgstr ""
 
-#. notes@lestcape->settings-schema.json->stripe->tooltip
+#. notes@lestcape->settings-schema.json->stripe-layout->tooltip
 msgid "Select a theme of paper sheet to show in Notes."
 msgstr ""
 
-#. notes@lestcape->settings-schema.json->staples->description
+#. notes@lestcape->settings-schema.json->staples-layout->description
 msgid "Selected theme of staples:"
 msgstr ""
 
-#. notes@lestcape->settings-schema.json->staples->tooltip
+#. notes@lestcape->settings-schema.json->staples-layout->tooltip
 msgid "Select theme of staples to show in Notes."
 msgstr ""
 
-#. notes@lestcape->settings-schema.json->pencil->description
+#. notes@lestcape->settings-schema.json->pencil-layout->description
 msgid "Selected theme of pencil:"
 msgstr ""
 
-#. notes@lestcape->settings-schema.json->pencil->tooltip
+#. notes@lestcape->settings-schema.json->pencil-layout->tooltip
 msgid "Select a theme of pencil to show in Notes."
 msgstr ""
 
-#. notes@lestcape->settings-schema.json->autoHideButtons->description
+#. notes@lestcape->settings-schema.json->auto-hide-buttons->description
 msgid "Auto hide buttons."
 msgstr ""
 
-#. notes@lestcape->settings-schema.json->autoHideButtons->tooltip
+#. notes@lestcape->settings-schema.json->auto-hide-buttons->tooltip
 msgid "Check this if you want to autohide the action buttons when mouse is outside of the desklet."
 msgstr ""
 
-#. notes@lestcape->settings-schema.json->boxColor->description
-msgid "Box color:"
-msgstr ""
-
-#. notes@lestcape->settings-schema.json->boxColor->tooltip
-msgid "Set the custom box's color."
-msgstr ""
-
-#. notes@lestcape->settings-schema.json->fontColor->description
-msgid "Font color:"
-msgstr ""
-
-#. notes@lestcape->settings-schema.json->fontColor->tooltip
-msgid "Set the custom text color."
-msgstr ""
-
-#. notes@lestcape->settings-schema.json->textSize->description
-msgid "Font size:"
-msgstr ""
-
-#. notes@lestcape->settings-schema.json->textSize->tooltip
-msgid "Increase or decrease the font size of Note text."
-msgstr ""
-
-#. notes@lestcape->settings-schema.json->fontFamily->description
-msgid "Font family:"
-msgstr ""
-
-#. notes@lestcape->settings-schema.json->fontFamily->tooltip
-msgid "Select a Font family to use in Notes."
-msgstr ""
-
-#. notes@lestcape->settings-schema.json->transparency->description
-msgid "Opacity:"
-msgstr ""
-
-#. notes@lestcape->settings-schema.json->transparency->tooltip
-msgid "Select a opacity percent."
-msgstr ""
-
-#. notes@lestcape->settings-schema.json->borderBoxWidth->description
-msgid "Border's box width:"
-msgstr ""
-
-#. notes@lestcape->settings-schema.json->borderBoxWidth->tooltip
-msgid "Increase or decrease the border's box width."
-msgstr ""
-
-#. notes@lestcape->settings-schema.json->borderBoxColor->description
-msgid "Border's box color:"
-msgstr ""
-
-#. notes@lestcape->settings-schema.json->borderBoxColor->tooltip
-msgid "Set the custom border box's color."
-msgstr ""
-
-#. notes@lestcape->settings-schema.json->fixWidth->description
+#. notes@lestcape->settings-schema.json->fix-width->description
 msgid "Fixed width."
 msgstr ""
 
-#. notes@lestcape->settings-schema.json->fixWidth->tooltip
+#. notes@lestcape->settings-schema.json->fix-width->tooltip
 msgid "Check this if you want to control the width of desklet."
 msgstr ""
 
@@ -212,11 +156,11 @@ msgstr ""
 msgid "Increase or decrease the desklet width."
 msgstr ""
 
-#. notes@lestcape->settings-schema.json->fixHeight->description
+#. notes@lestcape->settings-schema.json->fix-height->description
 msgid "Fixed height."
 msgstr ""
 
-#. notes@lestcape->settings-schema.json->fixHeight->tooltip
+#. notes@lestcape->settings-schema.json->fix-height->tooltip
 msgid "Check this if you want to control the height of Note."
 msgstr ""
 
@@ -228,76 +172,148 @@ msgstr ""
 msgid "Increase or decrease the Note height."
 msgstr ""
 
-#. notes@lestcape->settings-schema.json->scrollVisible->description
-msgid "Scroll visible."
+#. notes@lestcape->settings-schema.json->show-scroll->description
+msgid "Show scrolling area."
 msgstr ""
 
-#. notes@lestcape->settings-schema.json->scrollVisible->tooltip
-msgid "Check this if you want to put scroll visible or not."
+#. notes@lestcape->settings-schema.json->show-scroll->tooltip
+msgid "Check this if you want to show the scrolling area or not."
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->auto-scroll->description
+msgid "Enable autoscrolling."
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->auto-scroll->tooltip
+msgid "Check this if you want to enable smooth autoscrolling or not."
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->text-size->description
+msgid "Font size:"
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->text-size->tooltip
+msgid "Increase or decrease the font size of Note text."
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->font-family->description
+msgid "Font family:"
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->font-family->tooltip
+msgid "Select a Font family to use in Notes."
+msgstr ""
+
+#. notes@lestcape->settings-schema.json-override-theme->description
+msgid "Override the Cinnamon theme properties."
+msgstr ""
+
+#. notes@lestcape->settings-schema.json-override-theme->tooltip
+msgid "Check this if you want to override the Cinnamon theme properties or not."
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->box-color->description
+msgid "Box color:"
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->box-color->tooltip
+msgid "Set the custom box's color."
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->font-color->description
+msgid "Font color:"
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->font-color->tooltip
+msgid "Set the custom text color."
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->opacity->description
+msgid "Opacity:"
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->opacity->tooltip
+msgid "Select a opacity percent."
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->border-box-width->description
+msgid "Border's box width:"
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->border-box-width->tooltip
+msgid "Increase or decrease the border's box width."
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->border-box-color->description
+msgid "Border's box color:"
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->border-box-color->tooltip
+msgid "Set the custom border box's color."
 msgstr ""
 
 #. #-#-#-#-#  default.pot (PACKAGE VERSION)  #-#-#-#-#
-#. notes@lestcape->settings-schema.json->stripe->combobox->None
+#. notes@lestcape->settings-schema.json->stripe-layout->combobox->None
 #. #-#-#-#-#  default.pot (PACKAGE VERSION)  #-#-#-#-#
-#. notes@lestcape->settings-schema.json->staples->combobox->None
+#. notes@lestcape->settings-schema.json->staples-layout->combobox->None
 #. #-#-#-#-#  default.pot (PACKAGE VERSION)  #-#-#-#-#
-#. notes@lestcape->settings-schema.json->pencil->combobox->None
+#. notes@lestcape->settings-schema.json->pencil-layout->combobox->None
 msgid "None"
 msgstr ""
 
-#. notes@lestcape->settings-schema.json->stripe->combobox->simplestripe
+#. notes@lestcape->settings-schema.json->stripe-layout->combobox->simplestripe
 msgid "Simple Stripe"
 msgstr ""
 
-#. notes@lestcape->settings-schema.json->stripe->combobox->doublestripe
+#. notes@lestcape->settings-schema.json->stripe-layout->combobox->doublestripe
 msgid "Double Stripe"
 msgstr ""
 
-#. notes@lestcape->settings-schema.json->stripe->combobox->griddedstripe
+#. notes@lestcape->settings-schema.json->stripe-layout->combobox->griddedstripe
 msgid "Gridded Stripe"
 msgstr ""
 
-#. notes@lestcape->settings-schema.json->staples->combobox->doublestaple
+#. notes@lestcape->settings-schema.json->staples-layout->combobox->doublestaple
 msgid "Double Staple"
 msgstr ""
 
-#. notes@lestcape->settings-schema.json->staples->combobox->borderstaple
+#. notes@lestcape->settings-schema.json->staples-layout->combobox->borderstaple
 msgid "Border Staple"
 msgstr ""
 
-#. notes@lestcape->settings-schema.json->staples->combobox->brightstaple
+#. notes@lestcape->settings-schema.json->staples-layout->combobox->brightstaple
 msgid "Bright Staple"
 msgstr ""
 
-#. notes@lestcape->settings-schema.json->staples->combobox->chainstaple
+#. notes@lestcape->settings-schema.json->staples-layout->combobox->chainstaple
 msgid "Chain Staple"
 msgstr ""
 
-#. notes@lestcape->settings-schema.json->staples->combobox->clampstaple
+#. notes@lestcape->settings-schema.json->staples-layout->combobox->clampstaple
 msgid "Clamp Staple"
 msgstr ""
 
-#. notes@lestcape->settings-schema.json->staples->combobox->clipstaple
+#. notes@lestcape->settings-schema.json->staples-layout->combobox->clipstaple
 msgid "Clip Staple"
 msgstr ""
 
-#. notes@lestcape->settings-schema.json->staples->combobox->offhandedstaple
+#. notes@lestcape->settings-schema.json->staples-layout->combobox->offhandedstaple
 msgid "Offhanded Staple"
 msgstr ""
 
-#. notes@lestcape->settings-schema.json->staples->combobox->tackstaple
+#. notes@lestcape->settings-schema.json->staples-layout->combobox->tackstaple
 msgid "Tack Staple"
 msgstr ""
 
-#. notes@lestcape->settings-schema.json->staples->combobox->whitestaple
+#. notes@lestcape->settings-schema.json->staples-layout->combobox->whitestaple
 msgid "White Staple"
 msgstr ""
 
-#. notes@lestcape->settings-schema.json->pencil->combobox->bluepencil
+#. notes@lestcape->settings-schema.json->pencil-layout->combobox->bluepencil
 msgid "Blue Pencil"
 msgstr ""
 
-#. notes@lestcape->settings-schema.json->pencil->combobox->yellowpencil
+#. notes@lestcape->settings-schema.json->pencil-layout->combobox->yellowpencil
 msgid "Yellow Pencil"
 msgstr ""
 
