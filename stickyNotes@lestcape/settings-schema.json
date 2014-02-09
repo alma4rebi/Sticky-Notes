@@ -61,7 +61,7 @@
     "width": {
         "default": 250,
         "type": "spinbutton",
-        "min": 200,
+        "min": 230,
         "max": 1600,
         "description": "Width:",
         "units": "pixels",
@@ -260,21 +260,45 @@
         "type": "checkbox",
         "tooltip": "Check this if you want to override the Cinnamon theme properties or not."
     },
-    "box-color": {
+    "main-box-color": {
         "type": "colorchooser",
         "default": "rgb(0,0,0)",
-        "description": "Box color:",
+        "description": "Main box color:",
         "indent": true,
         "dependency": "override-theme",
-        "tooltip": "Set the custom box's color."
+        "tooltip": "Set the custom main box's color."
+    },
+   "text-box-color": {
+        "type": "colorchooser",
+        "default": "rgb(255,255,255)",
+        "description": "Text box color:",
+        "indent": true,
+        "dependency": "override-theme",
+        "tooltip": "Set the custom text box's color."
     },
     "font-color": {
         "type": "colorchooser",
-        "default": "white",
+        "default": "rgb(0,0,0)",
         "description": "Font color:",
         "indent": true,
         "dependency": "override-theme",
         "tooltip": "Set the custom text color."
+    },
+    "selected-text-color": {
+        "type": "colorchooser",
+        "default": "rgb(128,128,128)",
+        "description": "Selected text color:",
+        "indent": true,
+        "dependency": "override-theme",
+        "tooltip": "Set the custom selected text color."
+    },
+   "override-gradient": {
+        "default": true,
+        "description": "Override the gradient of text box.",
+        "type": "checkbox",
+        "indent": true,
+        "dependency": "override-theme",
+        "tooltip": "Check this if you want also to override the gradient of text box."
     },
     "border-box-width": {
         "default": 1,

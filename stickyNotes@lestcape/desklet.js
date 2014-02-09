@@ -43,7 +43,7 @@ const Gtk = imports.gi.Gtk;
 const Util = imports.misc.util;
 const Tweener = imports.ui.tweener;
 const Keymap = imports.gi.Gdk.Keymap.get_default();
-const MIN_WIDTH = 200;
+const MIN_WIDTH = 230;
 
 
 function _(str) {
@@ -129,35 +129,58 @@ MyDesklet.prototype = {
       this.textInsertIDSignal = 0;
       this.autoHideButtonsIDSignal = 0;
       this.scrollIDSignal = 0;
+      this._timeOutSettings = 0;
       this._multInstance = false;
       try {
-         this.settingsExt = Gio.Settings.new("org.cinnamon");
-         this._initSettings();
-         this._initDeskletContruction();
-         this.setContent(this.mainBox);
-
-         this.initDeskletType();
-
-         this._keyFocusNotifyIDSignal = global.stage.connect('notify::key-focus', Lang.bind(this, this._onKeyFocusChanged));
-         this.clutterText.connect('button-press-event', Lang.bind(this, this._onButtonPress));
-         this.clutterText.connect('button-release-event', Lang.bind(this, this._onButtonRelease));
-         this.textAreaBox.connect('button-press-event', Lang.bind(this, this._onButtonPress));
-         this.textAreaBox.connect('button-release-event', Lang.bind(this, this._onButtonRelease));
-         //this.textBox.connect('allocation_changed', Lang.bind(this, this._onAllocationChanged));
-         this.entry.connect('allocation_changed', Lang.bind(this, this._onAllocationChanged));
-
-         this._onFixWidth();
-         this._onFixHeight();
-         this._onScrollVisibleChange();
-         this._onScrollAutoChange();
-         this._onAutoHideButtons();
-         this.multInstanceMenuItem._switch.setToggleState(this._multInstance);
-         Mainloop.idle_add(Lang.bind(this, this._onStyleChange));
+         Main.themeManager.connect('theme-set', Lang.bind(this, this._onThemeChange));
+         this._updateComplete();
       } catch(e) {
          this.showErrorMessage(e.message);
       }
       this._trackMouse();
    },
+
+   _onThemeChange : function() {
+     this._timeOutSettings = Mainloop.timeout_add(2000, Lang.bind(this, function() {
+         this.on_desklet_removed();
+         this._updateComplete();
+      }));
+      //this.multInstanceUpdate();
+   },
+
+
+   _updateComplete : function() {
+      if(this._timeOutSettings > 0) {
+         Mainloop.source_remove(this._timeOutSettings);
+         this._timeOutSettings = 0;
+      }
+
+      this.settingsExt = Gio.Settings.new("org.cinnamon");
+      this._initSettings();
+      this._initDeskletContruction();
+      this.setContent(this.mainBox);
+
+      this.initDeskletType();
+
+      this._keyFocusNotifyIDSignal = global.stage.connect('notify::key-focus', Lang.bind(this, this._onKeyFocusChanged));
+      this.clutterText.connect('button-press-event', Lang.bind(this, this._onButtonPress));
+      this.clutterText.connect('button-release-event', Lang.bind(this, this._onButtonRelease));
+      this.textAreaBox.connect('button-press-event', Lang.bind(this, this._onButtonPress));
+      this.textAreaBox.connect('button-release-event', Lang.bind(this, this._onButtonRelease));
+      //this.textBox.connect('allocation_changed', Lang.bind(this, this._onAllocationChanged));
+      this.entry.connect('allocation_changed', Lang.bind(this, this._onAllocationChanged));
+
+      
+
+      this._onFixWidth();
+      this._onFixHeight();
+      this._onScrollVisibleChange();
+      this._onScrollAutoChange();
+      this._onAutoHideButtons();
+      this.multInstanceMenuItem._switch.setToggleState(this._multInstance);
+      Mainloop.idle_add(Lang.bind(this, this._onStyleChange));
+   },
+
 
    showErrorMessage: function(menssage) {
       Main.notifyError(_("Error"), menssage);
@@ -609,8 +632,10 @@ MyDesklet.prototype = {
    },
 
    setStyle: function() {
-      let _color = (this._boxColor.replace(')',',' + this._opacity + ')')).replace('rgb','rgba');
+      let _colorBox = (this._boxColor.replace(')',',' + this._opacity + ')')).replace('rgb','rgba');
+      let _colorText = (this._textBoxColor.replace(')',',' + this._opacity + ')')).replace('rgb','rgba');
       let _colorBanner = (this._boxColor.replace(')',',' + 0.1 + ')')).replace('rgb','rgba');
+
       this.rootBox.set_style_class_name('desklet-with-borders');
       if(this._themeStaples != "none") {
          this.rootBox.add_style_class_name('sticky-main-box-staples');
@@ -629,15 +654,28 @@ MyDesklet.prototype = {
          this.rootBox.add_style_class_name('sticky-main-box-none');
       }
       if(this._overrideTheme) {
+         this.rootBox.set_style_class_name('sticky-main-box-staples');
          this.bannerBox.set_style('background-color: ' + _colorBanner);
-         this.rootBox.set_style('background-color: ' + _color + '; color: ' + this._fontColor + '; border: ' +
+         this.rootBox.set_style('background-color: ' + _colorBox + '; color: ' + this._fontColor + '; border: ' +
                                  this._borderBoxWidth + 'px solid ' + this._borderBoxColor + '; border-top: none;');
          this.endBoxBackGround.set_style('background-color: ' + _colorBanner);
+         if(this._overrideGradient) {
+            this.textBox.set_style_class_name('');
+            this.textBox.set_style('background-color: ' + _colorText + '; background:' + _colorText + '; ' + ' background-gradient-start: rgba(255,255,255,0);' +
+                                   'background-gradient-end: rgba(255,255,255,0);');
+         }
+         else {
+            this.textBox.set_style_class_name('sticky-text-box');
+            this.textBox.set_style('background-color: ' + _colorText + ';');
+         }
       }
       else {
-         this.bannerBox.set_style('')
-         if(this._themeStaples != "none")
-            this.rootBox.set_style('border-top: none;');
+         this.textBox.set_style_class_name('sticky-text-box');
+         this.bannerBox.set_style('');
+         this.textBox.set_style('');
+         if(this._themeStaples != "none") {
+            this.rootBox.set_style('border-top: none; padding-top: 0px;');
+         }
          else
             this.rootBox.set_style('');
          this.endBoxBackGround.set_style('');
@@ -650,8 +688,11 @@ MyDesklet.prototype = {
      // desc.set_family("UnPilgi"); 13
      // desc.set_family("Times New Roman"); 14
 
-      this.entry.set_style('font-size: ' + this._textSize + 'pt; color: ' + this._fontColor +
-                           '; font-weight: normal; ' + fontTag);
+      if(this._overrideTheme)
+          this.entry.set_style('font-size: ' + this._textSize + 'pt; color: ' + this._fontColor +  '; font-weight: normal; caret-color: ' +
+                               this._fontColor + '; selected-color: ' + this._textSelectedColor + ';' + fontTag);
+      else
+          this.entry.set_style('font-size: ' + this._textSize + 'pt;' + fontTag);
 
       if(this._themeStripe != "none") {
          let image = GLib.get_home_dir() + "/.local/share/cinnamon/desklets/" + this.uuid + "/stripe/" + this._themeStripe + "/";
@@ -660,8 +701,11 @@ MyDesklet.prototype = {
          let suported = true;
          if(imageNumber != textHeight) {
             let newVal = this._textSize*imageNumber/textHeight;
-            this.entry.set_style('font-size: ' + newVal + 'pt; color: ' + this._fontColor +
-                                 '; font-weight: normal; ' + fontTag);
+            if(this._overrideTheme)
+               this.entry.set_style('font-size: ' + newVal + 'pt; color: ' + this._fontColor + '; font-weight: normal; caret-color: ' +
+                                     this._fontColor + '; selected-color: ' + this._textSelectedColor + ';' + fontTag);
+            else
+               this.entry.set_style('font-size: ' + newVal + 'pt;' + fontTag);
             textHeight = this._getTextHeight();
          }
          if((imageNumber < 10)||(imageNumber > 60)||(imageNumber != textHeight)) {
@@ -686,9 +730,9 @@ MyDesklet.prototype = {
       if((this._themePencil != "none")&&(activePencil)) {
          let image = GLib.get_home_dir() + "/.local/share/cinnamon/desklets/" + this.uuid + "/pencil/" + this._themePencil + ".svg";
          this.pencilBox.set_style(' background-image: url(\'' + image + '\'); background-size:' + this.pencilBox.width +'px' +
-                                    this.pencilBox.height + 'px; max-width: 200px;');
+                                    this.pencilBox.height + 'px; max-width: 200px; min-width: 60px;');
       } else {
-         this.pencilBox.set_style('max-width: 200px;');
+         this.pencilBox.set_style('max-width: 200px; min-width: 60px;');
       }
    },
 
@@ -710,7 +754,7 @@ MyDesklet.prototype = {
    _initDeskletContruction: function() {
       this.mainBox = new St.BoxLayout({vertical:true, reactive: true, track_hover: true});
       this.rootBox = new St.BoxLayout({vertical:true});
-      this.rootBox.connect('style-changed', Lang.bind(this, this._onOpacityChange));
+      this.rootBox.connect('style-changed', Lang.bind(this, this._onOpacityRootChange));
       this.bannerBox = new St.BoxLayout({ vertical:true, style_class: 'sticky-button-box' });
       this.buttonBanner = new St.BoxLayout({vertical:false});
       this.leftBox = new St.BoxLayout({vertical:false});
@@ -718,6 +762,8 @@ MyDesklet.prototype = {
       this.pencilBox = new St.BoxLayout({vertical:false});
       let rightBox = new St.BoxLayout({vertical:false});
       this.textBox = new St.BoxLayout({ vertical:true, style_class: 'sticky-text-box' });
+      this.textBox.connect('style-changed', Lang.bind(this, this._onOpacityTextChange));
+
       this.textAreaBox = new St.BoxLayout({vertical:true, reactive: true});
       this.bottomBox = new St.BoxLayout({ vertical:false, style_class: 'sticky-bootom-box' });
 
@@ -1154,7 +1200,12 @@ MyDesklet.prototype = {
        this.setStyle();
     },
 
-    _onOpacityChange: function() {
+   _onOpacityChange: function() {
+       this._onOpacityRootChange();
+       this._onOpacityTextChange();
+    },
+
+    _onOpacityRootChange: function() {
         let themeNode = this.rootBox.get_theme_node();
         let boxColor = themeNode.get_color('background-color');
         let boxColorString = boxColor.to_string();
@@ -1163,9 +1214,20 @@ MyDesklet.prototype = {
         let b = parseInt(boxColorString.substring(5,7),16);
         let remplace = "rgba("+r+","+g+","+b+","+this._opacity+")";
         if(this._themeStaples != "none")
-           this.rootBox.set_style('background-color: ' + remplace + "; border-top: none;");
+           this.rootBox.set_style('background-color: ' + remplace + "; border-top: none; padding-top: 0px");
         else
            this.rootBox.set_style('background-color: ' + remplace + ";");
+    },
+
+    _onOpacityTextChange: function() {
+        let themeNode = this.textBox.get_theme_node();
+        let boxColor = themeNode.get_color('background-color');
+        let boxColorString = boxColor.to_string();
+        let r = parseInt(boxColorString.substring(1,3),16);
+        let g = parseInt(boxColorString.substring(3,5),16);
+        let b = parseInt(boxColorString.substring(5,7),16);
+        let remplace = "rgba("+r+","+g+","+b+","+this._opacity+")";
+        this.textBox.set_style('background-color: ' + remplace + ";");
     },
 
     _onFixWidth: function() {
@@ -1237,11 +1299,15 @@ MyDesklet.prototype = {
 
          this.settings.bindProperty(Settings.BindingDirection.IN, "text-size", "_textSize", this._onStyleChange, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "font-family", "_fontFamily", this._onStyleChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "opacity", "_opacity", this._onOpacityChange, null);
 
          this.settings.bindProperty(Settings.BindingDirection.IN, "override-theme", "_overrideTheme", this._onStyleChange, null);
-         this.settings.bindProperty(Settings.BindingDirection.IN, "box-color", "_boxColor", this._onStyleChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "main-box-color", "_boxColor", this._onStyleChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "text-box-color", "_textBoxColor", this._onStyleChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "selected-text-color", "_textSelectedColor", this._onStyleChange, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "font-color", "_fontColor", this._onStyleChange, null);
-         this.settings.bindProperty(Settings.BindingDirection.IN, "opacity", "_opacity", this._onOpacityChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "override-gradient", "_overrideGradient", this._onStyleChange, null);
+
          this.settings.bindProperty(Settings.BindingDirection.IN, "border-box-width", "_borderBoxWidth", this._onStyleChange, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "border-box-color", "_borderBoxColor", this._onStyleChange, null);
 

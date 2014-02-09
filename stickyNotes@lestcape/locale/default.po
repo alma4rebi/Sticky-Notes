@@ -204,6 +204,14 @@ msgstr ""
 msgid "Select a Font family to use in Notes."
 msgstr ""
 
+#. notes@lestcape->settings-schema.json->opacity->description
+msgid "Opacity:"
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->opacity->tooltip
+msgid "Select a opacity percent."
+msgstr ""
+
 #. notes@lestcape->settings-schema.json-override-theme->description
 msgid "Override the Cinnamon theme properties."
 msgstr ""
@@ -212,12 +220,20 @@ msgstr ""
 msgid "Check this if you want to override the Cinnamon theme properties or not."
 msgstr ""
 
-#. notes@lestcape->settings-schema.json->box-color->description
-msgid "Box color:"
+#. notes@lestcape->settings-schema.json->main-box-color->description
+msgid "Main box color:"
 msgstr ""
 
-#. notes@lestcape->settings-schema.json->box-color->tooltip
-msgid "Set the custom box's color."
+#. notes@lestcape->settings-schema.json->main-box-color->tooltip
+msgid "Set the custom main box's color."
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->text-box-color->description
+msgid "Text box color:"
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->text-box-color->tooltip
+msgid "Set the custom text box's color."
 msgstr ""
 
 #. notes@lestcape->settings-schema.json->font-color->description
@@ -228,12 +244,20 @@ msgstr ""
 msgid "Set the custom text color."
 msgstr ""
 
-#. notes@lestcape->settings-schema.json->opacity->description
-msgid "Opacity:"
+#. notes@lestcape->settings-schema.json->selected-text-color->description
+msgid "Selected text color:"
 msgstr ""
 
-#. notes@lestcape->settings-schema.json->opacity->tooltip
-msgid "Select a opacity percent."
+#. notes@lestcape->settings-schema.json->selected-text-color->tooltip
+msgid "Set the custom selected text color."
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->override-gradient->description
+msgid "Override the gradient of text box."
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->override-gradient->tooltip
+msgid "Check this if you want also to override the gradient of text box."
 msgstr ""
 
 #. notes@lestcape->settings-schema.json->border-box-width->description
