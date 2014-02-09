@@ -765,7 +765,7 @@ MyDesklet.prototype = {
       this.textBox.connect('style-changed', Lang.bind(this, this._onOpacityTextChange));
 
       this.textAreaBox = new St.BoxLayout({vertical:true, reactive: true});
-      this.bottomBox = new St.BoxLayout({ vertical:false, style_class: 'sticky-bootom-box' });
+      this.bottomBox = new St.BoxLayout({ vertical:false, style_class: 'sticky-bottom-box' });
 
 
       let addButton = this._buttonCreation('list-add', _("Add new Note"), true);
