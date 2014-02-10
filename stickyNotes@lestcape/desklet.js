@@ -632,29 +632,14 @@ MyDesklet.prototype = {
    },
 
    setStyle: function() {
-      let _colorBox = (this._boxColor.replace(')',',' + this._opacity + ')')).replace('rgb','rgba');
-      let _colorText = (this._textBoxColor.replace(')',',' + this._opacity + ')')).replace('rgb','rgba');
-      let _colorBanner = (this._boxColor.replace(')',',' + 0.1 + ')')).replace('rgb','rgba');
+      this.setStaples();
+      this.setStripe();
 
-      this.rootBox.set_style_class_name('desklet-with-borders');
-      if(this._themeStaples != "none") {
-         this.rootBox.add_style_class_name('sticky-main-box-staples');
-         let imageG = GLib.get_home_dir() + "/.local/share/cinnamon/desklets/" + this.uuid + "/staples/"+ this._themeStaples +"/";
-         this.transpBox.set_style('background-image: url(\'' + imageG + '1.png\');' +
-                                  'background-repeat: repeat; background-position: 0px 0px;');
-         this.transpBox.set_height(10);
-         this.endBox.set_style('background-image: url(\'' + imageG + '2.png\');' +
-                               'background-repeat: repeat; background-position: 0px 0px;');
-         
-         this.endBox.set_height(15);
-      } else {
-         this.endBox.set_height(0);
-         this.transpBox.set_height(0);
-
-         this.rootBox.add_style_class_name('sticky-main-box-none');
-      }
       if(this._overrideTheme) {
-         this.rootBox.set_style_class_name('sticky-main-box-staples');
+         let _colorBox = (this._boxColor.replace(')',',' + this._opacity + ')')).replace('rgb','rgba');
+         let _colorText = (this._textBoxColor.replace(')',',' + this._opacity + ')')).replace('rgb','rgba');
+         let _colorBanner = (this._boxColor.replace(')',',' + 0.1 + ')')).replace('rgb','rgba');
+         this.rootBox.set_style_class_name('');
          this.bannerBox.set_style('background-color: ' + _colorBanner);
          this.rootBox.set_style('background-color: ' + _colorBox + '; color: ' + this._fontColor + '; border: ' +
                                  this._borderBoxWidth + 'px solid ' + this._borderBoxColor + '; border-top: none;');
@@ -670,30 +655,28 @@ MyDesklet.prototype = {
          }
       }
       else {
+         this.rootBox.set_style_class_name('desklet-with-borders');
          this.textBox.set_style_class_name('sticky-text-box');
          this.bannerBox.set_style('');
          this.textBox.set_style('');
+
          if(this._themeStaples != "none") {
+            this.rootBox.add_style_class_name('sticky-main-box-staples');
             this.rootBox.set_style('border-top: none; padding-top: 0px;');
          }
-         else
-            this.rootBox.set_style('');
+         else 
+            this.rootBox.add_style_class_name('sticky-main-box-none');
          this.endBoxBackGround.set_style('');
       }
-      let fontTag = '';
-      if((this._fontFamily)&&(this._fontFamily != ""))
-         fontTag = 'font-family: ' + this._fontFamily + ';';
+   },
 
+   setStripe: function() {
      // desc.set_family("Monospace"); 13
      // desc.set_family("UnPilgi"); 13
      // desc.set_family("Times New Roman"); 14
-
-      if(this._overrideTheme)
-          this.entry.set_style('font-size: ' + this._textSize + 'pt; color: ' + this._fontColor +  '; font-weight: normal; caret-color: ' +
-                               this._fontColor + '; selected-color: ' + this._textSelectedColor + ';' + fontTag);
-      else
-          this.entry.set_style('font-size: ' + this._textSize + 'pt;' + fontTag);
-
+      let fontTag = '';
+      if((this._fontFamily)&&(this._fontFamily != ""))
+         fontTag = 'font-family: ' + this._fontFamily + ';';
       if(this._themeStripe != "none") {
          let image = GLib.get_home_dir() + "/.local/share/cinnamon/desklets/" + this.uuid + "/stripe/" + this._themeStripe + "/";
          let textHeight = this._getTextHeight();
@@ -724,6 +707,22 @@ MyDesklet.prototype = {
          }
       } else
          this.textAreaBox.set_style('padding: 0px; min-width: ' + MIN_WIDTH + 'px;');
+   },
+
+   setStaples: function() {
+      if(this._themeStaples != "none") {
+         let imageG = GLib.get_home_dir() + "/.local/share/cinnamon/desklets/" + this.uuid + "/staples/"+ this._themeStaples +"/";
+         this.transpBox.set_style('background-image: url(\'' + imageG + '1.png\');' +
+                                  'background-repeat: repeat; background-position: 0px 0px;');
+
+         this.endBox.set_style('background-image: url(\'' + imageG + '2.png\');' +
+                               'background-repeat: repeat; background-position: 0px 0px;');
+         this.transpBox.set_height(10);
+         this.endBox.set_height(15);
+      } else {
+         this.transpBox.set_height(0);
+         this.endBox.set_height(0);
+      }
    },
 
    setPencil: function(activePencil) {
@@ -1203,31 +1202,70 @@ MyDesklet.prototype = {
    _onOpacityChange: function() {
        this._onOpacityRootChange();
        this._onOpacityTextChange();
+       return true;
     },
 
     _onOpacityRootChange: function() {
-        let themeNode = this.rootBox.get_theme_node();
-        let boxColor = themeNode.get_color('background-color');
-        let boxColorString = boxColor.to_string();
-        let r = parseInt(boxColorString.substring(1,3),16);
-        let g = parseInt(boxColorString.substring(3,5),16);
-        let b = parseInt(boxColorString.substring(5,7),16);
-        let remplace = "rgba("+r+","+g+","+b+","+this._opacity+")";
-        if(this._themeStaples != "none")
-           this.rootBox.set_style('background-color: ' + remplace + "; border-top: none; padding-top: 0px");
-        else
-           this.rootBox.set_style('background-color: ' + remplace + ";");
+       let themeNode = this.rootBox.get_theme_node();
+       let boxColor, remplaceColor;
+       let newStyle;
+       if(this._themeStaples != "none")
+          newStyle = 'border-top: none; padding-top: 0px;';
+       else
+          newStyle = '';
+       let defColor = new Clutter.Color().to_string();
+       boxColor = themeNode.get_color('background-color').to_string();
+       if(defColor != boxColor) {
+          remplaceColor = this.updateOpacityColor(boxColor);
+          newStyle += ' background-color: ' + remplaceColor + ';';
+       }
+       boxColor = themeNode.get_color('background-gradient-start').to_string();
+       if(defColor != boxColor) {
+          remplaceColor = this.updateOpacityColor(boxColor);
+          newStyle += ' background-gradient-start: ' + remplaceColor + ';';
+       }
+       boxColor = themeNode.get_color('background-gradient-end').to_string();
+       if(defColor != boxColor) {
+          remplaceColor = this.updateOpacityColor(boxColor);
+          newStyle += ' background-gradient-end: ' + remplaceColor + ';';
+       }
+       if(newStyle != this.rootBox.get_style()) {
+          //Main.notify("newStyle:" + newStyle);
+          this.rootBox.set_style(newStyle);
+       }
     },
 
     _onOpacityTextChange: function() {
-        let themeNode = this.textBox.get_theme_node();
-        let boxColor = themeNode.get_color('background-color');
-        let boxColorString = boxColor.to_string();
-        let r = parseInt(boxColorString.substring(1,3),16);
-        let g = parseInt(boxColorString.substring(3,5),16);
-        let b = parseInt(boxColorString.substring(5,7),16);
-        let remplace = "rgba("+r+","+g+","+b+","+this._opacity+")";
-        this.textBox.set_style('background-color: ' + remplace + ";");
+       let newStyle = '';
+       let themeNode = this.textBox.get_theme_node();
+       let defColor = new Clutter.Color().to_string();
+       boxColor = themeNode.get_color('background-color').to_string();
+       if(defColor != boxColor) {
+          remplaceColor = this.updateOpacityColor(boxColor);
+          newStyle += ' background-color: ' + remplaceColor + ';';
+       }
+       boxColor = themeNode.get_color('background-gradient-start').to_string();
+       if(defColor != boxColor) {
+          remplaceColor = this.updateOpacityColor(boxColor);
+          newStyle += ' background-gradient-start: ' + remplaceColor + ';';
+       }
+       boxColor = themeNode.get_color('background-gradient-end').to_string();
+       if(defColor != boxColor) {
+          remplaceColor = this.updateOpacityColor(boxColor);
+          newStyle += ' background-gradient-end: ' + remplaceColor + ';';
+       }
+       if(newStyle != this.textBox.get_style()) {
+          //Main.notify("newStyle:" + newStyle);
+          this.textBox.set_style(newStyle);
+       }
+    },
+
+    updateOpacityColor: function(color) {
+       let r = parseInt(color.substring(1,3),16);
+       let g = parseInt(color.substring(3,5),16);
+       let b = parseInt(color.substring(5,7),16);
+       //let a = parseInt(color.substring(7,9),16);
+       return "rgba("+r+","+g+","+b+","+(this._opacity)+")";
     },
 
     _onFixWidth: function() {
