@@ -70,14 +70,14 @@
         "dependency": "fixWidth",
         "tooltip": "Increase or decrease the desklet width."
     },
-   "fix-height": {
+    "fix-height": {
         "default": true,
         "description": "Fixed height.",
         "type": "checkbox",
         "tooltip": "Check this if you want to control the height of Note."
     },
     "height": {
-        "default": 50,
+        "default": 120,
         "type": "spinbutton",
         "min": 50,
         "max": 500,
@@ -88,7 +88,7 @@
         "dependency": "fixHeight",
         "tooltip": "Increase or decrease the Note height."
     },
-   "show-scroll": {
+    "show-scroll": {
         "default": true,
         "description": "Show scrolling area.",
         "type": "checkbox",
@@ -96,7 +96,7 @@
         "dependency": "fixHeight",
         "tooltip": "Check this if you want to show the scrolling area or not."
     },
-   "auto-scroll": {
+    "auto-scroll": {
         "default": true,
         "description": "Enable autoscrolling.",
         "type": "checkbox",
@@ -254,11 +254,19 @@
         "description": "Opacity:",
         "tooltip": "Select a opacity percent."
     },
-   "override-theme": {
+    "override-theme": {
         "default": false,
         "description": "Override the Cinnamon theme properties.",
         "type": "checkbox",
         "tooltip": "Check this if you want to override the Cinnamon theme properties or not."
+    },
+    "override-text-box": {
+        "default": true,
+        "description": "Override all Cinnamon theme properties on the text box.",
+        "type": "checkbox",
+        "indent": true,
+        "dependency": "override-theme",
+        "tooltip": "Check this if you also want to override all Cinnamon theme properties on the text box or not."
     },
     "main-box-color": {
         "type": "colorchooser",
@@ -268,7 +276,7 @@
         "dependency": "override-theme",
         "tooltip": "Set the custom main box's color."
     },
-   "text-box-color": {
+    "text-box-color": {
         "type": "colorchooser",
         "default": "rgb(255,255,255)",
         "description": "Text box color:",
@@ -291,14 +299,6 @@
         "indent": true,
         "dependency": "override-theme",
         "tooltip": "Set the custom selected text color."
-    },
-   "override-gradient": {
-        "default": true,
-        "description": "Override the gradient of text box.",
-        "type": "checkbox",
-        "indent": true,
-        "dependency": "override-theme",
-        "tooltip": "Check this if you want also to override the gradient of text box."
     },
     "border-box-width": {
         "default": 1,

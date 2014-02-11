@@ -122,7 +122,7 @@ MyDesklet.prototype = {
       this._fWidth = true;
       this._width = 200;
       this._fHeight = true;
-      this._height = 50;
+      this._height = 120;
       this._scrollVisible = true;
       this.focusIDSignal = 0;
       this.keyPressIDSignal = 0;
@@ -634,20 +634,26 @@ MyDesklet.prototype = {
    setStyle: function() {
       this.setStaples();
       this.setStripe();
-
       if(this._overrideTheme) {
          let _colorBox = (this._boxColor.replace(')',',' + this._opacity + ')')).replace('rgb','rgba');
          let _colorText = (this._textBoxColor.replace(')',',' + this._opacity + ')')).replace('rgb','rgba');
          let _colorBanner = (this._boxColor.replace(')',',' + 0.1 + ')')).replace('rgb','rgba');
          this.rootBox.set_style_class_name('');
+         if(this._themeStaples != "none") {
+            this.rootBox.set_style('background-color: ' + _colorBox + '; color: ' + this._fontColor + '; border: ' +
+                                   this._borderBoxWidth + 'px solid ' + this._borderBoxColor +
+                                   '; border-top: none; padding: 0px 4px 0px 4px; font-weight: bold; border-radius: 12px 12px 12px 12px;');
+         }
+         else {
+            this.rootBox.set_style('background-color: ' + _colorBox + '; color: ' + this._fontColor + '; border: ' +
+                                   this._borderBoxWidth + 'px solid ' + this._borderBoxColor +
+                                   '; padding: 0px 4px 0px 4px; font-weight: bold; border-radius: 12px 12px 12px 12px;');
+         }
          this.bannerBox.set_style('background-color: ' + _colorBanner);
-         this.rootBox.set_style('background-color: ' + _colorBox + '; color: ' + this._fontColor + '; border: ' +
-                                 this._borderBoxWidth + 'px solid ' + this._borderBoxColor + '; border-top: none;');
          this.endBoxBackGround.set_style('background-color: ' + _colorBanner);
-         if(this._overrideGradient) {
+         if(this._overrideTextBox) {
             this.textBox.set_style_class_name('');
-            this.textBox.set_style('background-color: ' + _colorText + '; background:' + _colorText + '; ' + ' background-gradient-start: rgba(255,255,255,0);' +
-                                   'background-gradient-end: rgba(255,255,255,0);');
+            this.textBox.set_style('background-color: ' + _colorText + '; background:' + _colorText + ';');
          }
          else {
             this.textBox.set_style_class_name('sticky-text-box');
@@ -677,6 +683,13 @@ MyDesklet.prototype = {
       let fontTag = '';
       if((this._fontFamily)&&(this._fontFamily != ""))
          fontTag = 'font-family: ' + this._fontFamily + ';';
+
+      if(this._overrideTheme)
+         this.entry.set_style('font-size: ' + this._textSize  + 'pt; color: ' + this._fontColor + '; font-weight: normal; caret-color: ' +
+                              this._fontColor + '; selected-color: ' + this._textSelectedColor + ';' + fontTag);
+      else
+         this.entry.set_style('font-size: ' + this._textSize  + 'pt;' + fontTag);
+
       if(this._themeStripe != "none") {
          let image = GLib.get_home_dir() + "/.local/share/cinnamon/desklets/" + this.uuid + "/stripe/" + this._themeStripe + "/";
          let textHeight = this._getTextHeight();
@@ -705,8 +718,9 @@ MyDesklet.prototype = {
                                        MIN_WIDTH + 'px;');
             }
          }
-      } else
+      } else {
          this.textAreaBox.set_style('padding: 0px; min-width: ' + MIN_WIDTH + 'px;');
+      }
    },
 
    setStaples: function() {
@@ -764,7 +778,7 @@ MyDesklet.prototype = {
       this.textBox.connect('style-changed', Lang.bind(this, this._onOpacityTextChange));
 
       this.textAreaBox = new St.BoxLayout({vertical:true, reactive: true});
-      this.bottomBox = new St.BoxLayout({ vertical:false, style_class: 'sticky-bottom-box' });
+      this.bottomBox = new St.BoxLayout({ vertical:false, height: 6 });
 
 
       let addButton = this._buttonCreation('list-add', _("Add new Note"), true);
@@ -851,6 +865,7 @@ MyDesklet.prototype = {
                                             style_class: 'vfade' });
       this.scrollBox = new St.BoxLayout({vertical:false});
       this.scrollBox.add(this.scrollArea, {x_fill: true, y_fill: true, x_align: St.Align.END, y_align: St.Align.START, expand: true});
+      this.scrollBox.set_style('padding-top: 6px;');
 
       this.scrollArea.add_actor(this.textBox);
       this.rootBox.add(this.scrollBox, { x_fill: true, y_fill: true, x_align: St.Align.START, y_align: St.Align.START, expand: true });
@@ -882,14 +897,12 @@ MyDesklet.prototype = {
    fixHeight: function(fix) {
       this._fHeight = fix;
       if(fix) {
-         this.mainBox.set_height(this._height);
+         if(this.bannerBox.visible)
+            this.mainBox.set_height(this._height);
       } else {
          this.mainBox.set_height(-1);
       }
       this.enableScrolling(fix);
-      this.leftBox.remove_actor(this.minimizeButton);
-      this.leftBox.remove_actor(this.maximizeButton);
-      this.leftBox.add(this.minimizeButton, {x_fill: true, x_align: St.Align.END});
    },
 
 
@@ -1209,25 +1222,37 @@ MyDesklet.prototype = {
        let themeNode = this.rootBox.get_theme_node();
        let boxColor, remplaceColor;
        let newStyle;
-       if(this._themeStaples != "none")
-          newStyle = 'border-top: none; padding-top: 0px;';
-       else
-          newStyle = '';
-       let defColor = new Clutter.Color().to_string();
-       boxColor = themeNode.get_color('background-color').to_string();
-       if(defColor != boxColor) {
-          remplaceColor = this.updateOpacityColor(boxColor);
-          newStyle += ' background-color: ' + remplaceColor + ';';
-       }
-       boxColor = themeNode.get_color('background-gradient-start').to_string();
-       if(defColor != boxColor) {
-          remplaceColor = this.updateOpacityColor(boxColor);
-          newStyle += ' background-gradient-start: ' + remplaceColor + ';';
-       }
-       boxColor = themeNode.get_color('background-gradient-end').to_string();
-       if(defColor != boxColor) {
-          remplaceColor = this.updateOpacityColor(boxColor);
-          newStyle += ' background-gradient-end: ' + remplaceColor + ';';
+       if(this._overrideTheme) {
+         let _colorBox = (this._boxColor.replace(')',',' + this._opacity + ')')).replace('rgb','rgba');
+         if(this._themeStaples != "none")
+            newStyle = 'background-color: ' + _colorBox + '; color: ' + this._fontColor + '; border: ' +
+                        this._borderBoxWidth + 'px solid ' + this._borderBoxColor +
+                        '; border-top: none; padding: 0px 4px 0px 4px; font-weight: bold; border-radius: 12px 12px 12px 12px;';
+         else
+            newStyle = 'background-color: ' + _colorBox + '; color: ' + this._fontColor + '; border: ' +
+                        this._borderBoxWidth + 'px solid ' + this._borderBoxColor +
+                        '; padding: 0px 4px 0px 4px; font-weight: bold; border-radius: 12px 12px 12px 12px;';
+       } else {
+          if(this._themeStaples != "none")
+             newStyle = 'border-top: none; padding-top: 0px;';
+          else
+             newStyle = '';
+          let defColor = new Clutter.Color().to_string();
+          boxColor = themeNode.get_color('background-color').to_string();
+          if(defColor != boxColor) {
+             remplaceColor = this.updateOpacityColor(boxColor);
+             newStyle += ' background-color: ' + remplaceColor + ';';
+          }
+          boxColor = themeNode.get_color('background-gradient-start').to_string();
+          if(defColor != boxColor) {
+             remplaceColor = this.updateOpacityColor(boxColor);
+             newStyle += ' background-gradient-start: ' + remplaceColor + ';';
+          }
+          boxColor = themeNode.get_color('background-gradient-end').to_string();
+          if(defColor != boxColor) {
+             remplaceColor = this.updateOpacityColor(boxColor);
+             newStyle += ' background-gradient-end: ' + remplaceColor + ';';
+          }
        }
        if(newStyle != this.rootBox.get_style()) {
           //Main.notify("newStyle:" + newStyle);
@@ -1237,22 +1262,27 @@ MyDesklet.prototype = {
 
     _onOpacityTextChange: function() {
        let newStyle = '';
-       let themeNode = this.textBox.get_theme_node();
-       let defColor = new Clutter.Color().to_string();
-       boxColor = themeNode.get_color('background-color').to_string();
-       if(defColor != boxColor) {
-          remplaceColor = this.updateOpacityColor(boxColor);
-          newStyle += ' background-color: ' + remplaceColor + ';';
-       }
-       boxColor = themeNode.get_color('background-gradient-start').to_string();
-       if(defColor != boxColor) {
-          remplaceColor = this.updateOpacityColor(boxColor);
-          newStyle += ' background-gradient-start: ' + remplaceColor + ';';
-       }
-       boxColor = themeNode.get_color('background-gradient-end').to_string();
-       if(defColor != boxColor) {
-          remplaceColor = this.updateOpacityColor(boxColor);
-          newStyle += ' background-gradient-end: ' + remplaceColor + ';';
+       if(this._overrideTheme) {
+         let _colorText = (this._textBoxColor.replace(')',',' + this._opacity + ')')).replace('rgb','rgba');
+         newStyle = 'background-color: ' + _colorText + '; background:' + _colorText + ';';
+       } else {
+          let themeNode = this.textBox.get_theme_node();
+          let defColor = new Clutter.Color().to_string();
+          boxColor = themeNode.get_color('background-color').to_string();
+          if(defColor != boxColor) {
+             remplaceColor = this.updateOpacityColor(boxColor);
+             newStyle += ' background-color: ' + remplaceColor + ';';
+          }
+          boxColor = themeNode.get_color('background-gradient-start').to_string();
+          if(defColor != boxColor) {
+             remplaceColor = this.updateOpacityColor(boxColor);
+             newStyle += ' background-gradient-start: ' + remplaceColor + ';';
+          }
+          boxColor = themeNode.get_color('background-gradient-end').to_string();
+          if(defColor != boxColor) {
+             remplaceColor = this.updateOpacityColor(boxColor);
+             newStyle += ' background-gradient-end: ' + remplaceColor + ';';
+          }
        }
        if(newStyle != this.textBox.get_style()) {
           //Main.notify("newStyle:" + newStyle);
@@ -1294,21 +1324,25 @@ MyDesklet.prototype = {
 
     _onAutoHideButtons: function() {
        if(this._autohideButtons) {
-          this.buttonBanner.visible = false;
+          //this.buttonBanner.visible = false;
+this.bannerBox.visible = false;
           if(this.autoHideButtonsIDSignal == 0) {
              this.autoHideButtonsIDSignal = this.mainBox.connect('notify::hover', Lang.bind(this, function(actor) {
                 let focusedActor = global.stage.get_key_focus();
                 if((focusedActor)&&(this.entry.contains(focusedActor)))
-                   this.buttonBanner.visible = true;
+            //       this.buttonBanner.visible = true;
+this.bannerBox.visible = true;
                 else
-                   this.buttonBanner.visible = actor.get_hover();
+            //       this.buttonBanner.visible = actor.get_hover();
+this.bannerBox.visible = actor.get_hover();
              }));
           }
        } else {
           if(this.autoHideButtonsIDSignal > 0)
              this.mainBox.disconnect(this.autoHideButtonsIDSignal);
           this.autoHideButtonsIDSignal = 0;
-          this.buttonBanner.visible = true;
+          //this.buttonBanner.visible = true;
+this.bannerBox.visible = true;
        }
     },
 
@@ -1344,7 +1378,7 @@ MyDesklet.prototype = {
          this.settings.bindProperty(Settings.BindingDirection.IN, "text-box-color", "_textBoxColor", this._onStyleChange, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "selected-text-color", "_textSelectedColor", this._onStyleChange, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "font-color", "_fontColor", this._onStyleChange, null);
-         this.settings.bindProperty(Settings.BindingDirection.IN, "override-gradient", "_overrideGradient", this._onStyleChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "override-text-box", "_overrideTextBox", this._onStyleChange, null);
 
          this.settings.bindProperty(Settings.BindingDirection.IN, "border-box-width", "_borderBoxWidth", this._onStyleChange, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "border-box-color", "_borderBoxColor", this._onStyleChange, null);

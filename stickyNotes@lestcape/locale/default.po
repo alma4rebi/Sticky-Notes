@@ -220,6 +220,14 @@ msgstr ""
 msgid "Check this if you want to override the Cinnamon theme properties or not."
 msgstr ""
 
+#. notes@lestcape->settings-schema.json->override-text-box->description
+msgid "Override all Cinnamon theme properties on the text box."
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->override-text-box->tooltip
+msgid "Check this if you also want to override all Cinnamon theme properties on the text box or not."
+msgstr ""
+
 #. notes@lestcape->settings-schema.json->main-box-color->description
 msgid "Main box color:"
 msgstr ""
@@ -250,14 +258,6 @@ msgstr ""
 
 #. notes@lestcape->settings-schema.json->selected-text-color->tooltip
 msgid "Set the custom selected text color."
-msgstr ""
-
-#. notes@lestcape->settings-schema.json->override-gradient->description
-msgid "Override the gradient of text box."
-msgstr ""
-
-#. notes@lestcape->settings-schema.json->override-gradient->tooltip
-msgid "Check this if you want also to override the gradient of text box."
 msgstr ""
 
 #. notes@lestcape->settings-schema.json->border-box-width->description

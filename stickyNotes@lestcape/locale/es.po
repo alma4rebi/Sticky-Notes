@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Sticky-Notes 0.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-11-08 21:29-0600\n"
-"PO-Revision-Date: 2014-02-08 15:48-0600\n"
+"PO-Revision-Date: 2014-02-10 18:47-0600\n"
 "Last-Translator: Lester Carballo Pérez <lestcape@gmail.com>\n"
 "Language-Team: lestcape <lestcape@gmail.com>\n"
 "MIME-Version: 1.0\n"
@@ -223,8 +223,21 @@ msgstr "Sobre escribir las propiedades del tema de Cinnamon."
 msgid ""
 "Check this if you want to override the Cinnamon theme properties or not."
 msgstr ""
-"Seleccione si usted desea o no sobre escribir las propiedades del tema de "
-"Cinnamon."
+"Seleccione esta opción si usted desea anular las propiedades del tema de "
+"Cinnamon o no."
+
+#. notes@lestcape->settings-schema.json->override-text-box->description
+msgid "Override all Cinnamon theme properties on the text box."
+msgstr ""
+"Anular todas las propiedades del tema de Cinnamon en el cuadro de texto."
+
+#. notes@lestcape->settings-schema.json->override-text-box->tooltip
+msgid ""
+"Check this if you also want to override all Cinnamon theme properties on the "
+"text box or not."
+msgstr ""
+"Seleccione esta opción si también desea anular todos las propiedades del "
+"tema de Cinnamon en el cuadro de texto o no."
 
 #. notes@lestcape->settings-schema.json->opacity->description
 msgid "Opacity:"
@@ -266,16 +279,6 @@ msgstr "Color del texto seleccionado:"
 msgid "Set the custom selected text color."
 msgstr ""
 "Seleccione el color del texto a mostrar cuando se encuentre seleccionado."
-
-#. notes@lestcape->settings-schema.json->override-gradient->description
-msgid "Override the gradient of text box."
-msgstr "Sobre escribir el gradiente de la caja de texto."
-
-#. notes@lestcape->settings-schema.json->override-gradient->tooltip
-msgid "Check this if you want also to override the gradient of text box."
-msgstr ""
-"Seleccione esto si usted desea sobre escribir el gradiente de la caja de "
-"texto."
 
 #. notes@lestcape->settings-schema.json->border-box-width->description
 msgid "Border's box width:"
