@@ -140,6 +140,14 @@ msgstr ""
 msgid "Check this if you want to autohide the action buttons when mouse is outside of the desklet."
 msgstr ""
 
+#. notes@lestcape->settings-schema.json->raise-key->description
+msgid "Shortcut key to raise:"
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->raise-key->tooltip
+msgid "Select the shortcut key to raise the desklet to the top."
+msgstr ""
+
 #. notes@lestcape->settings-schema.json->fix-width->description
 msgid "Fixed width."
 msgstr ""

@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Sticky-Notes 0.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-11-08 21:29-0600\n"
-"PO-Revision-Date: 2014-02-11 20:49-0600\n"
+"PO-Revision-Date: 2014-02-12 08:41-0600\n"
 "Last-Translator: Lester Carballo Pérez <lestcape@gmail.com>\n"
 "Language-Team: lestcape <lestcape@gmail.com>\n"
 "MIME-Version: 1.0\n"
@@ -148,6 +148,15 @@ msgid ""
 msgstr ""
 "Seleccione si usted quiere que los botones de acciones se auto oculten "
 "cuando el cursor está afuera del área del desklet."
+
+#. notes@lestcape->settings-schema.json->raise-key->description
+msgid "Shortcut key to raise:"
+msgstr "Tecla de acceso directo para elevar:"
+
+#. notes@lestcape->settings-schema.json->raise-key->tooltip
+msgid "Select the shortcut key to raise the desklet to the top."
+msgstr ""
+"Seleccione la tecla de acceso directo para elevar el desklet a la cima."
 
 #. notes@lestcape->settings-schema.json->fix-width->description
 msgid "Fixed width."

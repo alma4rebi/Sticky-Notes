@@ -1,5 +1,5 @@
 // Desklet : Sticky Notes           Version      : v0.9.1-Beta
-// O.S.    : Cinnamon               Release Date : 08 February 2014.
+// O.S.    : Cinnamon               Release Date : 12 February 2014.
 // Author  : Lester Carballo Pérez  Email        : lestcape@gmail.com
 //
 // Website : https://github.com/lestcape/Sticky-Notes
@@ -43,6 +43,7 @@ const Gtk = imports.gi.Gtk;
 const Util = imports.misc.util;
 const Tweener = imports.ui.tweener;
 const Keymap = imports.gi.Gdk.Keymap.get_default();
+const Signals = imports.signals;
 const MIN_WIDTH = 170;
 
 
@@ -122,7 +123,7 @@ MyDesklet.prototype = {
       this._fWidth = true;
       this._width = 200;
       this._fHeight = true;
-      this._height = 50;
+      this._height = 120;
       this._scrollVisible = true;
       this.focusIDSignal = 0;
       this.keyPressIDSignal = 0;
@@ -131,6 +132,8 @@ MyDesklet.prototype = {
       this.scrollIDSignal = 0;
       this._multInstance = false;
       this._timeOutSettings = 0;
+      this.deskletRaised = false;
+
       try {
          Main.themeManager.connect('theme-set', Lang.bind(this, this._onThemeChange));
          this._updateComplete();
@@ -177,6 +180,7 @@ MyDesklet.prototype = {
          this._onScrollAutoChange();
          this._onAutoHideButtons();
          this._onHideTextBox();
+         this._onRaiseKeyChange();
          this.multInstanceMenuItem._switch.setToggleState(this._multInstance);
          Mainloop.idle_add(Lang.bind(this, this._onStyleChange));
       }
@@ -237,7 +241,9 @@ MyDesklet.prototype = {
                posY = 100;
             let posX = Math.floor(numberInstance % countMaxDesklet)*this.mainBox.get_width();
             
-            let storePos = this.positions["" + this.notesList[this.getCountInstance()][0]];
+            let storePos;
+            if(this.notesList[this.getCountInstance()])
+               storePos = this.positions["" + this.notesList[this.getCountInstance()][0]];
             if(storePos)
                deskletDef = (this.uuid + ':%s:%s:%s').format(newDeskletID, storePos[0], storePos[1]);
             else
@@ -315,6 +321,24 @@ MyDesklet.prototype = {
          resultNumber = -1;
       }
       return resultNumber;
+   },
+
+   getAllInstanceObject: function() {
+      let resultObject = new Array();
+      try {
+         let enabledDesklets = this.settingsExt.get_strv("enabled-desklets");
+         let def, id;
+         for(idPos in enabledDesklets) {
+            def = this._getDeskletDefinition(enabledDesklets[idPos]);
+            if((def)&&(def.uuid == this.uuid)) {
+               let id = parseInt(def.desklet_id);
+               resultObject.push(DeskletManager.get_object_for_instance(id));
+            }
+         }
+      } catch (e) {
+         this.showErrorMessage(e.message);
+      }
+      return resultObject;
    },
 
    getCountInstance: function() {
@@ -1050,6 +1074,10 @@ MyDesklet.prototype = {
          this.setPencil(false);
          global.stage.set_key_focus(null);
          this._onAutoHideButtons();
+         if(this.raisedBox) {
+            global.stage.set_key_focus(this.raisedBox.actor);
+            this.raisedBox._actionCloseAll();
+         }
       } catch(e) {
          this.showErrorMessage(e.message);
       }
@@ -1079,8 +1107,6 @@ MyDesklet.prototype = {
          this.showErrorMessage(e.message);
       }
    },
-
-   
 
    _onButtonRelease: function(actor, event) {
       if(this._entryActiveMenu) {
@@ -1413,6 +1439,8 @@ MyDesklet.prototype = {
          this.settings.bindProperty(Settings.BindingDirection.IN, "staples-layout", "_themeStaples", this._onStyleChange, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "pencil-layout", "_themePencil", this._onThemePencilChange, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "auto-hide-buttons", "_autohideButtons", this._onAutoHideButtons, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "raise-key", "_raiseKey", this._onRaiseKeyChange, null);
+
 
          this.settings.bindProperty(Settings.BindingDirection.IN, "fix-width", "_fWidth", this._onFixWidth, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "width", "_width", this._onFixWidth, null);
@@ -1445,6 +1473,97 @@ MyDesklet.prototype = {
          this.showErrorMessage(e.message);
          global.logError(e);
       }
+   },
+
+   _onRaiseKeyChange: function() {
+      if(this.keyId)
+         Main.keybindingManager.removeHotKey(this.keyId);
+       
+      this.keyId = this.uuid + "-raise";
+      Main.keybindingManager.addHotKey(this.keyId, this._raiseKey, Lang.bind(this, this.toggleRaise));
+   },
+    
+   toggleRaise: function() {
+      try {
+         if((this.deskletRaised)&&(this.raisedBox)) {
+            this.raisedBox._actionCloseAll();
+            //this.lower();
+         }
+         else
+            this.raise();
+         //throw "works";   
+      } catch(e) {
+         Main.notify("Error:", e.message);
+         global.logError(e);
+      }
+   },
+    
+   raise: function() {
+      if((this.deskletRaised) || (this.changingRaiseState))
+         return;
+      this.changingRaiseState = true;
+   
+      let listOfDesklets = this.getAllInstanceObject();
+      this.raisedBox = new RaisedBox();
+      let deskletC;
+
+
+      for(let i = 0; i < listOfDesklets.length; i++) {
+         deskletC = listOfDesklets[i];
+         deskletC.actor.get_parent().remove_actor(deskletC.actor);
+         this.raisedBox.add(deskletC);
+         this.raisedBox.connect("closed", Lang.bind(this, this.lower));
+
+         deskletC.raisedBox = this.raisedBox;
+         deskletC.deskletRaised = true;
+         deskletC._untrackMouse();
+         deskletC._draggable.inhibit = true;
+      }
+      if(listOfDesklets.length == 1) {
+        this.raisedBox._actionClose(listOfDesklets[0]);
+      }
+      this.raisedBox.show();
+      this.deskletRaised = true;
+      this.changingRaiseState = false;
+   },
+
+   lower: function() {
+      if((!this.deskletRaised) || (this.changingRaiseState))
+         return;
+      this.changingRaiseState = true;
+      /*if(this._menu.isOpen)
+         this._onButtonReleaseEvent(this.actor, event);*/
+
+      if(this.raisedBox) {
+         let listOfDesklets = this.getAllInstanceObject();
+         let deskletC;
+
+         for(let i = 0; i < listOfDesklets.length; i++) {
+            deskletC = listOfDesklets[i];
+            if(!this.raisedBox.isSelected(deskletC)) {
+               this.raisedBox.remove(deskletC);
+               Main.deskletContainer.addDesklet(deskletC.actor);
+            }
+         }
+
+         if(!this.raisedBox.haveDesklets()) {
+            global.stage.set_key_focus(this.raisedBox.actor);
+            this.raisedBox.destroy();
+            for(let i = 0; i < listOfDesklets.length; i++) {
+               deskletC = listOfDesklets[i];
+               deskletC.raisedBox = null;
+               deskletC.deskletRaised = false;
+
+               if(deskletC._draggable._dragActor) {
+                  deskletC._draggable._dragActor.destroy();
+               }
+               deskletC._trackMouse();
+               deskletC._draggable.inhibit = false;
+            }
+         }
+      }
+
+      this.changingRaiseState = false;
    },
 
    _onDragEnd: function() {
@@ -1731,6 +1850,166 @@ _onResizeMotionEvent: function(actor, event) {
       }
    }
 };
+
+function RaisedBox() {
+   this._init();
+}
+
+RaisedBox.prototype = {
+   _init: function() {
+      try {
+         this.desklets = new Array();
+         this.stageEventIds = new Array();
+         /*this.contextMenuEvents = [];*/
+         this.stageEventIds.push(global.stage.connect("captured-event", Lang.bind(this, this.onStageEvent)));
+         this.stageEventIds.push(global.stage.connect("enter-event", Lang.bind(this, this.onStageEvent)));
+         this.stageEventIds.push(global.stage.connect("leave-event", Lang.bind(this, this.onStageEvent)));
+
+         this.actor = new St.Group({ visible: false, x: 0, y: 0 });
+         Main.uiGroup.add_actor(this.actor);
+         global.focus_manager.add_group(this.actor);
+
+         let constraint = new Clutter.BindConstraint({ source: global.stage,
+                                                       coordinate: Clutter.BindCoordinate.POSITION | Clutter.BindCoordinate.SIZE });
+         this.actor.add_constraint(constraint);
+
+         this._backgroundBin = new St.Bin();
+         this.actor.add_actor(this._backgroundBin);
+
+         let monitor = Main.layoutManager.focusMonitor;
+         this._backgroundBin.set_position(monitor.x, monitor.y);
+         this._backgroundBin.set_size(monitor.width, monitor.height);
+
+         let stack = new Cinnamon.Stack();
+         this._backgroundBin.child = stack;
+
+         this.eventBlocker = new Clutter.Group({ reactive: true });
+         stack.add_actor(this.eventBlocker);
+
+         this.groupContent = new St.Bin();
+         stack.add_actor(this.groupContent);
+      } catch(e) {
+         Main.notify("Error:", e.message);
+         global.logError(e);
+      }
+   },
+
+   isSelected: function(desklet) {
+      return ((this.deskletSelected) && (this.deskletSelected == desklet));
+   },
+
+   haveDesklets: function() {
+      return this.desklets.length > 0;
+   },
+
+   show: function() {
+      global.set_stage_input_mode(Cinnamon.StageInputMode.FULLSCREEN);
+      this.actor.show();
+   },
+
+   destroy: function() {
+     // global.set_stage_input_mode(Cinnamon.StageInputMode.FOCUSED);
+      global.set_stage_input_mode(Cinnamon.StageInputMode.NORMAL)
+      global.focus_manager.remove_group(this.actor);
+      Main.uiGroup.remove_actor(this.actor);
+      //global.set_stage_input_mode(Cinnamon.StageInputMode.NORMAL);
+      for(let i = 0; i < this.stageEventIds.length; i++)
+         global.stage.disconnect(this.stageEventIds[i]);
+      this.actor.destroy();
+
+      //Main.notify("finish");
+   },
+
+   add: function(desklet) {
+      try {
+         this.desklets.push(desklet);
+         this.actor.add_actor(desklet.actor);
+      } catch(e) {
+         Main.notify("Error:", e.message);
+         global.logError(e);
+      }
+   },
+    
+   remove: function(desklet) {
+      try {
+         let index = this.desklets.indexOf(desklet);
+         if(index != -1) {
+             this.desklets.splice(index, 1);
+             this.actor.remove_actor(desklet.actor);
+         }
+      } catch(e) {
+         Main.notify("Error:", e.message);
+         global.logError(e);
+      }
+   },
+    
+   onStageEvent: function(actor, event) {
+      try {
+         let type = event.type();
+         if((type == Clutter.EventType.KEY_PRESS) || (type == Clutter.EventType.KEY_RELEASE)) {
+            if(event.get_key_symbol() == Clutter.Escape) {
+               this._actionCloseAll();
+               return true;
+            }
+            return false;
+         }
+         let selectedDesklet = this._getDeskletOfActorEvent(event.get_source());
+         if(selectedDesklet != null) {
+            if(type == Clutter.EventType.BUTTON_PRESS) {
+              // Main.notify("noooo");
+               return this._actionClose(selectedDesklet);
+            }
+            return false;
+         }
+         if(type == Clutter.EventType.BUTTON_PRESS) {
+           // Main.notify("siii");
+            this._actionCloseAll();
+            return true;
+         }
+      } catch(e) {
+         Main.notify("Error:", e.message);
+         global.logError(e);
+      }
+
+      return true;
+   },
+
+   _getDeskletOfActorEvent: function(target) {
+      let desklet; 
+      for(let i = 0; i < this.desklets.length; i++) {
+         desklet = this.desklets[i];
+         if((target == desklet.actor) || (desklet.actor.contains(target)) ||
+            (target == desklet._menu.actor) || (desklet._menu.actor.contains(target))) {
+               //Main.notify("Desklet:" + desklet.notesList[desklet.noteCurrent - 1][0] + " " + desklet.notesList[desklet.noteCurrent - 1][1]);
+            return desklet;
+         }
+      }
+      return null;     
+   },
+
+   _actionCloseAll: function() {
+      if(this.deskletSelected)
+         this.deskletSelected.actor.set_position(this.positionSelected[0], this.positionSelected[1]);
+      this.deskletSelected = null;
+      this.emit("closed");
+   },
+
+   _actionClose: function(desklet) {
+      if(desklet != null) {
+         let index = this.desklets.indexOf(desklet);
+         if((index != -1)&&(!this.deskletSelected)) {
+            this.deskletSelected = desklet;
+            this.positionSelected = desklet.actor.get_position();
+            let monitor = Main.layoutManager.focusMonitor;
+            desklet.actor.set_position((monitor.width - desklet.actor.width)/2, (monitor.height - desklet.actor.height)/2);
+            this.emit("closed");
+            return true;
+         }
+      }
+      return false;
+   }
+};
+Signals.addSignalMethods(RaisedBox.prototype);
 
 function main(metadata, desklet_id) {
    let desklet = new MyDesklet(metadata, desklet_id);

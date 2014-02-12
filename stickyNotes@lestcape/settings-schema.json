@@ -52,6 +52,12 @@
         "type": "checkbox",
         "tooltip": "Check this if you want to autohide the action buttons when mouse is outside of the desklet."
     },
+    "raise-key": {
+        "type": "keybinding",
+        "description": "Shortcut key to raise:",
+        "default": "<Super>n",
+        "tooltip": "Select the shortcut key to raise the desklet to the top."
+    },
     "fix-width": {
         "default": true,
         "description": "Fixed width.",
