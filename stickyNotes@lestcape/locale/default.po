@@ -204,12 +204,20 @@ msgstr ""
 msgid "Select a Font family to use in Notes."
 msgstr ""
 
-#. notes@lestcape->settings-schema.json->opacity->description
-msgid "Opacity:"
+#. notes@lestcape->settings-schema.json->desklet-opacity->description
+msgid "Opacity of the desklet:"
 msgstr ""
 
-#. notes@lestcape->settings-schema.json->opacity->tooltip
-msgid "Select a opacity percent."
+#. notes@lestcape->settings-schema.json->desklet-opacity->tooltip
+msgid "Select the opacity of the desklet."
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->boxes-opacity->description
+msgid "Opacity of the boxes:"
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->boxes-opacity->tooltip
+msgid "Select the opacity of the boxes."
 msgstr ""
 
 #. notes@lestcape->settings-schema.json-override-theme->description

@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Sticky-Notes 0.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-11-08 21:29-0600\n"
-"PO-Revision-Date: 2014-02-10 18:47-0600\n"
+"PO-Revision-Date: 2014-02-11 20:49-0600\n"
 "Last-Translator: Lester Carballo Pérez <lestcape@gmail.com>\n"
 "Language-Team: lestcape <lestcape@gmail.com>\n"
 "MIME-Version: 1.0\n"
@@ -239,13 +239,21 @@ msgstr ""
 "Seleccione esta opción si también desea anular todos las propiedades del "
 "tema de Cinnamon en el cuadro de texto o no."
 
-#. notes@lestcape->settings-schema.json->opacity->description
-msgid "Opacity:"
-msgstr "Opacidad:"
+#. notes@lestcape->settings-schema.json->desklet-opacity->description
+msgid "Opacity of the desklet:"
+msgstr "Opacidad del desklet:"
 
-#. notes@lestcape->settings-schema.json->opacity->tooltip
-msgid "Select a opacity percent."
-msgstr "Seleccione el porciento de opacidad."
+#. notes@lestcape->settings-schema.json->desklet-opacity->tooltip
+msgid "Select the opacity of the desklet."
+msgstr "Seleccione la opacidad del desklet."
+
+#. notes@lestcape->settings-schema.json->boxes-opacity->description
+msgid "Opacity of the boxes:"
+msgstr "Opacidad de las cajas:"
+
+#. notes@lestcape->settings-schema.json->boxes-opacity->tooltip
+msgid "Select the opacity of the boxes."
+msgstr "Seleccione la opacidad de las cajas."
 
 #. notes@lestcape->settings-schema.json->main-box-color->description
 msgid "Main box color:"

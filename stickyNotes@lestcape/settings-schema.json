@@ -59,15 +59,15 @@
         "tooltip": "Check this if you want to control the width of desklet."
     },
     "width": {
-        "default": 250,
+        "default": 200,
         "type": "spinbutton",
-        "min": 230,
+        "min": 170,
         "max": 1600,
         "description": "Width:",
         "units": "pixels",
         "step": 10,
         "indent": true,
-        "dependency": "fixWidth",
+        "dependency": "fix-width",
         "tooltip": "Increase or decrease the desklet width."
     },
     "fix-height": {
@@ -79,13 +79,13 @@
     "height": {
         "default": 120,
         "type": "spinbutton",
-        "min": 50,
+        "min": 80,
         "max": 500,
         "description": "Height:",
         "units": "pixels",
         "step": 10,
         "indent": true,
-        "dependency": "fixHeight",
+        "dependency": "fix-height",
         "tooltip": "Increase or decrease the Note height."
     },
     "show-scroll": {
@@ -93,7 +93,7 @@
         "description": "Show scrolling area.",
         "type": "checkbox",
         "indent": true,
-        "dependency": "fixHeight",
+        "dependency": "fix-height",
         "tooltip": "Check this if you want to show the scrolling area or not."
     },
     "auto-scroll": {
@@ -101,7 +101,7 @@
         "description": "Enable autoscrolling.",
         "type": "checkbox",
         "indent": true,
-        "dependency": "fixHeight",
+        "dependency": "fix-height",
         "tooltip": "Check this if you want to enable smooth autoscrolling or not."
     },
     "text-size": {
@@ -245,14 +245,23 @@
             "Monospace": "Monospace"
         }
     },
-    "opacity": {
+    "desklet-opacity": {
+        "type": "scale",
+        "default": 1.0,
+        "min": 0,
+        "max": 1,
+        "step": 0.05,
+        "description": "Opacity of the desklet:",
+        "tooltip": "Select the opacity of the desklet."
+    },
+    "boxes-opacity": {
         "type": "scale",
         "default": 0.5,
         "min": 0,
         "max": 1,
         "step": 0.05,
-        "description": "Opacity:",
-        "tooltip": "Select a opacity percent."
+        "description": "Opacity of the boxes:",
+        "tooltip": "Select the opacity of the boxes."
     },
     "override-theme": {
         "default": false,
@@ -319,5 +328,25 @@
         "indent": true,
         "dependency": "override-theme",
         "tooltip": "Set the custom border box's color."
+    },
+    "position-x": {
+        "type": "generic",
+        "default": "0"
+    },
+    "position-y": {
+        "type": "generic",
+        "default": "0"
+    },
+    "list-position": {
+        "type": "generic",
+        "default": ""
+    },
+    "hide-text-box": {
+        "type": "generic",
+        "default": "false"
+    },
+    "list-hide-text-box": {
+        "type": "generic",
+        "default": ""
     }
 }

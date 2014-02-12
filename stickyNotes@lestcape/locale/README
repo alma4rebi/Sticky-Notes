@@ -38,8 +38,11 @@ Installation Instructions:
 Change Log:
 --------------
 v0.9.1- Beta
-   - Added theme support.
+   - Added Cinnamon theme support.
    - Allow auto scroll.
+   - Allow override Cinnamon theme.
+   - Remember all desklets positions on the change to multiple instance.
+   - Remember all minimized desklets.
    - Improve the code.
 
 0.9- Beta

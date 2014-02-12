@@ -43,7 +43,7 @@ const Gtk = imports.gi.Gtk;
 const Util = imports.misc.util;
 const Tweener = imports.ui.tweener;
 const Keymap = imports.gi.Gdk.Keymap.get_default();
-const MIN_WIDTH = 230;
+const MIN_WIDTH = 170;
 
 
 function _(str) {
@@ -113,7 +113,7 @@ MyDesklet.prototype = {
       this._text = "";
       this.noteCurrent = 0;
       this._boxColor = "#000000";
-      this._opacity = 50;
+      this._opacityBoxes = 0.5;
       this._borderBoxWidth = 1;
       this._borderBoxColor = "#ffffff";
       this._textSize = 12;
@@ -122,15 +122,15 @@ MyDesklet.prototype = {
       this._fWidth = true;
       this._width = 200;
       this._fHeight = true;
-      this._height = 120;
+      this._height = 50;
       this._scrollVisible = true;
       this.focusIDSignal = 0;
       this.keyPressIDSignal = 0;
       this.textInsertIDSignal = 0;
       this.autoHideButtonsIDSignal = 0;
       this.scrollIDSignal = 0;
-      this._timeOutSettings = 0;
       this._multInstance = false;
+      this._timeOutSettings = 0;
       try {
          Main.themeManager.connect('theme-set', Lang.bind(this, this._onThemeChange));
          this._updateComplete();
@@ -140,7 +140,7 @@ MyDesklet.prototype = {
       this._trackMouse();
    },
 
-   _onThemeChange : function() {
+   _onThemeChange: function() {
      this._timeOutSettings = Mainloop.timeout_add(2000, Lang.bind(this, function() {
          this.on_desklet_removed();
          this._updateComplete();
@@ -148,8 +148,7 @@ MyDesklet.prototype = {
       //this.multInstanceUpdate();
    },
 
-
-   _updateComplete : function() {
+   _updateComplete: function() {
       if(this._timeOutSettings > 0) {
          Mainloop.source_remove(this._timeOutSettings);
          this._timeOutSettings = 0;
@@ -160,27 +159,28 @@ MyDesklet.prototype = {
       this._initDeskletContruction();
       this.setContent(this.mainBox);
 
-      this.initDeskletType();
+      if(this.initDeskletType()) {
+         this.rootBox.connect('style-changed', Lang.bind(this, this._onOpacityRootChange));
+         this.textBox.connect('style-changed', Lang.bind(this, this._onOpacityTextChange));
+         this._keyFocusNotifyIDSignal = global.stage.connect('notify::key-focus', Lang.bind(this, this._onKeyFocusChanged));
+         this.clutterText.connect('button-press-event', Lang.bind(this, this._onButtonPress));
+         this.clutterText.connect('button-release-event', Lang.bind(this, this._onButtonRelease));
+         this.textBox.connect('button-press-event', Lang.bind(this, this._onButtonPress));
+         this.textBox.connect('button-release-event', Lang.bind(this, this._onButtonRelease));
+         this.entry.connect('allocation_changed', Lang.bind(this, this._onAllocationChanged));
+         //this.scrollBox.connect('allocation_changed', Lang.bind(this, this._onAllocationChanged));
 
-      this._keyFocusNotifyIDSignal = global.stage.connect('notify::key-focus', Lang.bind(this, this._onKeyFocusChanged));
-      this.clutterText.connect('button-press-event', Lang.bind(this, this._onButtonPress));
-      this.clutterText.connect('button-release-event', Lang.bind(this, this._onButtonRelease));
-      this.textAreaBox.connect('button-press-event', Lang.bind(this, this._onButtonPress));
-      this.textAreaBox.connect('button-release-event', Lang.bind(this, this._onButtonRelease));
-      //this.textBox.connect('allocation_changed', Lang.bind(this, this._onAllocationChanged));
-      this.entry.connect('allocation_changed', Lang.bind(this, this._onAllocationChanged));
 
-      
-
-      this._onFixWidth();
-      this._onFixHeight();
-      this._onScrollVisibleChange();
-      this._onScrollAutoChange();
-      this._onAutoHideButtons();
-      this.multInstanceMenuItem._switch.setToggleState(this._multInstance);
-      Mainloop.idle_add(Lang.bind(this, this._onStyleChange));
+         this._onFixWidth();
+         this._onFixHeight();
+         this._onScrollVisibleChange();
+         this._onScrollAutoChange();
+         this._onAutoHideButtons();
+         this._onHideTextBox();
+         this.multInstanceMenuItem._switch.setToggleState(this._multInstance);
+         Mainloop.idle_add(Lang.bind(this, this._onStyleChange));
+      }
    },
-
 
    showErrorMessage: function(menssage) {
       Main.notifyError(_("Error"), menssage);
@@ -188,6 +188,7 @@ MyDesklet.prototype = {
 
    initDeskletType: function() {
       this.notesList = this.findNotesFromFile();
+      this._readListPosition();
       if(this._multInstance) {
          let numberInstance = this.getInstanceNumber();
          if((numberInstance == 0)&&(this.notesList.length > 1)&&(this.getCountInstance() == 1)) {
@@ -201,11 +202,16 @@ MyDesklet.prototype = {
             this.noteCurrent = numberInstance + 1;
             this.reset();
          }
+         return true;
       }
-      else {
+      else if(this.getCountInstance() == 1){
          this.readNotesFromFile();
          this.loadNote(0);
+         return true;
       }
+      DeskletManager.removeDesklet(this.uuid, this.instance_id);
+      this.destroyDesklet();
+      return false;
    },
 
    multInstanceUpdate: function() {
@@ -230,10 +236,15 @@ MyDesklet.prototype = {
             if(posY > monitor.height)
                posY = 100;
             let posX = Math.floor(numberInstance % countMaxDesklet)*this.mainBox.get_width();
-            deskletDef = (this.uuid + ':%s:%s:%s').format(newDeskletID, posX, posY);
+            
+            let storePos = this.positions["" + this.notesList[this.getCountInstance()][0]];
+            if(storePos)
+               deskletDef = (this.uuid + ':%s:%s:%s').format(newDeskletID, storePos[0], storePos[1]);
+            else
+               deskletDef = (this.uuid + ':%s:%s:%s').format(newDeskletID, posX, posY);
          }
          else {
-            deskletDef = (this.uuid + ':%s:0:0').format(newDeskletID);
+            deskletDef = (this.uuid + ':%s:%s:%s').format(newDeskletID, this._xPosition, this._yPosition);
          }
          let enabledDesklets = this.settingsExt.get_strv("enabled-desklets");
          enabledDesklets.push(deskletDef);
@@ -257,6 +268,15 @@ MyDesklet.prototype = {
       }
       DeskletManager.removeDesklet(this.uuid, this.instance_id);
    },
+
+   destroyDesklet: function(){
+        this.on_desklet_removed();
+        this.actor.destroy();
+        this._menu.destroy();
+        this._menu = null;
+        this._menuManager = null;
+        this.emit('destroy');
+    },
 
    openAllMulInstance: function() {
       try {
@@ -484,6 +504,14 @@ MyDesklet.prototype = {
       return this._sorting(notes);
    },
 
+   isNoteInList: function(noteName) {
+      for(let i = 0; i < this.notesList.length; i++) {
+         if(this.notesList[i][0] == noteName)
+            return true;
+      }
+      return false;
+   },
+
    _sorting: function(notes) {
       let valueL, valueF, tempSwap;
       for(let posF=0; posF < notes.length - 1; posF++) {
@@ -516,14 +544,21 @@ MyDesklet.prototype = {
       this.leftBox.remove_actor(actor);
       if(this.minimizeButton == actor) {
          this.leftBox.add(this.maximizeButton, {x_fill: true, x_align: St.Align.END});
+         this._changeHideTextBox(true);
          this.scrollBox.visible = false;
-         this.mainBox.set_height(-1);
+         if(this._fHeight) {
+            this.mainBox.set_height(-1);
+         }
+
       }
       else {
-         this.leftBox.add(this.minimizeButton, {x_fill: true, x_align: St.Align.END});
+         this.leftBox.add(this.minimizeButton, {x_fill: true, x_align: St.Align.END}); 
+         this._changeHideTextBox(false);
          this.scrollBox.visible = true;
-         if(this._fHeight)
-            this.mainBox.set_height(this._height);
+         if(this._fHeight) {
+            this.fixHeight(true);
+         }
+
       }
    },
 
@@ -634,45 +669,44 @@ MyDesklet.prototype = {
    setStyle: function() {
       this.setStaples();
       this.setStripe();
+
       if(this._overrideTheme) {
-         let _colorBox = (this._boxColor.replace(')',',' + this._opacity + ')')).replace('rgb','rgba');
-         let _colorText = (this._textBoxColor.replace(')',',' + this._opacity + ')')).replace('rgb','rgba');
+         let _colorBox = (this._boxColor.replace(')',',' + this._opacityBoxes + ')')).replace('rgb','rgba');
+         let _colorText = (this._textBoxColor.replace(')',',' + this._opacityBoxes + ')')).replace('rgb','rgba');
          let _colorBanner = (this._boxColor.replace(')',',' + 0.1 + ')')).replace('rgb','rgba');
-         this.rootBox.set_style_class_name('');
          if(this._themeStaples != "none") {
             this.rootBox.set_style('background-color: ' + _colorBox + '; color: ' + this._fontColor + '; border: ' +
                                    this._borderBoxWidth + 'px solid ' + this._borderBoxColor +
-                                   '; border-top: none; padding: 0px 4px 0px 4px; font-weight: bold; border-radius: 12px 12px 12px 12px;');
-         }
-         else {
+                                   '; border-top: none; padding: 0px 4px 0px 4px; font-weight: bold; border-radius: 12px;');
+         } else {
             this.rootBox.set_style('background-color: ' + _colorBox + '; color: ' + this._fontColor + '; border: ' +
                                    this._borderBoxWidth + 'px solid ' + this._borderBoxColor +
-                                   '; padding: 0px 4px 0px 4px; font-weight: bold; border-radius: 12px 12px 12px 12px;');
+                                   '; padding: 0px 4px 0px 4px; font-weight: bold; border-radius: 12px;');
          }
-         this.bannerBox.set_style('background-color: ' + _colorBanner);
-         this.endBoxBackGround.set_style('background-color: ' + _colorBanner);
          if(this._overrideTextBox) {
             this.textBox.set_style_class_name('');
-            this.textBox.set_style('background-color: ' + _colorText + '; background:' + _colorText + ';');
+            this.textBox.set_style('background-color: ' + _colorText + ';' +
+                                   'border-radius: 4px; border: 2px solid ' + _colorText + ';');
          }
          else {
             this.textBox.set_style_class_name('sticky-text-box');
             this.textBox.set_style('background-color: ' + _colorText + ';');
          }
-      }
-      else {
+         this.buttonBanner.set_style_class_name('');
+         this.buttonBanner.set_style('background-color: ' + _colorBanner);
+      } else {
          this.rootBox.set_style_class_name('desklet-with-borders');
-         this.textBox.set_style_class_name('sticky-text-box');
-         this.bannerBox.set_style('');
-         this.textBox.set_style('');
-
          if(this._themeStaples != "none") {
             this.rootBox.add_style_class_name('sticky-main-box-staples');
             this.rootBox.set_style('border-top: none; padding-top: 0px;');
          }
          else 
             this.rootBox.add_style_class_name('sticky-main-box-none');
-         this.endBoxBackGround.set_style('');
+
+         this.textBox.set_style_class_name('sticky-text-box');
+         this.buttonBanner.set_style_class_name('sticky-button-box');
+         this.buttonBanner.set_style('');
+         this.textBox.set_style('');
       }
    },
 
@@ -708,18 +742,12 @@ MyDesklet.prototype = {
             this.showErrorMessage(_("Unsupported text size '%s'  to use the font '%s' in this theme.").format(this._textSize, this._fontFamily));
             this.textAreaBox.set_style('min-width:' + MIN_WIDTH + 'px;');
          } else {
-            if(this._themeStaples != "none") {
-               this.textAreaBox.set_style('background-image: url(\'' + image + imageNumber + '.png\');' +
-                                      'background-repeat: repeat; background-position: 0px 0px; min-width: ' +
-                                       MIN_WIDTH + 'px;');
-            } else {
-               this.textAreaBox.set_style('background-image: url(\'' + image + imageNumber + '.png\');' +
-                                      'background-repeat: repeat; background-position: 0px 0px; border-radius: 12px; min-width: ' +
-                                       MIN_WIDTH + 'px;');
-            }
+            this.textAreaBox.set_style('background-image: url(\'' + image + imageNumber + '.png\'); ' +
+                                       'background-repeat: repeat; background-position: 0px 0px; ' + 'background-size: auto; ' +
+                                       'min-width: ' + MIN_WIDTH + 'px;');
          }
       } else {
-         this.textAreaBox.set_style('padding: 0px; min-width: ' + MIN_WIDTH + 'px;');
+         this.textAreaBox.set_style('min-width: ' + MIN_WIDTH + 'px;');
       }
    },
 
@@ -742,10 +770,10 @@ MyDesklet.prototype = {
    setPencil: function(activePencil) {
       if((this._themePencil != "none")&&(activePencil)) {
          let image = GLib.get_home_dir() + "/.local/share/cinnamon/desklets/" + this.uuid + "/pencil/" + this._themePencil + ".svg";
-         this.pencilBox.set_style(' background-image: url(\'' + image + '\'); background-size:' + this.pencilBox.width +'px' +
-                                    this.pencilBox.height + 'px; max-width: 200px; min-width: 60px;');
+         this.pencilBox.set_style(' background-image: url(\'' + image + '\'); background-size:' + this.pencilBox.width +'px ' +
+                                  this.pencilBox.height + 'px; max-width: 200px; min-width: 60px; padding: 0px 10px 0px 10px');
       } else {
-         this.pencilBox.set_style('max-width: 200px; min-width: 60px;');
+         this.pencilBox.set_style('max-width: 200px; min-width: 60px; padding: 0px 10px 0px 10px');
       }
    },
 
@@ -767,19 +795,16 @@ MyDesklet.prototype = {
    _initDeskletContruction: function() {
       this.mainBox = new St.BoxLayout({vertical:true, reactive: true, track_hover: true});
       this.rootBox = new St.BoxLayout({vertical:true});
-      this.rootBox.connect('style-changed', Lang.bind(this, this._onOpacityRootChange));
-      this.bannerBox = new St.BoxLayout({ vertical:true, style_class: 'sticky-button-box' });
-      this.buttonBanner = new St.BoxLayout({vertical:false});
+      this.bannerBox = new St.BoxLayout({vertical:true});
+      this.buttonBanner = new St.BoxLayout({ vertical:false, style_class: 'sticky-button-box' });
       this.leftBox = new St.BoxLayout({vertical:false});
       this.centerBox = new St.BoxLayout({vertical:false});
-      this.pencilBox = new St.BoxLayout({vertical:false});
-      let rightBox = new St.BoxLayout({vertical:false});
-      this.textBox = new St.BoxLayout({ vertical:true, style_class: 'sticky-text-box' });
-      this.textBox.connect('style-changed', Lang.bind(this, this._onOpacityTextChange));
+      this.pencilBox = new St.BoxLayout({vertical:true});
+      let rightBox = new St.BoxLayout({vertical:false}); 
+      this.textBox = new St.BoxLayout({ vertical:true, reactive: true, style_class: 'sticky-text-box' });
+      this.textAreaBox = new St.BoxLayout({vertical:true/*, reactive: true*/});
 
-      this.textAreaBox = new St.BoxLayout({vertical:true, reactive: true});
       this.bottomBox = new St.BoxLayout({ vertical:false, height: 6 });
-
 
       let addButton = this._buttonCreation('list-add', _("Add new Note"), true);
       addButton.connect('clicked', Lang.bind(this, this._onAddNote));
@@ -802,6 +827,7 @@ MyDesklet.prototype = {
 
       this.titleNote = new St.Label({ style_class: 'sticky-title-label' });
       this.titleNote.set_text("");
+      this.titleNote.set_height(16);
 
       let backButton = this._buttonCreation('edit-undo', _("Back Note"), true);
       backButton.connect('clicked', Lang.bind(this, this._onBackNote));
@@ -810,18 +836,16 @@ MyDesklet.prototype = {
       nextButton.connect('clicked', Lang.bind(this, this._onNextNote));
 
       if(!this._multInstance) {
-         this.centerBox.add(backButton, {x_fill: false, y_fill: false, expand: false, y_align: St.Align.MIDDLE});
-         this.centerBox.add(this.pencilBox, {x_fill: false, y_fill: false, expand: true, y_align: St.Align.MIDDLE});
-         this.centerBox.add(nextButton, {x_fill: false, y_fill: false, expand: false, y_align: St.Align.MIDDLE});
-         this.pencilBox.add(this.currentNote, {x_fill: false, y_fill: false, expand: false, y_align: St.Align.MIDDLE});
-         this.pencilBox.add(separator, {x_fill: false, y_fill: false, expand: false, y_align: St.Align.MIDDLE});
-         this.pencilBox.add(this.numberNote, {x_fill: false, y_fill: false, expand: false, y_align: St.Align.MIDDLE});
+         this.centerBox.add(backButton, {x_fill: false, y_fill: false, expand: true, y_align: St.Align.MIDDLE});
+         this.centerBox.add(this.currentNote, {x_fill: false, y_fill: false, expand: true, y_align: St.Align.MIDDLE});
+         this.centerBox.add(separator, {x_fill: false, y_fill: false, expand: true, y_align: St.Align.MIDDLE});
+         this.centerBox.add(this.numberNote, {x_fill: false, y_fill: false, expand: true, y_align: St.Align.MIDDLE});
+         this.centerBox.add(nextButton, {x_fill: false, y_fill: false, expand: true, y_align: St.Align.MIDDLE});      
+      } else
+         this.centerBox.add(this.titleNote, {x_fill: false, y_fill: false, expand: true, x_align: St.Align.MIDDLE});
+      //this.centerBox.set_width(80);
 
-      } else {
-         this.pencilBox.add(this.titleNote, {x_fill: false, y_fill: false, expand: true, x_align: St.Align.MIDDLE});
-         this.centerBox.add(this.pencilBox, {x_fill: false, y_fill: false, expand: true, x_align: St.Align.MIDDLE});
-      }
-      
+      this.pencilBox.add(this.centerBox, {x_fill: false, y_fill: false, expand: true, y_align: St.Align.MIDDLE});
       this.setPencil(false);
 
       let configButton = this._buttonCreation('preferences-system', _("Configure..."), true);
@@ -834,24 +858,27 @@ MyDesklet.prototype = {
       rightBox.add(deleteButton, {x_fill: true, x_align: St.Align.END});
 
       this.buttonBanner.add(this.leftBox, {x_fill: true, x_align: St.Align.START});
-      this.buttonBanner.add(this.centerBox, {x_fill: false, expand: true, x_align: St.Align.MIDDLE});
+      this.buttonBanner.add(this.pencilBox, {x_fill: false, expand: true, x_align: St.Align.MIDDLE});
       this.buttonBanner.add(rightBox, {x_fill: true, x_align: St.Align.END});
-      this.bannerBox.add(this.buttonBanner, {x_fill: true, x_align: St.Align.MIDDLE});
+
+      this.bannerBox.add(this.buttonBanner, { x_fill: true, y_fill: false, expand: true, x_align: St.Align.MIDDLE, y_align: St.Align.START });
+      this.bannerBox.set_style('padding-top: 6px;');
 
       this.entry = new St.Entry({ name: 'sticky-note-entry', hint_text: _("Type to your note..."), track_hover: false, can_focus: true});
-      this.textBox.add(this.textAreaBox, { x_fill: true, y_fill: true, x_align: St.Align.START, y_align: St.Align.START, expand: true });
-      this.textAreaBox.add(this.entry, { x_fill: true, y_fill: false, x_align: St.Align.START, y_align: St.Align.START, expand: true });
+      //this.textBox.add(this.entry, {x_fill: true, y_fill: false, expand: true, x_align: St.Align.START, y_align: St.Align.START});
+      this.textBox.add(this.textAreaBox, { x_fill: true, y_fill: true, expand: true, x_align: St.Align.START, y_align: St.Align.START });
+      this.textAreaBox.add(this.entry, { x_fill: true, y_fill: false, expand: true, x_align: St.Align.START, y_align: St.Align.START });
 
       this.transpBox = new St.BoxLayout({vertical:true});
-      this.endBoxBackGround = new St.BoxLayout({ vertical:true, style_class: 'sticky-top-box' });
+      this.endBoxBackGround = new St.BoxLayout({ vertical:true/*, style_class: 'sticky-top-box'*/ });
       this.endBox = new St.BoxLayout({vertical:false});
       this.endBoxBackGround.add(this.endBox, {x_fill: false, x_align: St.Align.MIDDLE});
 
-      this.rootBox.add(this.endBoxBackGround, {x_fill: true, x_align: St.Align.MIDDLE, expand: false});
-      this.rootBox.add(this.bannerBox, { x_fill: true, y_fill: false, x_align: St.Align.START, y_align: St.Align.START, expand: false });
+      this.rootBox.add(this.endBoxBackGround, {x_fill: true, y_fill: false, expand: false, x_align: St.Align.MIDDLE, y_align: St.Align.START });
+      this.rootBox.add(this.bannerBox, { x_fill: true, y_fill: false, expand: false, x_align: St.Align.MIDDLE, y_align: St.Align.START });
 
       this.mainBox.add(this.transpBox, {x_fill: false, x_align: St.Align.MIDDLE});
-      this.mainBox.add(this.rootBox, {x_fill: true, x_align: St.Align.START, expand: true});
+      this.mainBox.add(this.rootBox, {x_fill: true, y_fill: true, expand: true, x_align: St.Align.START, y_align: St.Align.START });
 
       this.clutterText = this.entry.clutter_text;
       this.clutterText.set_single_line_mode(false);
@@ -860,16 +887,17 @@ MyDesklet.prototype = {
       this.clutterText.set_line_wrap_mode(imports.gi.Pango.WrapMode.WORD_CHAR);
       this.clutterText.set_selectable(true);
 //scroll
-      this.scrollArea = new St.ScrollView({ name: 'sticky-scrollview', x_fill: true, y_fill: false, y_align: St.Align.START,
-                                            vscrollbar_policy: Gtk.PolicyType.AUTOMATIC, hscrollbar_policy: Gtk.PolicyType.NEVER,
-                                            style_class: 'vfade' });
+      this.scrollArea = new St.ScrollView({ name: 'sticky-scrollview', x_fill: true, y_fill: true, y_align: St.Align.START, style_class: 'vfade' });
+      this.scrollArea.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC);
+
       this.scrollBox = new St.BoxLayout({vertical:false});
-      this.scrollBox.add(this.scrollArea, {x_fill: true, y_fill: true, x_align: St.Align.END, y_align: St.Align.START, expand: true});
+      this.scrollBox.add(this.scrollArea, { x_fill: true, y_fill: true, expand: true, x_align: St.Align.START, y_align: St.Align.START });
       this.scrollBox.set_style('padding-top: 6px;');
 
       this.scrollArea.add_actor(this.textBox);
-      this.rootBox.add(this.scrollBox, { x_fill: true, y_fill: true, x_align: St.Align.START, y_align: St.Align.START, expand: true });
-      this.rootBox.add(this.bottomBox, { x_fill: true, y_fill: true, y_align: St.Align.END });
+//scroll
+      this.rootBox.add(this.scrollBox, { x_fill: true, y_fill: true, expand: true, x_align: St.Align.START, y_align: St.Align.START });
+      this.rootBox.add(this.bottomBox, { x_fill: true, y_fill: false, expand: false, y_align: St.Align.END });
    },
 
    _scrollFilter: function(actor, event) {
@@ -884,10 +912,19 @@ MyDesklet.prototype = {
    },
 
    enableScrolling: function(scrolling) {
+      if(this.textBox.get_parent() == this.scrollBox)
+         this.scrollBox.remove_actor(this.textBox);
+      else {
+         this.scrollArea.remove_actor(this.textBox);
+         this.scrollBox.remove_actor(this.scrollArea);
+      }
       if(scrolling) {
+         this.scrollArea.add_actor(this.textBox);
+         this.scrollBox.add(this.scrollArea, { x_fill: true, y_fill: true, expand: true, x_align: St.Align.START, y_align: St.Align.START });
          if(this.scrollIDSignal == 0)
             this.scrollIDSignal = this.scrollBox.connect('event', Lang.bind(this, this._scrollFilter));
       } else {
+         this.scrollBox.add(this.textBox, {x_fill: true, y_fill: true, expand: true, x_align: St.Align.START, y_align: St.Align.START});
          if(this.scrollIDSignal > 0)
             this.scrollBox.disconnect(this.scrollIDSignal);
          this.scrollIDSignal = 0;
@@ -897,7 +934,7 @@ MyDesklet.prototype = {
    fixHeight: function(fix) {
       this._fHeight = fix;
       if(fix) {
-         if(this.bannerBox.visible)
+         if(this.scrollBox.visible)
             this.mainBox.set_height(this._height);
       } else {
          this.mainBox.set_height(-1);
@@ -905,30 +942,23 @@ MyDesklet.prototype = {
       this.enableScrolling(fix);
    },
 
-
    fixWidth: function(fix) {
       this._fWidth = fix;
       if(fix) {
-         //this.transpBox.set_width(-1);
-         //this.endBox.set_width(-1);
          this.mainBox.set_width(this._width);
       }
       else {
          this.mainBox.set_width(-1);
-         //this.transpBox.set_width(-1);
       }
    },
 
-   _onAllocationChanged: function(actor, event) {
-      //let availWidth = this.textBox.get_width();
+   _onAllocationChanged: function() {
       let availWidth = this.entry.get_width();
       if(availWidth < MIN_WIDTH)
          availWidth = MIN_WIDTH;
       let diff = (availWidth % 18);
-      //Main.notifyError("Width: " + availWidth + " diff: " + diff);
       this.transpBox.set_width(availWidth - diff);
       this.endBox.set_width(availWidth - diff);
-     // this.endBoxBackGround.set_width(availWidth - diff);
    },
 
    on_desklet_removed: function() {
@@ -954,11 +984,11 @@ MyDesklet.prototype = {
       this.settings.finalize();
    },
 
-   _buttonCreation: function(icon, toolTip, iconSymbolic) { 
+   _buttonCreation: function(icon, toolTip, iconSymbolic) {
       let iconType;
       if(iconSymbolic) iconType = St.IconType.SYMBOLIC;
       else iconType = St.IconType.FULLCOLOR;
-      let bttIcon = new St.Icon({icon_name: icon, icon_type: St.IconType.SYMBOLIC,
+      let bttIcon = new St.Icon({icon_name: icon, icon_type: iconType,
 				 style_class: 'popup-menu-icon' });
       let btt = new St.Button({ child: bttIcon });
       btt.connect('notify::hover', Lang.bind(this, function(actor) {
@@ -975,6 +1005,7 @@ MyDesklet.prototype = {
       }));
       btt.set_style_class_name('menu-category-button');
       btt.add_style_class_name('sticky-button')
+      btt.set_style('padding: 2px;');
       let bttTooltip = new Tooltips.Tooltip(btt, toolTip);
       return btt;
    },
@@ -1049,6 +1080,8 @@ MyDesklet.prototype = {
       }
    },
 
+   
+
    _onButtonRelease: function(actor, event) {
       if(this._entryActiveMenu) {
           this._onButtonReleaseEvent(this.actor, event);
@@ -1096,9 +1129,10 @@ MyDesklet.prototype = {
    },
 
    _updatePasteItem: function() {
-      this._clipboard.get_text(Lang.bind(this, function(clipboard, text) {
-         this.pasteMenuItem.setSensitive(text && text != '' && this.clutterText.text != '' && this._isActivated());
-      }));
+      this._clipboard.get_text(Lang.bind(this,
+         function(clipboard, text) {
+            this.pasteMenuItem.setSensitive(text && text != '' && this.clutterText.text != '' && this._isActivated());
+         }));
     },
 
    _onCopyActivated: function() {
@@ -1179,9 +1213,9 @@ MyDesklet.prototype = {
          return false;
       }
       return false;
-    },
+   },
 
-    _onInsertText: function(actor, newText, length) {
+   _onInsertText: function(actor, newText, length) {
       if((new Date().getTime() - this.keyPress < 50)&&(Keymap.get_caps_lock_state())) {
          let position = -1;
          let newEntryText = actor.get_text();
@@ -1201,29 +1235,33 @@ MyDesklet.prototype = {
       return false;
    },
 
-    _onMultInstanceChange: function() {
-       if(this.instance_id ==  this.getMasterInstance()) {
-          this.multInstanceUpdate();
-          this.multInstanceMenuItem._switch.setToggleState(this._multInstance);
-       }
-    },
+   _onMultInstanceChange: function() {
+      if(this.instance_id ==  this.getMasterInstance()) {
+         this.multInstanceUpdate();
+         this.multInstanceMenuItem._switch.setToggleState(this._multInstance);
+      }
+   },
 
-    _onStyleChange: function() {
-       this.setStyle();
-    },
+   _onStyleChange: function() {
+      this.setStyle();
+   },
 
-   _onOpacityChange: function() {
-       this._onOpacityRootChange();
-       this._onOpacityTextChange();
-       return true;
-    },
+   _onOpacityDeskletChange: function() {
+      this.mainBox.opacity = 255*this._opacityDesklet;
+   },
 
-    _onOpacityRootChange: function() {
-       let themeNode = this.rootBox.get_theme_node();
-       let boxColor, remplaceColor;
-       let newStyle;
-       if(this._overrideTheme) {
-         let _colorBox = (this._boxColor.replace(')',',' + this._opacity + ')')).replace('rgb','rgba');
+   _onOpacityBoxesChange: function() {
+      this._onOpacityRootChange();
+      this._onOpacityTextChange();
+      return true;
+   },
+
+   _onOpacityRootChange: function() {
+      let themeNode = this.rootBox.get_theme_node();
+      let boxColor, remplaceColor;
+      let newStyle;
+      if(this._overrideTheme) {
+         let _colorBox = (this._boxColor.replace(')',',' + this._opacityBoxes + ')')).replace('rgb','rgba');
          if(this._themeStaples != "none")
             newStyle = 'background-color: ' + _colorBox + '; color: ' + this._fontColor + '; border: ' +
                         this._borderBoxWidth + 'px solid ' + this._borderBoxColor +
@@ -1232,121 +1270,135 @@ MyDesklet.prototype = {
             newStyle = 'background-color: ' + _colorBox + '; color: ' + this._fontColor + '; border: ' +
                         this._borderBoxWidth + 'px solid ' + this._borderBoxColor +
                         '; padding: 0px 4px 0px 4px; font-weight: bold; border-radius: 12px 12px 12px 12px;';
-       } else {
-          if(this._themeStaples != "none")
-             newStyle = 'border-top: none; padding-top: 0px;';
-          else
-             newStyle = '';
-          let defColor = new Clutter.Color().to_string();
-          boxColor = themeNode.get_color('background-color').to_string();
-          if(defColor != boxColor) {
-             remplaceColor = this.updateOpacityColor(boxColor);
-             newStyle += ' background-color: ' + remplaceColor + ';';
-          }
-          boxColor = themeNode.get_color('background-gradient-start').to_string();
-          if(defColor != boxColor) {
-             remplaceColor = this.updateOpacityColor(boxColor);
-             newStyle += ' background-gradient-start: ' + remplaceColor + ';';
-          }
-          boxColor = themeNode.get_color('background-gradient-end').to_string();
-          if(defColor != boxColor) {
-             remplaceColor = this.updateOpacityColor(boxColor);
-             newStyle += ' background-gradient-end: ' + remplaceColor + ';';
-          }
-       }
-       if(newStyle != this.rootBox.get_style()) {
-          //Main.notify("newStyle:" + newStyle);
-          this.rootBox.set_style(newStyle);
-       }
-    },
+      } else {
+         if(this._themeStaples != "none")
+            newStyle = 'border-top: none; padding-top: 0px;';
+         else
+            newStyle = '';
+         let defColor = new Clutter.Color().to_string();
+         boxColor = themeNode.get_color('background-color').to_string();
+         if(defColor != boxColor) {
+            remplaceColor = this.updateOpacityColor(boxColor);
+            newStyle += ' background-color: ' + remplaceColor + ';';
+         }
+         boxColor = themeNode.get_color('background-gradient-start').to_string();
+         if(defColor != boxColor) {
+            remplaceColor = this.updateOpacityColor(boxColor);
+            newStyle += ' background-gradient-start: ' + remplaceColor + ';';
+         }
+         boxColor = themeNode.get_color('background-gradient-end').to_string();
+         if(defColor != boxColor) {
+            remplaceColor = this.updateOpacityColor(boxColor);
+            newStyle += ' background-gradient-end: ' + remplaceColor + ';';
+         }
+      }
+      if(newStyle != this.rootBox.get_style()) {
+         //Main.notify("newStyle:" + newStyle);
+         this.rootBox.set_style(newStyle);
+      }
+   },
 
-    _onOpacityTextChange: function() {
-       let newStyle = '';
-       if(this._overrideTheme) {
-         let _colorText = (this._textBoxColor.replace(')',',' + this._opacity + ')')).replace('rgb','rgba');
+   _onOpacityTextChange: function() {
+      let newStyle = '';
+      if(this._overrideTheme) {
+         let _colorText = (this._textBoxColor.replace(')',',' + this._opacityBoxes + ')')).replace('rgb','rgba');
          newStyle = 'background-color: ' + _colorText + '; background:' + _colorText + ';';
-       } else {
-          let themeNode = this.textBox.get_theme_node();
-          let defColor = new Clutter.Color().to_string();
-          boxColor = themeNode.get_color('background-color').to_string();
-          if(defColor != boxColor) {
-             remplaceColor = this.updateOpacityColor(boxColor);
-             newStyle += ' background-color: ' + remplaceColor + ';';
-          }
-          boxColor = themeNode.get_color('background-gradient-start').to_string();
-          if(defColor != boxColor) {
-             remplaceColor = this.updateOpacityColor(boxColor);
-             newStyle += ' background-gradient-start: ' + remplaceColor + ';';
-          }
-          boxColor = themeNode.get_color('background-gradient-end').to_string();
-          if(defColor != boxColor) {
-             remplaceColor = this.updateOpacityColor(boxColor);
-             newStyle += ' background-gradient-end: ' + remplaceColor + ';';
-          }
-       }
-       if(newStyle != this.textBox.get_style()) {
-          //Main.notify("newStyle:" + newStyle);
-          this.textBox.set_style(newStyle);
-       }
-    },
+      } else {
+         let themeNode = this.textBox.get_theme_node();
+         let defColor = new Clutter.Color().to_string();
+         boxColor = themeNode.get_color('background-color').to_string();
+         if(defColor != boxColor) {
+            remplaceColor = this.updateOpacityColor(boxColor);
+            newStyle += ' background-color: ' + remplaceColor + ';';
+         }
+         boxColor = themeNode.get_color('background-gradient-start').to_string();
+         if(defColor != boxColor) {
+            remplaceColor = this.updateOpacityColor(boxColor);
+            newStyle += ' background-gradient-start: ' + remplaceColor + ';';
+         }
+         boxColor = themeNode.get_color('background-gradient-end').to_string();
+         if(defColor != boxColor) {
+            remplaceColor = this.updateOpacityColor(boxColor);
+            newStyle += ' background-gradient-end: ' + remplaceColor + ';';
+         }
+      }
+      if(newStyle != this.textBox.get_style()) {
+         //Main.notify("newStyle:" + newStyle);
+         this.textBox.set_style(newStyle);
+      }
+   },
 
-    updateOpacityColor: function(color) {
-       let r = parseInt(color.substring(1,3),16);
-       let g = parseInt(color.substring(3,5),16);
-       let b = parseInt(color.substring(5,7),16);
-       //let a = parseInt(color.substring(7,9),16);
-       return "rgba("+r+","+g+","+b+","+(this._opacity)+")";
-    },
+   updateOpacityColor: function(color) {
+      let r = parseInt(color.substring(1,3),16);
+      let g = parseInt(color.substring(3,5),16);
+      let b = parseInt(color.substring(5,7),16);
+      //let a = parseInt(color.substring(7,9),16);
+      return "rgba("+r+","+g+","+b+","+(this._opacityBoxes)+")";
+   },
 
-    _onFixWidth: function() {
-       this.fixWidth(this._fWidth);
-    },
+   _onFixWidth: function() {
+      this.fixWidth(this._fWidth);
+   },
 
-    _onFixHeight: function() {
-       this.fixHeight(this._fHeight);
-    },
+   _onFixHeight: function() {
+      this.fixHeight(this._fHeight);
+   },
 
-    _onScrollVisibleChange: function() {
-       this.scrollArea.get_vscroll_bar().visible = this._scrollVisible;
-    },
+   _onScrollVisibleChange: function() {
+      this.scrollArea.get_vscroll_bar().visible = this._scrollVisible;
+   },
 
-    _onScrollAutoChange: function() {
-       this.scrollArea.set_auto_scrolling(this._scrollAuto);
-    },
+   _onScrollAutoChange: function() {
+      this.scrollArea.set_auto_scrolling(this._scrollAuto);
+   },
 
-    _onTextSetting: function() {
-       this.entry.text = this._text;
-       this.titleNote.set_text(this.entry.text);
-    },
+   _onTextSetting: function() {
+      this.entry.text = this._text;
+      this.titleNote.set_text(this.entry.text);
+   },
 
-    _onThemePencilChange: function() {
-    },
+   _onThemePencilChange: function() {
+   },
 
-    _onAutoHideButtons: function() {
-       if(this._autohideButtons) {
-          //this.buttonBanner.visible = false;
-this.bannerBox.visible = false;
-          if(this.autoHideButtonsIDSignal == 0) {
-             this.autoHideButtonsIDSignal = this.mainBox.connect('notify::hover', Lang.bind(this, function(actor) {
-                let focusedActor = global.stage.get_key_focus();
-                if((focusedActor)&&(this.entry.contains(focusedActor)))
-            //       this.buttonBanner.visible = true;
-this.bannerBox.visible = true;
-                else
-            //       this.buttonBanner.visible = actor.get_hover();
-this.bannerBox.visible = actor.get_hover();
-             }));
-          }
-       } else {
-          if(this.autoHideButtonsIDSignal > 0)
-             this.mainBox.disconnect(this.autoHideButtonsIDSignal);
-          this.autoHideButtonsIDSignal = 0;
-          //this.buttonBanner.visible = true;
-this.bannerBox.visible = true;
-       }
-    },
+   _onAutoHideButtons: function() {
+      if(this._autohideButtons) {
+         this.buttonBanner.visible = false;
+         if(this.autoHideButtonsIDSignal == 0) {
+            this.autoHideButtonsIDSignal = this.mainBox.connect('notify::hover', Lang.bind(this, function(actor) {
+               let focusedActor = global.stage.get_key_focus();
+               if((focusedActor)&&(this.entry.contains(focusedActor)))
+                  this.buttonBanner.visible = true;
+               else
+                  this.buttonBanner.visible = actor.get_hover();
+            }));
+         }
+      } else {
+         if(this.autoHideButtonsIDSignal > 0)
+            this.mainBox.disconnect(this.autoHideButtonsIDSignal);
+         this.autoHideButtonsIDSignal = 0;
+         this.buttonBanner.visible = true;
+      }
+   },
 
-    _initSettings: function() {
+   _onHideTextBox: function() {
+      if(this._multInstance) {
+         if((this.noteCurrent > 0)&&(this.noteCurrent < this.notesList.length + 1)) {
+            this._readListHideTextBox();
+            let hideNote = this.hideTextBox["" + this.notesList[this.noteCurrent - 1][0]];
+            if(hideNote)
+               this._onVisibleNoteChange(this.minimizeButton);
+            else
+               this._onVisibleNoteChange(this.maximizeButton);
+         }
+      } else {
+         if(this._hideTextBox)
+            this._onVisibleNoteChange(this.minimizeButton);
+         else
+            this._onVisibleNoteChange(this.maximizeButton);
+      }    
+   }, 
+
+   _initSettings: function() {
       try {
          this.settings = new Settings.DeskletSettings(this, this.uuid, this.instance_id);
          this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "multi-instance", "_multInstance", this._onMultInstanceChange, null);
@@ -1371,7 +1423,8 @@ this.bannerBox.visible = true;
 
          this.settings.bindProperty(Settings.BindingDirection.IN, "text-size", "_textSize", this._onStyleChange, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "font-family", "_fontFamily", this._onStyleChange, null);
-         this.settings.bindProperty(Settings.BindingDirection.IN, "opacity", "_opacity", this._onOpacityChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "desklet-opacity", "_opacityDesklet", this._onOpacityDeskletChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "boxes-opacity", "_opacityBoxes", this._onOpacityBoxesChange, null);
 
          this.settings.bindProperty(Settings.BindingDirection.IN, "override-theme", "_overrideTheme", this._onStyleChange, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "main-box-color", "_boxColor", this._onStyleChange, null);
@@ -1383,12 +1436,232 @@ this.bannerBox.visible = true;
          this.settings.bindProperty(Settings.BindingDirection.IN, "border-box-width", "_borderBoxWidth", this._onStyleChange, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "border-box-color", "_borderBoxColor", this._onStyleChange, null);
 
+         this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "position-x", "_xPosition", null, null);
+         this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "position-y", "_yPosition", null, null);
+         this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "list-position", "_listPosition", null, null);
+         this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "hide-text-box", "_hideTextBox", null, null);
+         this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "list-hide-text-box", "_listHideTextBox", null, null);
       } catch (e) {
          this.showErrorMessage(e.message);
          global.logError(e);
       }
    },
 
+   _onDragEnd: function() {
+      global.set_stage_input_mode(Cinnamon.StageInputMode.NORMAL);
+      this._trackMouse();
+      this._saveDeskletPosition();
+   },
+
+   _readListPosition: function() {
+      this.positions = new Array();
+      let pos = 0;
+      let posString;
+      let listString = this._listPosition.split(";;");
+      while(pos < listString.length) {
+         if(listString[pos] != "") {
+            posString = listString[pos].split("::");
+            if(this.isNoteInList(posString[0])) {
+               this.positions[posString[0]] = [posString[1], posString[2]];
+            }
+         }
+         pos++;
+      }
+   },
+
+   _writeListPosition: function() {
+      let stringList = "";
+      for(key in this.positions) {
+         if(this.isNoteInList(key))
+            stringList += key + "::" + this.positions[key][0] + "::" + this.positions[key][1] + ";;";
+      }
+      this._listPosition = stringList.substring(0, stringList.length - 2);//commit
+   },
+
+   _saveDeskletPosition: function() {
+try {
+      let [ax, ay] = this.actor.get_transformed_position();
+      if(this._multInstance) {
+         if((this.noteCurrent > 0)&&(this.noteCurrent < this.notesList.length + 1)) {
+            this._readListPosition();
+            let strNote = "" + this.notesList[this.noteCurrent - 1][0];
+            this.positions[strNote] = [ax, ay];
+            this._writeListPosition();
+         }
+      } else { 
+         this._xPosition = ax;
+         this._yPosition = ay;
+      }
+} catch(e) {
+  Main.notify("errorPosition", e.message);
+}
+   },
+
+   _readListHideTextBox: function() {
+      this.hideTextBox = new Array();
+      let pos = 0;
+      let hideString;
+      let listString = this._listHideTextBox.split(";;");
+      while(pos < listString.length) {
+         if(listString[pos] != "") {
+            hideString = listString[pos].split("::");
+            if(this.isNoteInList(hideString[0])) {
+               this.hideTextBox[hideString[0]] = (hideString[1] === 'true');
+            }
+         }
+         pos++;
+      }
+   },
+
+   _writeListHideTextBox: function() {
+      let stringList = "";
+      for(key in this.hideTextBox) {
+         if(this.isNoteInList(key)) {
+            if(this.hideTextBox[key])
+               stringList += key + "::true;;";
+            else
+               stringList += key + "::false;;";
+         }
+      }
+      this._listHideTextBox = stringList.substring(0, stringList.length - 2);//commit
+   },
+
+   _changeHideTextBox: function(value) {
+      if(this._multInstance) {
+         if((this.noteCurrent > 0)&&(this.noteCurrent < this.notesList.length + 1)) {
+            this._readListHideTextBox();
+            let strNote = "" + this.notesList[this.noteCurrent - 1][0];
+            this.hideTextBox[strNote] = value;
+            this._writeListHideTextBox();
+         }
+      }      
+      else {
+         this._hideTextBox = value;
+      }
+   },
+
+/*
+_onResizeMotionEvent: function(actor, event) {
+      if(!this.actorResize) {
+         let [mx, my] = event.get_coords();
+         let [ax, ay] = actor.get_transformed_position();
+         let ar = ax + actor.get_width();
+         let at = ay + actor.get_height();
+         if(this._isInsideMenu(mx, my, ax, ay, ar, at)) {
+            if(this._correctPlaceResize(mx, my, ax, ay, ar, at)) {
+               this._cursorChanged = true;
+               global.set_cursor(Cinnamon.Cursor.DND_MOVE);
+            } else if(this._cursorChanged) {
+               this._cursorChanged = false;
+               global.unset_cursor();
+            }
+         } else if(this._cursorChanged) {
+            this._cursorChanged = false;
+            global.unset_cursor();
+         }
+      }
+   },
+
+   _onBeginResize: function(actor, event) {
+      this.actorResize = actor;
+      let [mx, my] = event.get_coords();
+      let [ax, ay] = actor.get_transformed_position();
+      let aw = actor.get_width();
+      let ah = actor.get_height();
+      if(this._isInsideMenu(mx, my, ax, ay, aw, ah)) {
+         if(this._correctPlaceResize(mx, my, ax, ay, aw, ah)) {
+            this._findMouseDeltha();
+            global.set_cursor(Cinnamon.Cursor.DND_MOVE);
+            this._doResize();
+         }
+      }
+   },
+
+   _findMouseDeltha: function(mx, my) {
+      if(this.actorResize) {
+         this.mouseDx = 0;
+         this.mouseDy = 0;
+            this._updatePosResize();
+         this.mouseDx = this.width - this.mainBox.get_width();
+         this.mouseDy = this.height - this.mainBox.get_height();
+      }
+      
+   },
+
+   _disableResize: function() {
+      this.actorResize = null;
+      global.unset_cursor();
+   },
+
+   _disableOverResizeIcon: function() {
+      if(!this.actorResize) {
+         this._disableResize();
+      }
+   },
+
+   _isInsideMenu: function(mx, my, ax, ay, aw, ah) {
+      return ((this.controlingSize)&&(mx > ax)&&(mx < ax + aw)&&(my > ay)&&(my < ay + ah));
+   },
+
+   _correctPlaceResize: function(mx, my, ax, ay, aw, ah) {
+      let monitor = Main.layoutManager.findMonitorForActor(this.actor);
+      let middelScreen = (monitor.x + monitor.width)/2;
+      let [cx, cy] = this.actor.get_transformed_position();
+      switch (this.orientation) {
+         case St.Side.TOP:
+            if(my > ah - this.deltaMinResize) {
+               if(cx > middelScreen)
+                  return (mx < ax + this.deltaMinResize);
+               return (mx > aw - this.deltaMinResize);
+            }
+            return false;
+         case St.Side.BOTTOM:
+            if(my < ay + this.deltaMinResize) {
+               if(cx < middelScreen)
+                  return (mx > aw - this.deltaMinResize);
+               return  (mx < ax + this.deltaMinResize);
+            }
+            return false;
+      }
+      return false;
+   },
+
+   _doResize: function() {
+      if(this.actorResize) {
+         this._updatePosResize();
+         this._updateSize();
+         Mainloop.timeout_add(300, Lang.bind(this, this._doResize));
+      }
+   },
+
+   _updatePosResize: function() {
+      if(this.actorResize) {
+         let [mx, my, mask] = global.get_pointer();
+         let [ax, ay] = this.actorResize.get_transformed_position();
+         aw = this.actorResize.get_width();
+         ah = this.actorResize.get_height();
+         let monitor = Main.layoutManager.findMonitorForActor(this.actor);
+         let middelScreen = (monitor.x + monitor.width)/2;
+         let [cx, cy] = this.actor.get_transformed_position();
+         switch (this.orientation) {
+            case St.Side.TOP:
+               this.height = this.mainBox.get_height() + my - this._processPanelSize(false) - ah + 4 - this.mouseDy;
+               if(cx < middelScreen)
+                  this.width = mx - ax - this.mouseDx;
+               else
+                  this.width = this.mainBox.get_width() + ax - mx - this.mouseDx;
+               break;
+            case St.Side.BOTTOM:
+               this.height = this.mainBox.get_height() + ay - my + 4 - this.mouseDy;
+               if(cx < middelScreen)
+                  this.width = mx - ax - this.mouseDx;
+               else
+                  this.width = this.mainBox.get_width() + ax - mx - this.mouseDx;
+               break;
+         }
+      }
+   },
+*/
    renderFontFamily: function() {
       try {
          let fontMap = Clutter.get_font_map();
