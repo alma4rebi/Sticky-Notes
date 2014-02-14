@@ -39,7 +39,7 @@
 }
 
 .sticky-information-label {
-        padding: 0px 6px 0px 6px;
+        padding: 0px 4px 0px 4px;
 }
 
 .sticky-text-box {
@@ -51,15 +51,11 @@
 	background-gradient-direction: vertical;
 	transition-duration: 300;
 	box-shadow: inset 0px 2px 4px rgba(0,0,0,0.6);
-        /*min-height: 50px;*/
 }
 
 #sticky-note-entry {
 	padding: 5px;
 	color: rgb(49, 49, 49);
-/*background-gradient-start: rgba(255,255,255,1.0);
-	background-gradient-end: rgba(190,190,190,1.0);
-	background-gradient-direction: vertical;*/
 	selected-color: black;
 	caret-color: rgb(128, 128, 128);
 	caret-size: 1px;

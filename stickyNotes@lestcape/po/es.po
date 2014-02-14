@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Sticky-Notes 0.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-11-08 21:29-0600\n"
-"PO-Revision-Date: 2014-02-12 08:41-0600\n"
+"PO-Revision-Date: 2014-02-14 06:28-0600\n"
 "Last-Translator: Lester Carballo Pérez <lestcape@gmail.com>\n"
 "Language-Team: lestcape <lestcape@gmail.com>\n"
 "MIME-Version: 1.0\n"
@@ -64,6 +64,11 @@ msgstr ""
 "El tamaño '%s' del texto no está soportado para ser usado en el tipo de "
 "letra '%s' para este tema."
 
+#: desklet.js:432
+msgid "Sticky Notes is hidden to be visible again please, press '%s'."
+msgstr ""
+"Sticky Notes está oculto, para volverlo a mostrar por favor presione '%s'."
+
 #: desklet.js:453
 msgid "Add new Note"
 msgstr "Añadir una Nota"
@@ -101,9 +106,45 @@ msgstr "Eliminar Nota"
 msgid "pixels"
 msgstr "píxeles"
 
+#. notes@lestcape->settings-schema.json->header-general->description
+msgid "General:"
+msgstr "General:"
+
+#. notes@lestcape->settings-schema.json->header-layouts->description
+msgid "Layouts:"
+msgstr "Diseños:"
+
+#. notes@lestcape->settings-schema.json->header-shortcut->description
+msgid "Shortcut keys:"
+msgstr "Teclas de acceso directo:"
+
+#. notes@lestcape->settings-schema.json->header-size->description
+msgid "Size:"
+msgstr "Tamaño:"
+
+#. notes@lestcape->settings-schema.json->header-appearance->description
+msgid "Appearance:"
+msgstr "Apariencia:"
+
+#. notes@lestcape->settings-schema.json->header-advance->description
+msgid "Advance Appearance:"
+msgstr "Apariencia Avanzada:"
+
 #. notes@lestcape->settings-schema.json->multi-instance->description
 msgid "Multiple Instances."
 msgstr "Instancias Múltiples."
+
+#. notes@lestcape->settings-schema.json->auto-hide-buttonss->description
+msgid "Auto hide buttons."
+msgstr "Auto ocultar botones."
+
+#. notes@lestcape->settings-schema.json->auto-hide-buttons->tooltip
+msgid ""
+"Check this if you want to autohide the action buttons when mouse is outside "
+"of the desklet."
+msgstr ""
+"Seleccione si usted quiere que los botones de acciones se auto oculten "
+"cuando el cursor está afuera del área del desklet."
 
 #. notes@lestcape->settings-schema.json->multi-instance->tooltip
 msgid ""
@@ -137,26 +178,13 @@ msgstr "Tema para el lápiz:"
 msgid "Select a theme of pencil to show in Notes."
 msgstr "Seleccione un tema de lápiz para mostrar en las Notas."
 
-#. notes@lestcape->settings-schema.json->auto-hide-buttonss->description
-msgid "Auto hide buttons."
-msgstr "Auto ocultar botones."
-
-#. notes@lestcape->settings-schema.json->auto-hide-buttons->tooltip
-msgid ""
-"Check this if you want to autohide the action buttons when mouse is outside "
-"of the desklet."
-msgstr ""
-"Seleccione si usted quiere que los botones de acciones se auto oculten "
-"cuando el cursor está afuera del área del desklet."
-
 #. notes@lestcape->settings-schema.json->raise-key->description
-msgid "Shortcut key to raise:"
-msgstr "Tecla de acceso directo para elevar:"
+msgid "Shortcut key to raise the desklet to the top:"
+msgstr "Tecla de acceso directo para elevar el desklet:"
 
-#. notes@lestcape->settings-schema.json->raise-key->tooltip
-msgid "Select the shortcut key to raise the desklet to the top."
-msgstr ""
-"Seleccione la tecla de acceso directo para elevar el desklet a la cima."
+#. notes@lestcape->settings-schema.json->hide-key->description
+msgid "Shortcut key to hide the desklet:"
+msgstr "Tecla de acceso directo para esconder el desklet:"
 
 #. notes@lestcape->settings-schema.json->fix-width->description
 msgid "Fixed width."
@@ -223,6 +251,14 @@ msgstr "Tipo de fuente:"
 #. notes@lestcape->settings-schema.json->font-family->tooltip
 msgid "Select a Font family to use in Notes."
 msgstr "Seleccione el tipo de fuente a usar en la nota."
+
+#. notes@lestcape->settings-schema.json->symbolic-icons->description
+msgid "Show symbolic icons."
+msgstr "Mostrar íconos simbólicos."
+
+#. notes@lestcape->settings-schema.json->symbolic-icons->tooltip
+msgid "Check this if you want to show symbolic instead full color icons."
+msgstr "Seleccionelo para mostrar íconos simbólicos en lugar de a todo color."
 
 #. notes@lestcape->settings-schema.json-override-theme->description
 msgid "Override the Cinnamon theme properties."
@@ -377,3 +413,11 @@ msgstr "Lápiz Azul"
 #. notes@lestcape->settings-schema.json->pencil-layout->combobox->yellowpencil
 msgid "Yellow Pencil"
 msgstr "Lápiz Amarillo"
+
+#. notes@lestcape->settings-schema.json->pencil-layout->combobox->orangepencil
+msgid "Orange Pencil"
+msgstr "Lápiz Naranja"
+
+#. notes@lestcape->settings-schema.json->pencil-layout->combobox->blackpencil
+msgid "Black Pencil"
+msgstr "Lápiz Negro"

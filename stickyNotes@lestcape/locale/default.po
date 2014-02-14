@@ -63,6 +63,10 @@ msgstr ""
 msgid "Unsupported text size '%s'  to use the font '%s' in this theme."
 msgstr ""
 
+#: desklet.js:432
+msgid "Sticky Notes is hidden to be visible again please, press '%s'."
+msgstr ""
+
 #: desklet.js:453
 msgid "Add new Note"
 msgstr ""
@@ -100,12 +104,44 @@ msgstr ""
 msgid "pixels"
 msgstr ""
 
+#. notes@lestcape->settings-schema.json->header-general->description
+msgid "General:"
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->header-layouts->description
+msgid "Layouts:"
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->header-shortcut->description
+msgid "Shortcut keys:"
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->header-size->description
+msgid "Size:"
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->header-appearance->description
+msgid "Appearance:"
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->header-advance->description
+msgid "Advance Appearance:"
+msgstr ""
+
 #. notes@lestcape->settings-schema.json->multi-instance->description
 msgid "Multiple Instances."
 msgstr ""
 
 #. notes@lestcape->settings-schema.json->multi-instance->tooltip
 msgid "Check this if you want to have different instances of this desklet for for each note."
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->auto-hide-buttons->description
+msgid "Auto hide buttons."
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->auto-hide-buttons->tooltip
+msgid "Check this if you want to autohide the action buttons when mouse is outside of the desklet."
 msgstr ""
 
 #. notes@lestcape->settings-schema.json->stripe-layout->description
@@ -132,20 +168,12 @@ msgstr ""
 msgid "Select a theme of pencil to show in Notes."
 msgstr ""
 
-#. notes@lestcape->settings-schema.json->auto-hide-buttons->description
-msgid "Auto hide buttons."
-msgstr ""
-
-#. notes@lestcape->settings-schema.json->auto-hide-buttons->tooltip
-msgid "Check this if you want to autohide the action buttons when mouse is outside of the desklet."
-msgstr ""
-
 #. notes@lestcape->settings-schema.json->raise-key->description
-msgid "Shortcut key to raise:"
+msgid "Shortcut key to raise the desklet to the top:"
 msgstr ""
 
-#. notes@lestcape->settings-schema.json->raise-key->tooltip
-msgid "Select the shortcut key to raise the desklet to the top."
+#. notes@lestcape->settings-schema.json->hide-key->description
+msgid "Shortcut key to hide the desklet:"
 msgstr ""
 
 #. notes@lestcape->settings-schema.json->fix-width->description
@@ -210,6 +238,14 @@ msgstr ""
 
 #. notes@lestcape->settings-schema.json->font-family->tooltip
 msgid "Select a Font family to use in Notes."
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->symbolic-icons->description
+msgid "Show symbolic icons."
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->symbolic-icons->tooltip
+msgid "Check this if you want to show symbolic instead full color icons."
 msgstr ""
 
 #. notes@lestcape->settings-schema.json->desklet-opacity->description
@@ -357,3 +393,10 @@ msgstr ""
 msgid "Yellow Pencil"
 msgstr ""
 
+#. notes@lestcape->settings-schema.json->pencil-layout->combobox->orangepencil
+msgid "Orange Pencil"
+msgstr ""
+
+#. notes@lestcape->settings-schema.json->pencil-layout->combobox->blackpencil
+msgid "Black Pencil"
+msgstr ""

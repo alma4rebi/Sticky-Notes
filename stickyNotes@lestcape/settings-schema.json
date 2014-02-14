@@ -1,9 +1,35 @@
 {
+    "separator-general-top": {
+       "type": "separator"
+    },
+    "header-general": {
+        "type": "header",
+        "description": "General:"
+    },
+    "separator-general-bottom": {
+       "type": "separator"
+    },
     "multi-instance": {
         "default": false,
         "description": "Multiple Instances.",
         "type": "checkbox",
         "tooltip": "Check this if you want to have different instances of this desklet for for each note."
+    },
+    "auto-hide-buttons": {
+        "default": true,
+        "description": "Auto hide buttons.",
+        "type": "checkbox",
+        "tooltip": "Check this if you want to autohide the action buttons when mouse is outside of the desklet."
+    },
+    "separator-layouts-top": {
+       "type": "separator"
+    },
+    "header-layouts": {
+        "type": "header",
+        "description": "Layouts:"
+    },
+    "separator-layouts-bottom": {
+       "type": "separator"
     },
     "stripe-layout": {
         "type": "combobox",
@@ -43,20 +69,40 @@
         "options": {
             "None": "none",
             "Blue Pencil": "bluepencil",
-            "Yellow Pencil": "yellowpencil"
+            "Yellow Pencil": "yellowpencil",
+            "Orange Pencil": "orangepencil",
+            "Black Pencil": "blackpencil"
         }
     },
-    "auto-hide-buttons": {
-        "default": true,
-        "description": "Auto hide buttons.",
-        "type": "checkbox",
-        "tooltip": "Check this if you want to autohide the action buttons when mouse is outside of the desklet."
+    "separator-shortcut-top": {
+       "type": "separator"
+    },
+    "header-shortcut": {
+        "type": "header",
+        "description": "Shortcut keys:"
+    },
+    "separator-shortcut-bottom": {
+       "type": "separator"
     },
     "raise-key": {
         "type": "keybinding",
-        "description": "Shortcut key to raise:",
-        "default": "<Super>n",
-        "tooltip": "Select the shortcut key to raise the desklet to the top."
+        "description": "Shortcut key to raise the desklet to the top:",
+        "default": "<Super>n"
+    },
+    "hide-key": {
+        "type": "keybinding",
+        "description": "Shortcut key to hide the desklet:",
+        "default": "<Super>h"
+    },
+    "separator-size-top": {
+       "type": "separator"
+    },
+    "header-size": {
+        "type": "header",
+        "description": "Size:"
+    },
+    "separator-size-bottom": {
+       "type": "separator"
     },
     "fix-width": {
         "default": true,
@@ -109,6 +155,16 @@
         "indent": true,
         "dependency": "fix-height",
         "tooltip": "Check this if you want to enable smooth autoscrolling or not."
+    },
+    "separator-appearance-top": {
+       "type": "separator"
+    },
+    "header-appearance": {
+        "type": "header",
+        "description": "Appearance:"
+    },
+    "separator-appearance-bottom": {
+       "type": "separator"
     },
     "text-size": {
         "default": 12,
@@ -251,6 +307,12 @@
             "Monospace": "Monospace"
         }
     },
+    "symbolic-icons": {
+        "default": true,
+        "description": "Show symbolic icons.",
+        "type": "checkbox",
+        "tooltip": "Check this if you want to show symbolic instead full color icons."
+    },
     "desklet-opacity": {
         "type": "scale",
         "default": 1.0,
@@ -268,6 +330,16 @@
         "step": 0.05,
         "description": "Opacity of the boxes:",
         "tooltip": "Select the opacity of the boxes."
+    },
+    "separator-advance-top": {
+       "type": "separator"
+    },
+    "header-advance": {
+        "type": "header",
+        "description": "Advance Appearance:"
+    },
+    "separator-advance-bottom": {
+       "type": "separator"
     },
     "override-theme": {
         "default": false,

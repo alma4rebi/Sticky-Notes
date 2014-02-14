@@ -5,7 +5,7 @@ Desklet: Sticky Notes Version: v0.9.1-Beta
 
 O.S.: Cinnamon 
 
-Release Date: 12 February 2014.
+Release Date: 14 February 2014.
 
 Author: Lester Carballo Pérez
 
@@ -50,7 +50,10 @@ v0.9.1- Beta
    - Allow override Cinnamon theme.
    - Remember all desklets positions on the change to multiple instance.
    - Remember all minimized desklets.
-   - Raised the desklets over all apps.
+   - Now you can launch all instances of desklets to the top of all apps.
+   - You can hide the desklets.
+   - Was improved the settings.
+   - The images are vectors now.
    - Improve the code.
 
 0.9- Beta
