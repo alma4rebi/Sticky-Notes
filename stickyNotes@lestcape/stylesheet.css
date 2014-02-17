@@ -35,7 +35,6 @@
 }
 
 .sticky-title-label {
-        height: 16px;
         max-width: 100px;
         padding: 0px 4px 0px 4px;
 }
@@ -56,7 +55,7 @@
 }
 
 #sticky-note-entry {
-	padding: 5px;
+	padding: 4px;
 	color: rgb(49, 49, 49);
 	selected-color: black;
 	caret-color: rgb(128, 128, 128);

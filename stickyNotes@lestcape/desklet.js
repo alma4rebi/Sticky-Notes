@@ -761,9 +761,9 @@ MyDesklet.prototype = {
 
       if(this._overrideTheme)
          this.entry.set_style('font-size: ' + this._textSize  + 'pt; color: ' + this._fontColor + '; font-weight: normal; caret-color: ' +
-                              this._fontColor + '; selected-color: ' + this._textSelectedColor + ';' + fontTag);
+                              this._fontColor + '; selected-color: ' + this._textSelectedColor + ';' + fontTag + ' padding-top: 0px;');
       else
-         this.entry.set_style('font-size: ' + this._textSize  + 'pt;' + fontTag);
+         this.entry.set_style('font-size: ' + this._textSize  + 'pt;' + fontTag + ' padding-top: 0px;');
 
       if(this._themeStripe != "none") {
          let image = GLib.get_home_dir() + "/.local/share/cinnamon/desklets/" + this.uuid + "/stripe/" + this._themeStripe + "/";
@@ -774,9 +774,9 @@ MyDesklet.prototype = {
             let newVal = this._textSize*imageNumber/textHeight;
             if(this._overrideTheme)
                this.entry.set_style('font-size: ' + newVal + 'pt; color: ' + this._fontColor + '; font-weight: normal; caret-color: ' +
-                                     this._fontColor + '; selected-color: ' + this._textSelectedColor + ';' + fontTag);
+                                     this._fontColor + '; selected-color: ' + this._textSelectedColor + ';' + fontTag + ' padding-top: 0px;');
             else
-               this.entry.set_style('font-size: ' + newVal + 'pt;' + fontTag);
+               this.entry.set_style('font-size: ' + newVal + 'pt;' + fontTag + ' padding-top: 0px;');
             textHeight = this._getTextHeight();
          }
          if((imageNumber < 10)||(imageNumber > 60)||(imageNumber != textHeight)) {
