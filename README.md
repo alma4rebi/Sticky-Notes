@@ -53,7 +53,7 @@ v0.9.1- Beta
    - Now you can launch all instances of desklets to the top of all apps.
    - You can hide the desklets.
    - Was improved the settings.
-   - The images are vectors now.
+   - The images are on svg format now.
    - Improved the code and fixed some bugs.
 
 0.9- Beta

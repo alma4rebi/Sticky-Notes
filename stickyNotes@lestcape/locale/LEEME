@@ -35,9 +35,9 @@ v0.9.1- Beta
    - Se recuerdan la posición de todos los desklets cuando se usan las instancias multiples.
    - Se recuerdan todos los desklets minimizados.
    - Ahora pueden lanzarse todas las instancias del desklets sobre todas las applicaciones.
+   - Se puede esconder el desklets.
    - Fue mejorada la configuración.
    - Las imagenes ahora están en formato svg.
-   - Se puede esconder el desklets.
    - Mejorado el código y eliminados algunos errores.
 
 v0.9- Beta
