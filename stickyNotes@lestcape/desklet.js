@@ -1,5 +1,5 @@
-// Desklet : Sticky Notes           Version      : v0.9.1-Beta
-// O.S.    : Cinnamon               Release Date : 16 February 2014.
+// Desklet : Sticky Notes           Version      : v0.9.2-Beta
+// O.S.    : Cinnamon               Release Date : 17 February 2014.
 // Author  : Lester Carballo Pérez  Email        : lestcape@gmail.com
 //
 // Website : https://github.com/lestcape/Sticky-Notes
@@ -714,6 +714,7 @@ MyDesklet.prototype = {
          let _colorBox = (this._boxColor.replace(')',',' + this._opacityBoxes + ')')).replace('rgb','rgba');
          let _colorText = (this._textBoxColor.replace(')',',' + this._opacityBoxes + ')')).replace('rgb','rgba');
          let _colorBanner = (this._boxColor.replace(')',',' + 0.1 + ')')).replace('rgb','rgba');
+         this.rootBox.set_style_class_name('');
          if(this._themeStaples != "none") {
             this.rootBox.set_style('background-color: ' + _colorBox + '; color: ' + this._fontColor + '; border: ' +
                                    this._borderBoxWidth + 'px solid ' + this._borderBoxColor +

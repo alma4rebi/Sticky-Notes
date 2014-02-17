@@ -1,11 +1,11 @@
 Sticky Notes
 =====
 
-Desklet: Sticky Notes Version: v0.9.1-Beta
+Desklet: Sticky Notes Version: v0.9.2-Beta
 
 O.S.: Cinnamon 
 
-Release Date: 16 February 2014.
+Release Date: 17 February 2014.
 
 Author: Lester Carballo Pérez
 
@@ -44,6 +44,9 @@ Installation Instructions:
 
 Change Log:
 --------------
+v0.9.2- Beta
+   - Allow override the Cinnamon theme without restart Cinnamon.
+
 v0.9.1- Beta
    - Added Cinnamon theme support.
    - Allow auto scroll.
