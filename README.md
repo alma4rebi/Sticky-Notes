@@ -5,7 +5,7 @@ Desklet: Sticky Notes Version: v0.9.1-Beta
 
 O.S.: Cinnamon 
 
-Release Date: 14 February 2014.
+Release Date: 16 February 2014.
 
 Author: Lester Carballo Pérez
 
