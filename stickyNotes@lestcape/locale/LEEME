@@ -36,8 +36,9 @@ v0.9.1- Beta
    - Se recuerdan todos los desklets minimizados.
    - Ahora pueden lanzarse todas las instancias del desklets sobre todas las applicaciones.
    - Fue mejorada la configuración.
-   - Las imagenes ahora son vectoriales.
+   - Las imagenes ahora están en formato svg.
    - Se puede esconder el desklets.
+   - Mejorado el código y eliminados algunos errores.
 
 v0.9- Beta
    - Arreglado el error en el bloqueo de mayúsculas, con el componente St.Entry(ClutterText).

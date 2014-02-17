@@ -46,8 +46,8 @@ v0.9.1- Beta
    - Now you can launch all instances of desklets to the top of all apps.
    - You can hide the desklets.
    - Was improved the settings.
-   - The images are vectors now.
-   - Improve the code.
+   - The images are on svg format now.
+   - Improved the code and fixed some bugs.
 
 0.9- Beta
    - Fixed the caps lock bug in St.Entry(ClutterText).

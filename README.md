@@ -54,7 +54,7 @@ v0.9.1- Beta
    - You can hide the desklets.
    - Was improved the settings.
    - The images are vectors now.
-   - Improve the code.
+   - Improved the code and fixed some bugs.
 
 0.9- Beta
    - Fixed the caps lock bug in St.Entry(ClutterText).

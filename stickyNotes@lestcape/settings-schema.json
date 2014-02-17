@@ -16,7 +16,7 @@
         "tooltip": "Check this if you want to have different instances of this desklet for for each note."
     },
     "auto-hide-buttons": {
-        "default": true,
+        "default": false,
         "description": "Auto hide buttons.",
         "type": "checkbox",
         "tooltip": "Check this if you want to autohide the action buttons when mouse is outside of the desklet."
@@ -324,7 +324,7 @@
     },
     "boxes-opacity": {
         "type": "scale",
-        "default": 0.5,
+        "default": 1.0,
         "min": 0,
         "max": 1,
         "step": 0.05,

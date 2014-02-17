@@ -45,6 +45,7 @@ const Tweener = imports.ui.tweener;
 const Keymap = imports.gi.Gdk.Keymap.get_default();
 const Signals = imports.signals;
 const MIN_WIDTH = 170;
+//const DELTA_MIN_RESIZE = 10;
 
 
 function _(str) {
@@ -137,9 +138,11 @@ MyDesklet.prototype = {
       this._timeOutSettings = 0;
       this.deskletRaised = false;
       this.deskletHide = false;
+     // this.actorResize = null;
+     // this.resizeIDSignal = 0;
 
       try {
-         Main.themeManager.connect('theme-set', Lang.bind(this, this._onThemeChange));
+         //Main.themeManager.connect('theme-set', Lang.bind(this, this._onThemeChange));
          this._updateComplete();
       } catch(e) {
          this.showErrorMessage(e.message);
@@ -601,7 +604,10 @@ MyDesklet.prototype = {
          this._effectIcon(actor, 0.2);
          if(this._multInstance) {
             this.deleteNote(this.noteCurrent - 1);
-            DeskletManager.removeDesklet(this.uuid, this.instance_id);
+            if(this.getCountInstance() > 1)
+               DeskletManager.removeDesklet(this.uuid, this.instance_id);
+            else
+               this.reset();
          } else {
             if(this.notesList.length > 1) { 
                if((this.noteCurrent != 0)&&(this.noteCurrent <= this.notesList.length)) {
@@ -613,7 +619,7 @@ MyDesklet.prototype = {
                         this.currentNote.set_text(this.noteCurrent.toString());
                         this.entry.text = this.notesList[this.noteCurrent - 1][1];
                      } else
-                        this.entry.text = this.notesList[this.noteCurrent][1];
+                        this.entry.text = this.notesList[this.noteCurrent - 1][1];
                   }
                } else if(this.noteCurrent == 0) {
                   if(this.deleteNote(this.noteCurrent)) {
@@ -821,6 +827,7 @@ MyDesklet.prototype = {
    },
 
    reset: function () {
+      this.titleNote.set_text(_("Type to your note..."));
       this._getTextHeight();
       this.entry.text = "";
       this.setPencil(false);
@@ -1299,7 +1306,6 @@ MyDesklet.prototype = {
    },
 
    _onOpacityRootChange: function() {
-      let themeNode = this.rootBox.get_theme_node();
       let newStyle;
       if(this._overrideTheme) {
          let _colorBox = (this._boxColor.replace(')',',' + this._opacityBoxes + ')')).replace('rgb','rgba');
@@ -1313,6 +1319,7 @@ MyDesklet.prototype = {
                         '; padding: 0px 4px 0px 4px; font-weight: bold; border-radius: 12px 12px 12px 12px;';
       } else {
          let remplaceColor;
+         let themeNode = this.rootBox.get_theme_node();
          if(this._themeStaples != "none")
             newStyle = 'border-top: none; padding-top: 0px;';
          else
@@ -1333,12 +1340,8 @@ MyDesklet.prototype = {
             remplaceColor = this.updateOpacityColor(boxColor);
             newStyle += ' background-gradient-end: ' + remplaceColor + ';';
          }
-         if((newStyle == '') || ((this._themeStaples != "none")&&(newStyle == 'border-top: none; padding-top: 0px;')))
-            newStyle += ' background-color: rgba(0,0,0,' + this._opacityBoxes + ');';
       }
-      
       if(newStyle != this.rootBox.get_style()) {
-         //Main.notify("newStyle:" + newStyle);
          this.rootBox.set_style(newStyle);
       }
    },
@@ -1563,7 +1566,6 @@ MyDesklet.prototype = {
       try {
          if((this.deskletRaised)&&(this.raisedBox)) {
             this.raisedBox._actionCloseAll();
-            //this.lower();
          }
          else
             this.raise();
@@ -1673,7 +1675,6 @@ MyDesklet.prototype = {
    },
 
    _saveDeskletPosition: function() {
-try {
       let [ax, ay] = this.actor.get_transformed_position();
       if(this._multInstance) {
          if((this.noteCurrent > 0)&&(this.noteCurrent < this.notesList.length + 1)) {
@@ -1686,9 +1687,6 @@ try {
          this._xPosition = ax;
          this._yPosition = ay;
       }
-} catch(e) {
-  Main.notify("errorPosition", e.message);
-}
    },
 
    _readListHideTextBox: function() {
@@ -1735,97 +1733,75 @@ try {
    },
 
 /*
-_onResizeMotionEvent: function(actor, event) {
+// this.menu.actor.connect('motion-event', Lang.bind(this, this._onResizeMotionEvent));
+//         this.menu.actor.connect('button-press-event', Lang.bind(this, this._onBeginResize));
+//         this.menu.actor.connect('leave-event', Lang.bind(this, this._disableOverResizeIcon));
+//         this.menu.actor.connect('button-release-event', Lang.bind(this, this._disableResize));
+
+   _onResizeMotionEvent: function(actor, event) {
+      this.deltaMinResize = 10;
       if(!this.actorResize) {
          let [mx, my] = event.get_coords();
          let [ax, ay] = actor.get_transformed_position();
-         let ar = ax + actor.get_width();
-         let at = ay + actor.get_height();
-         if(this._isInsideMenu(mx, my, ax, ay, ar, at)) {
-            if(this._correctPlaceResize(mx, my, ax, ay, ar, at)) {
-               this._cursorChanged = true;
-               global.set_cursor(Cinnamon.Cursor.DND_MOVE);
-            } else if(this._cursorChanged) {
-               this._cursorChanged = false;
-               global.unset_cursor();
-            }
-         } else if(this._cursorChanged) {
-            this._cursorChanged = false;
-            global.unset_cursor();
-         }
-      }
-   },
-
-   _onBeginResize: function(actor, event) {
-      this.actorResize = actor;
-      let [mx, my] = event.get_coords();
-      let [ax, ay] = actor.get_transformed_position();
-      let aw = actor.get_width();
-      let ah = actor.get_height();
-      if(this._isInsideMenu(mx, my, ax, ay, aw, ah)) {
+         let aw = actor.get_width();
+         let ah = actor.get_height();
          if(this._correctPlaceResize(mx, my, ax, ay, aw, ah)) {
-            this._findMouseDeltha();
+            this._cursorChanged = true;
             global.set_cursor(Cinnamon.Cursor.DND_MOVE);
-            this._doResize();
-         }
+         } else
+            this._disableResize();
       }
    },
-
-   _findMouseDeltha: function(mx, my) {
-      if(this.actorResize) {
-         this.mouseDx = 0;
-         this.mouseDy = 0;
-            this._updatePosResize();
-         this.mouseDx = this.width - this.mainBox.get_width();
-         this.mouseDy = this.height - this.mainBox.get_height();
-      }
-      
-   },
-
-   _disableResize: function() {
-      this.actorResize = null;
-      global.unset_cursor();
-   },
-
+ 
    _disableOverResizeIcon: function() {
       if(!this.actorResize) {
          this._disableResize();
       }
    },
 
-   _isInsideMenu: function(mx, my, ax, ay, aw, ah) {
-      return ((this.controlingSize)&&(mx > ax)&&(mx < ax + aw)&&(my > ay)&&(my < ay + ah));
+   _disableResize: function() {
+      this._cursorChanged = false;
+      this._draggable.inhibit = false;
+      this.actorResize = null;
+      global.unset_cursor();
+      if(this.resizeIDSignal > 0)
+         global.stage.disconnect(this.resizeIDSignal);
+      this.resizeIDSignal = 0;
    },
 
-   _correctPlaceResize: function(mx, my, ax, ay, aw, ah) {
-      let monitor = Main.layoutManager.findMonitorForActor(this.actor);
-      let middelScreen = (monitor.x + monitor.width)/2;
-      let [cx, cy] = this.actor.get_transformed_position();
-      switch (this.orientation) {
-         case St.Side.TOP:
-            if(my > ah - this.deltaMinResize) {
-               if(cx > middelScreen)
-                  return (mx < ax + this.deltaMinResize);
-               return (mx > aw - this.deltaMinResize);
-            }
-            return false;
-         case St.Side.BOTTOM:
-            if(my < ay + this.deltaMinResize) {
-               if(cx < middelScreen)
-                  return (mx > aw - this.deltaMinResize);
-               return  (mx < ax + this.deltaMinResize);
-            }
-            return false;
+   _onBeginResize: function(actor, event) {
+      this.actorResize = this.mainBox;
+      if(this.resizeIDSignal == 0)
+         this.resizeIDSignal = global.stage.connect("button-release-event", Lang.bind(this, this._disableResize));
+      this._draggable.inhibit = true;
+      let [mx, my] = event.get_coords();
+      let [ax, ay] = actor.get_transformed_position();
+      let aw = actor.get_width();
+      let ah = actor.get_height();
+      if(this._correctPlaceResize(mx, my, ax, ay, aw, ah)) {      
+         this._findMouseDeltha();
+         global.set_cursor(Cinnamon.Cursor.DND_MOVE);
+         this._doResize();
       }
-      return false;
+   },
+
+   _findMouseDeltha: function(mx, my) {
+      if(this.actorResize) {
+        // this.mouseDx = 0;
+        // this.mouseDy = 0;
+        //    this._updatePosResize();
+        // this.mouseDx = this.width - this.mainBox.get_width();
+        // this.mouseDy = this.height - this.mainBox.get_height();
+      } 
    },
 
    _doResize: function() {
       if(this.actorResize) {
          this._updatePosResize();
-         this._updateSize();
+        // this._updateSize();
          Mainloop.timeout_add(300, Lang.bind(this, this._doResize));
-      }
+      } else
+         this._disableResize();
    },
 
    _updatePosResize: function() {
@@ -1834,28 +1810,19 @@ _onResizeMotionEvent: function(actor, event) {
          let [ax, ay] = this.actorResize.get_transformed_position();
          aw = this.actorResize.get_width();
          ah = this.actorResize.get_height();
-         let monitor = Main.layoutManager.findMonitorForActor(this.actor);
-         let middelScreen = (monitor.x + monitor.width)/2;
-         let [cx, cy] = this.actor.get_transformed_position();
-         switch (this.orientation) {
-            case St.Side.TOP:
-               this.height = this.mainBox.get_height() + my - this._processPanelSize(false) - ah + 4 - this.mouseDy;
-               if(cx < middelScreen)
-                  this.width = mx - ax - this.mouseDx;
-               else
-                  this.width = this.mainBox.get_width() + ax - mx - this.mouseDx;
-               break;
-            case St.Side.BOTTOM:
-               this.height = this.mainBox.get_height() + ay - my + 4 - this.mouseDy;
-               if(cx < middelScreen)
-                  this.width = mx - ax - this.mouseDx;
-               else
-                  this.width = this.mainBox.get_width() + ax - mx - this.mouseDx;
-               break;
-         }
-      }
+         // this.width = this.mainBox.get_width() + mx - ax //- this.mouseDx;
+         let height = ah + my - (ay + ah) //+ 4 - this.mouseDy;
+         //this.mainBox.set_width(this.width)
+         this.actorResize.set_height(height)
+      } else
+         this._disableResize();
+   },
+
+   _correctPlaceResize: function(mx, my, ax, ay, aw, ah) {
+      return ((mx < ax + this.deltaMinResize)||(mx > ax + aw - this.deltaMinResize));
    },
 */
+
    renderFontFamily: function() {
       try {
          let fontMap = Clutter.get_font_map();
@@ -1992,8 +1959,6 @@ RaisedBox.prototype = {
       for(let i = 0; i < this.contextMenu.length; i++)
          this.contextMenu[i].disconnect(this.contextMenuEvents[i]);
       this.actor.destroy();
-
-      //Main.notify("finish");
    },
 
    add: function(desklet) {
