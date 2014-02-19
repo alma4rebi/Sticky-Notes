@@ -126,7 +126,7 @@ MyDesklet.prototype = {
       this._fontFamily = ""; //Default Font family
       this._fontColor= "#ffffff";
       this._fWidth = true;
-      this._width = 200;
+      this._width = 220;
       this._fHeight = true;
       this._height = 120;
       this._scrollVisible = true;
@@ -786,14 +786,14 @@ MyDesklet.prototype = {
          }
          if((imageNumber < 10)||(imageNumber > 60)||(imageNumber != textHeight)) {
             this.showErrorMessage(_("Unsupported text size '%s'  to use the font '%s' in this theme.").format(this._textSize, this._fontFamily));
-            this.textAreaBox.set_style('min-width:' + MIN_WIDTH + 'px;');
+            this.textAreaBox.set_style('min-width:' + (MIN_WIDTH-30) + 'px;');
          } else {
             this.textAreaBox.set_style('background-image: url(\'' + image + imageNumber + '.png\'); ' +
                                        'background-repeat: repeat; background-position: 0px 0px; ' + 'background-size: auto; ' +
-                                       'min-width: ' + MIN_WIDTH + 'px;');
+                                       'min-width: ' + (MIN_WIDTH-30) + 'px;');
          }
       } else {
-         this.textAreaBox.set_style('min-width: ' + MIN_WIDTH + 'px;');
+         this.textAreaBox.set_style('min-width: ' + (MIN_WIDTH-30) + 'px;');
          //this.textAreaBox.set_style('');
       }
    },
@@ -859,7 +859,7 @@ MyDesklet.prototype = {
       let rightBox = new St.BoxLayout({vertical:false}); 
       this.textBox = new St.BoxLayout({ vertical:true, reactive: true, style_class: 'sticky-text-box' });
       this.textAreaBox = new St.BoxLayout({vertical:true});
-      this.textAreaBox.set_style('min-width: ' + MIN_WIDTH + 'px;');
+      this.textAreaBox.set_style('min-width: ' + (MIN_WIDTH-30) + 'px;');
 
       this.bottomBox = new St.BoxLayout({ vertical:false, reactive: true, track_hover: true, height: 6 });
       this._enableResize();
@@ -1003,8 +1003,8 @@ MyDesklet.prototype = {
    _onAllocationChanged: function() {
       //let availWidth = this.entry.get_width();
       let availWidth = this.scrollBox.get_width() - 2;
-      if(availWidth < MIN_WIDTH)
-         availWidth = MIN_WIDTH;
+      if(availWidth < MIN_WIDTH - 30)
+         availWidth = MIN_WIDTH - 30;
       let diff = (availWidth % 18);
       this.transpBox.set_width(availWidth - diff);
       this.endBox.set_width(availWidth - diff);
@@ -1771,14 +1771,18 @@ MyDesklet.prototype = {
       }
    },
 
-
    _enableResize: function() {
       this.bottomBox.connect('motion-event', Lang.bind(this, this._onResizeMotionEvent));
       this.bottomBox.connect('button-press-event', Lang.bind(this, this._onBeginResize));
       this.bottomBox.connect('leave-event', Lang.bind(this, this._disableOverResizeIcon));
       //global.state.connect('button-release-event', Lang.bind(this, this._disableResize));
+      //this.bottomBox.connect('key-focus-out', Lang.bind(this, this._onDisableFocusOut));
    },
-
+/*
+   _onDisableFocusOut: function(actor, event) {
+      Main.notify("out");
+   },
+*/
    _onResizeMotionEvent: function(actor, event) {
       if((this.scrollArea.visible)&&(!this.actorResize)) {
          let [mx, my] = event.get_coords();
@@ -1809,7 +1813,7 @@ MyDesklet.prototype = {
       this._draggable.inhibit = false;
       this.actorResize = null;
       this._disableOverResizeIcon();
-
+      global.set_stage_input_mode(Cinnamon.StageInputMode.NORMAL);
    },
 
    _onBeginResize: function(actor, event) {
@@ -1817,7 +1821,9 @@ MyDesklet.prototype = {
          this.actorResize = this.mainBox;
          if(this.resizeIDSignal == 0) 
             this.resizeIDSignal = global.stage.connect('button-release-event', Lang.bind(this, this._disableResize));
+         global.set_stage_input_mode(Cinnamon.StageInputMode.FULLSCREEN);
          this._draggable.inhibit = true;
+         
          let [mx, my] = event.get_coords();
          let [ax, ay] = actor.get_transformed_position();
          let aw = actor.get_width();
@@ -1859,15 +1865,22 @@ MyDesklet.prototype = {
             if(MIN_WIDTH < aw + ax - mx - 10) {
                this.actorResize.set_width(aw + ax - mx + 4);
                this.actor.set_position(mx - 4, ay);
+            } else {
+               this.actorResize.set_width(MIN_WIDTH);
+               this.actor.set_position(ax + aw - MIN_WIDTH, ay);
             }
          } else {
             if(MIN_WIDTH < mx - ax - 10) {
                this.actorResize.set_width(mx - ax + 4);
+            } else {
+               this.actorResize.set_width(MIN_WIDTH);
             }
          }
          //this.mouseDx this.mouseDy;
          if(MIN_HEIGHT < my - ay - 10) {
             this.actorResize.set_height(my - ay  + 4);
+         } else {
+            this.actorResize.set_height(MIN_HEIGHT);
          }
       } else
          this._disableResize();
