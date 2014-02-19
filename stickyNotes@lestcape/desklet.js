@@ -44,7 +44,7 @@ const Util = imports.misc.util;
 const Tweener = imports.ui.tweener;
 const Keymap = imports.gi.Gdk.Keymap.get_default();
 const Signals = imports.signals;
-const MIN_WIDTH = 170;
+const MIN_WIDTH = 200;
 //const DELTA_MIN_RESIZE = 10;
 
 
@@ -132,7 +132,8 @@ MyDesklet.prototype = {
       this.focusIDSignal = 0;
       this.keyPressIDSignal = 0;
       this.textInsertIDSignal = 0;
-      this.autoHideButtonsIDSignal = 0;
+      this.enterAutoHideButtonsIDSignal = 0;
+      this.leaveAutoHideButtonsIDSignal = 0;
       this.scrollIDSignal = 0;
       this._multInstance = false;
       this._timeOutSettings = 0;
@@ -177,14 +178,14 @@ MyDesklet.prototype = {
          this.clutterText.connect('button-release-event', Lang.bind(this, this._onButtonRelease));
          this.textBox.connect('button-press-event', Lang.bind(this, this._onButtonPress));
          this.textBox.connect('button-release-event', Lang.bind(this, this._onButtonRelease));
-         this.entry.connect('allocation_changed', Lang.bind(this, this._onAllocationChanged));
-         //this.scrollBox.connect('allocation_changed', Lang.bind(this, this._onAllocationChanged));
+         //this.entry.connect('allocation_changed', Lang.bind(this, this._onAllocationChanged));
+         this.scrollBox.connect('allocation_changed', Lang.bind(this, this._onAllocationChanged));
 
          this._onFixWidth();
          this._onFixHeight();
          this._onScrollVisibleChange();
          this._onScrollAutoChange();
-         this._onAutoHideButtons();
+         this._onSetAutoHideButtons();
          this._onHideTextBox();
          this._onRaiseKeyChange();
          this._onHideKeyChange();
@@ -582,17 +583,21 @@ MyDesklet.prototype = {
       if((actor)&&(actor.get_parent() == this.leftBox))
          this.leftBox.remove_actor(actor);
       if(this.minimizeButton == actor) {
+         this.rootBox.remove_style_pseudo_class('open');
+         this.rootBox.set_style('');
          this.leftBox.add(this.maximizeButton, {x_fill: true, x_align: St.Align.END});
          this._changeHideTextBox(true);
-         this.scrollBox.visible = false;
+         this.scrollArea.visible = false;
          if(this._fHeight) {
             this.mainBox.set_height(-1);
          }
       }
       else {
+         this.rootBox.add_style_pseudo_class('open');
+         this.rootBox.set_style('');
          this.leftBox.add(this.minimizeButton, {x_fill: true, x_align: St.Align.END}); 
          this._changeHideTextBox(false);
-         this.scrollBox.visible = true;
+         this.scrollArea.visible = true;
          if(this._fHeight) {
             this.fixHeight(true);
          }
@@ -736,6 +741,7 @@ MyDesklet.prototype = {
          this.buttonBanner.set_style_class_name('');
          this.buttonBanner.set_style('background-color: ' + _colorBanner);
       } else {
+         this.rootBox.set_style('');
          this.rootBox.set_style_class_name('desklet-with-borders');
          if(this._themeStaples != "none") {
             this.rootBox.add_style_class_name('sticky-main-box-staples');
@@ -810,11 +816,19 @@ MyDesklet.prototype = {
    },
 
    setPencil: function(activePencil) {
-      if((this._themePencil != "none")&&(activePencil)) {
-         let image = GLib.get_home_dir() + "/.local/share/cinnamon/desklets/" + this.uuid + "/pencil/" + this._themePencil + ".svg";
-         this.pencilBox.set_style(' background-image: url(\'' + image + '\'); background-size:' + this.pencilBox.width +'px ' +
-                                  this.pencilBox.height + 'px; max-width: 200px; min-width: 60px; padding: 0px 10px 0px 10px');
+      if(activePencil) {
+         this.textBox.add_style_pseudo_class('active');
+         this.textBox.set_style('');
+         if(this._themePencil != "none") {
+            let image = GLib.get_home_dir() + "/.local/share/cinnamon/desklets/" + this.uuid + "/pencil/" + this._themePencil + ".svg";
+            this.pencilBox.set_style(' background-image: url(\'' + image + '\'); background-size:' + this.pencilBox.width +'px ' +
+                                     this.pencilBox.height + 'px; max-width: 200px; min-width: 60px; padding: 0px 10px 0px 10px');
+         } else {
+            this.pencilBox.set_style('max-width: 200px; min-width: 60px; padding: 0px 10px 0px 10px');
+         }
       } else {
+         this.textBox.remove_style_pseudo_class('active');
+         this.textBox.set_style('');
          this.pencilBox.set_style('max-width: 200px; min-width: 60px; padding: 0px 10px 0px 10px');
       }
    },
@@ -968,7 +982,7 @@ MyDesklet.prototype = {
    fixHeight: function(fix) {
       this._fHeight = fix;
       if(fix) {
-         if(this.scrollBox.visible)
+         if(this.scrollArea.visible)
             this.mainBox.set_height(this._height);
       } else {
          this.mainBox.set_height(-1);
@@ -1010,9 +1024,12 @@ MyDesklet.prototype = {
       if(this.textInsertIDSignal > 0)
          this.clutterText.disconnect(this.textInsertIDSignal);
       this.textInsertIDSignal = 0;
-      if(this.autoHideButtonsIDSignal > 0)
-         this.mainBox.disconnect(this.autoHideButtonsIDSignal);
-      this.autoHideButtonsIDSignal = 0;
+      if(this.enterAutoHideButtonsIDSignall > 0)
+         this.actor.disconnect(this.enterAutoHideButtonsIDSignal);
+      this.enterAutoHideButtonsIDSignal = 0;
+      if(this.leaveAutoHideButtonsIDSignall > 0)
+         this.actor.disconnect(this.leaveAutoHideButtonsIDSignal);
+      this.leaveAutoHideButtonsIDSignal = 0;
       if(this.scrollIDSignal > 0)
          this.scrollBox.disconnect(this.scrollIDSignal);
       this.scrollIDSignal = 0;
@@ -1039,8 +1056,9 @@ MyDesklet.prototype = {
          }
       }));
       btt.set_style_class_name('menu-category-button');
-      btt.add_style_class_name('sticky-button')
+      btt.add_style_class_name('sticky-button');
       btt.set_style('padding: 2px;');
+      
       let bttTooltip = new Tooltips.Tooltip(btt, toolTip);
       return btt;
    },
@@ -1073,10 +1091,10 @@ MyDesklet.prototype = {
          if(this.focusIDSignal > 0)
             this.clutterText.disconnect(this.focusIDSignal);
          this.focusIDSignal = 0;
-         if(this.keyPressIDSignal == 0)
+         if(this.keyPressIDSignal > 0)
             this.clutterText.disconnect(this.keyPressIDSignal);
          this.keyPressIDSignal = 0;
-         if(this.textInsertIDSignal == 0)
+         if(this.textInsertIDSignal > 0)
             this.clutterText.disconnect(this.textInsertIDSignal);
          this.textInsertIDSignal = 0;
          this.newNote(this.entry.text);
@@ -1084,7 +1102,7 @@ MyDesklet.prototype = {
          this.titleNote.set_text(this.entry.text);
          this.setPencil(false);
          global.stage.set_key_focus(null);
-         this._onAutoHideButtons();
+         this._onAutoHideButtons(false);
          if(this.raisedBox) {
             global.stage.set_key_focus(this.raisedBox.actor);
             this.raisedBox._actionCloseAll();
@@ -1410,23 +1428,43 @@ MyDesklet.prototype = {
    _onThemePencilChange: function() {
    },
 
-   _onAutoHideButtons: function() {
+   _onAutoHideButtons: function(hide) {
       if(this._autohideButtons) {
+         let focusedActor = global.stage.get_key_focus();
+         if((focusedActor)&&(this.entry.contains(focusedActor)))
+            this._onAutoHideButtons(true);
+         else
+            this.buttonBanner.visible = hide;
+      } else {
+         this.buttonBanner.visible = true;
+      }
+   },
+
+   _onSetAutoHideButtons: function() {
+       if(this._autohideButtons) {
          this.buttonBanner.visible = false;
-         if(this.autoHideButtonsIDSignal == 0) {
-            this.autoHideButtonsIDSignal = this.mainBox.connect('notify::hover', Lang.bind(this, function(actor) {
-               let focusedActor = global.stage.get_key_focus();
-               if((focusedActor)&&(this.entry.contains(focusedActor)))
-                  this.buttonBanner.visible = true;
-               else
-                  this.buttonBanner.visible = actor.get_hover();
+         if(this.enterAutoHideButtonsIDSignal == 0) {
+            this.enterAutoHideButtonsIDSignal = this.actor.connect('enter-event', Lang.bind(this, function(actor) {
+               this._onAutoHideButtons(true);
+               this.rootBox.add_style_pseudo_class('hover');
+               this.rootBox.set_style('');
+            }));
+         }
+         if(this.leaveAutoHideButtonsIDSignal == 0) {
+            this.leaveAutoHideButtonsIDSignal = this.actor.connect('leave-event', Lang.bind(this, function(actor) {
+               this._onAutoHideButtons(false);
+               this.rootBox.remove_style_pseudo_class('hover');
+               this.rootBox.set_style('');
             }));
          }
       } else {
-         if(this.autoHideButtonsIDSignal > 0)
-            this.mainBox.disconnect(this.autoHideButtonsIDSignal);
-         this.autoHideButtonsIDSignal = 0;
-         this.buttonBanner.visible = true;
+         if(this.enterAutoHideButtonsIDSignall > 0)
+            this.actor.disconnect(this.enterAutoHideButtonsIDSignal);
+         if(this.leaveAutoHideButtonsIDSignall > 0)
+            this.actor.disconnect(this.leaveAutoHideButtonsIDSignal);
+         this.enterAutoHideButtonsIDSignal = 0;
+         this.leaveAutoHideButtonsIDSignal = 0;
+         this._onAutoHideButtons(true);
       }
    },
 
@@ -1445,14 +1483,14 @@ MyDesklet.prototype = {
             this._onVisibleNoteChange(this.minimizeButton);
          else
             this._onVisibleNoteChange(this.maximizeButton);
-      }    
+      }
    }, 
 
    _initSettings: function() {
       try {
          this.settings = new Settings.DeskletSettings(this, this.uuid, this.instance_id);
          this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "multi-instance", "_multInstance", this._onMultInstanceChange, null);
-         this.settings.bindProperty(Settings.BindingDirection.IN, "auto-hide-buttons", "_autohideButtons", this._onAutoHideButtons, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "auto-hide-buttons", "_autohideButtons", this._onSetAutoHideButtons, null);
          //this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "text", "_text", this._onTextSetting, null);
          /*"text": {
       "type": "entry",

@@ -111,9 +111,9 @@
         "tooltip": "Check this if you want to control the width of desklet."
     },
     "width": {
-        "default": 200,
+        "default": 220,
         "type": "spinbutton",
-        "min": 170,
+        "min": 200,
         "max": 1600,
         "description": "Width:",
         "units": "pixels",
