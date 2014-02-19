@@ -849,8 +849,8 @@ MyDesklet.prototype = {
    },
 
    _initDeskletContruction: function() {
-      this.mainBox = new St.BoxLayout({ vertical:true, reactive: true, track_hover: true });
-      this.rootBox = new St.BoxLayout({vertical:true});
+      this.mainBox = new St.BoxLayout({ vertical:true });
+      this.rootBox = new St.BoxLayout({ vertical:true, reactive: true, track_hover: true });
       this.bannerBox = new St.BoxLayout({vertical:true});
       this.buttonBanner = new St.BoxLayout({ vertical:false, style_class: 'sticky-button-box' });
       this.leftBox = new St.BoxLayout({vertical:false});
@@ -861,7 +861,7 @@ MyDesklet.prototype = {
       this.textAreaBox = new St.BoxLayout({vertical:true});
       this.textAreaBox.set_style('min-width: ' + (MIN_WIDTH-30) + 'px;');
 
-      this.bottomBox = new St.BoxLayout({ vertical:false, reactive: true, track_hover: true, height: 6 });
+      this.bottomBox = new St.BoxLayout({ vertical:false, height: 6 });
       this._enableResize();
 
       this.addButton = this._buttonCreation('list-add', _("Add new Note"), this._symbolicIcons);
@@ -1586,6 +1586,8 @@ MyDesklet.prototype = {
    hideDesklet: function() {
       if((this.deskletHide) || (this.changingHideState))
          return;
+      if((this.deskletRaised)&&(this.raisedBox))
+         this.raisedBox._actionCloseAll();
       Main.notify(_("Sticky Notes is hidden to be visible again please, press '%s'.").format(this._hideKey));
       this.changingHideState = true;
    
@@ -1623,9 +1625,11 @@ MyDesklet.prototype = {
       let listOfDesklets = this.getAllInstanceObject();
       this.raisedBox = new RaisedBox();
       let deskletC;
-
+      this.deskletHide = false;
       for(let i = 0; i < listOfDesklets.length; i++) {
          deskletC = listOfDesklets[i];
+         deskletC.actor.visible = true;
+         deskletC.deskletHide = false;
          deskletC.actor.get_parent().remove_actor(deskletC.actor);
          this.raisedBox.add(deskletC);
          this.raisedBox.connect("closed", Lang.bind(this, this.lower));
@@ -1772,9 +1776,12 @@ MyDesklet.prototype = {
    },
 
    _enableResize: function() {
-      this.bottomBox.connect('motion-event', Lang.bind(this, this._onResizeMotionEvent));
+      /*this.bottomBox.connect('motion-event', Lang.bind(this, this._onResizeMotionEvent));
       this.bottomBox.connect('button-press-event', Lang.bind(this, this._onBeginResize));
-      this.bottomBox.connect('leave-event', Lang.bind(this, this._disableOverResizeIcon));
+      this.bottomBox.connect('leave-event', Lang.bind(this, this._disableOverResizeIcon));*/
+      this.rootBox.connect('motion-event', Lang.bind(this, this._onResizeMotionEvent));
+      this.rootBox.connect('button-press-event', Lang.bind(this, this._onBeginResize));
+      this.rootBox.connect('leave-event', Lang.bind(this, this._disableOverResizeIcon));
       //global.state.connect('button-release-event', Lang.bind(this, this._disableResize));
       //this.bottomBox.connect('key-focus-out', Lang.bind(this, this._onDisableFocusOut));
    },
@@ -1818,17 +1825,16 @@ MyDesklet.prototype = {
 
    _onBeginResize: function(actor, event) {
       if(this.scrollArea.visible) {
-         this.actorResize = this.mainBox;
-         if(this.resizeIDSignal == 0) 
-            this.resizeIDSignal = global.stage.connect('button-release-event', Lang.bind(this, this._disableResize));
-         global.set_stage_input_mode(Cinnamon.StageInputMode.FULLSCREEN);
-         this._draggable.inhibit = true;
-         
          let [mx, my] = event.get_coords();
          let [ax, ay] = actor.get_transformed_position();
          let aw = actor.get_width();
          let ah = actor.get_height();
-         if(this._correctPlaceResize(mx, my, ax, ay, aw, ah)) {      
+         if(this._correctPlaceResize(mx, my, ax, ay, aw, ah)) {
+            this.actorResize = this.mainBox;
+            if(this.resizeIDSignal == 0) 
+               this.resizeIDSignal = global.stage.connect('button-release-event', Lang.bind(this, this._disableResize));
+            global.set_stage_input_mode(Cinnamon.StageInputMode.FULLSCREEN);
+            this._draggable.inhibit = true;
             this._findMouseDeltha();
             global.set_cursor(Cinnamon.Cursor.DND_MOVE);
             this._doResize();
@@ -1877,21 +1883,46 @@ MyDesklet.prototype = {
             }
          }
          //this.mouseDx this.mouseDy;
-         if(MIN_HEIGHT < my - ay - 10) {
-            this.actorResize.set_height(my - ay  + 4);
+         if(this.topSide) {
+            if(MIN_HEIGHT < ah + ay - my - 10) {
+               this.actorResize.set_height(ah + ay - my + 10);
+               this.actor.set_position(this.actor.x, my - 10);
+            } else {
+               this.actorResize.set_height(MIN_HEIGHT);
+               this.actor.set_position(this.actor.x, ay + ah - MIN_HEIGHT);
+            }
          } else {
-            this.actorResize.set_height(MIN_HEIGHT);
+            if(MIN_HEIGHT < my - ay - 10) {
+               this.actorResize.set_height(my - ay  + 4);
+            } else {
+               this.actorResize.set_height(MIN_HEIGHT);
+            }
          }
       } else
          this._disableResize();
    },
 
    _correctPlaceResize: function(mx, my, ax, ay, aw, ah) {
-      if(mx < ax + DELTA_MIN_RESIZE)
+      let goodPlace = false;
+      if(mx < ax + DELTA_MIN_RESIZE) {
          this.leftSide = true;
-      else if(mx > ax + aw - DELTA_MIN_RESIZE)
+         goodPlace = true;
+      }
+      else if(mx > ax + aw - DELTA_MIN_RESIZE) {
          this.leftSide = false;
-      return ((mx < ax + DELTA_MIN_RESIZE)||(mx > ax + aw - DELTA_MIN_RESIZE));
+         goodPlace = true;
+      }
+      if(goodPlace) {
+         goodPlace = false;
+         if(my < ay + DELTA_MIN_RESIZE) {
+            this.topSide = true;
+            goodPlace = true;
+         } else if(my > ay + ah - DELTA_MIN_RESIZE) {
+            this.topSide = false;
+            goodPlace = true;
+         }
+      }
+      return goodPlace;
    },
 
    renderFontFamily: function() {
