@@ -45,7 +45,8 @@ const Tweener = imports.ui.tweener;
 const Keymap = imports.gi.Gdk.Keymap.get_default();
 const Signals = imports.signals;
 const MIN_WIDTH = 200;
-//const DELTA_MIN_RESIZE = 10;
+const MIN_HEIGHT = 80;
+const DELTA_MIN_RESIZE = 10;
 
 
 function _(str) {
@@ -139,8 +140,8 @@ MyDesklet.prototype = {
       this._timeOutSettings = 0;
       this.deskletRaised = false;
       this.deskletHide = false;
-     // this.actorResize = null;
-     // this.resizeIDSignal = 0;
+      this.actorResize = null;
+      this.resizeIDSignal = 0;
 
       try {
          //Main.themeManager.connect('theme-set', Lang.bind(this, this._onThemeChange));
@@ -588,9 +589,7 @@ MyDesklet.prototype = {
          this.leftBox.add(this.maximizeButton, {x_fill: true, x_align: St.Align.END});
          this._changeHideTextBox(true);
          this.scrollArea.visible = false;
-         if(this._fHeight) {
-            this.mainBox.set_height(-1);
-         }
+         this.mainBox.set_height(-1);
       }
       else {
          this.rootBox.add_style_pseudo_class('open');
@@ -862,7 +861,8 @@ MyDesklet.prototype = {
       this.textAreaBox = new St.BoxLayout({vertical:true});
       this.textAreaBox.set_style('min-width: ' + MIN_WIDTH + 'px;');
 
-      this.bottomBox = new St.BoxLayout({ vertical:false, height: 6 });
+      this.bottomBox = new St.BoxLayout({ vertical:false, reactive: true, track_hover: true, height: 6 });
+      this._enableResize();
 
       this.addButton = this._buttonCreation('list-add', _("Add new Note"), this._symbolicIcons);
       this.addButton.connect('clicked', Lang.bind(this, this._onAddNote));
@@ -1771,15 +1771,16 @@ MyDesklet.prototype = {
       }
    },
 
-/*
-// this.menu.actor.connect('motion-event', Lang.bind(this, this._onResizeMotionEvent));
-//         this.menu.actor.connect('button-press-event', Lang.bind(this, this._onBeginResize));
-//         this.menu.actor.connect('leave-event', Lang.bind(this, this._disableOverResizeIcon));
-//         this.menu.actor.connect('button-release-event', Lang.bind(this, this._disableResize));
+
+   _enableResize: function() {
+      this.bottomBox.connect('motion-event', Lang.bind(this, this._onResizeMotionEvent));
+      this.bottomBox.connect('button-press-event', Lang.bind(this, this._onBeginResize));
+      this.bottomBox.connect('leave-event', Lang.bind(this, this._disableOverResizeIcon));
+      //global.state.connect('button-release-event', Lang.bind(this, this._disableResize));
+   },
 
    _onResizeMotionEvent: function(actor, event) {
-      this.deltaMinResize = 10;
-      if(!this.actorResize) {
+      if((this.scrollArea.visible)&&(!this.actorResize)) {
          let [mx, my] = event.get_coords();
          let [ax, ay] = actor.get_transformed_position();
          let aw = actor.get_width();
@@ -1788,39 +1789,44 @@ MyDesklet.prototype = {
             this._cursorChanged = true;
             global.set_cursor(Cinnamon.Cursor.DND_MOVE);
          } else
-            this._disableResize();
+            this._disableOverResizeIcon();
       }
    },
  
    _disableOverResizeIcon: function() {
       if(!this.actorResize) {
-         this._disableResize();
+         if(this._cursorChanged) {
+            this._cursorChanged = false;
+            global.unset_cursor();
+         }
       }
    },
 
    _disableResize: function() {
-      this._cursorChanged = false;
-      this._draggable.inhibit = false;
-      this.actorResize = null;
-      global.unset_cursor();
       if(this.resizeIDSignal > 0)
          global.stage.disconnect(this.resizeIDSignal);
       this.resizeIDSignal = 0;
+      this._draggable.inhibit = false;
+      this.actorResize = null;
+      this._disableOverResizeIcon();
+
    },
 
    _onBeginResize: function(actor, event) {
-      this.actorResize = this.mainBox;
-      if(this.resizeIDSignal == 0)
-         this.resizeIDSignal = global.stage.connect("button-release-event", Lang.bind(this, this._disableResize));
-      this._draggable.inhibit = true;
-      let [mx, my] = event.get_coords();
-      let [ax, ay] = actor.get_transformed_position();
-      let aw = actor.get_width();
-      let ah = actor.get_height();
-      if(this._correctPlaceResize(mx, my, ax, ay, aw, ah)) {      
-         this._findMouseDeltha();
-         global.set_cursor(Cinnamon.Cursor.DND_MOVE);
-         this._doResize();
+      if(this.scrollArea.visible) {
+         this.actorResize = this.mainBox;
+         if(this.resizeIDSignal == 0) 
+            this.resizeIDSignal = global.stage.connect('button-release-event', Lang.bind(this, this._disableResize));
+         this._draggable.inhibit = true;
+         let [mx, my] = event.get_coords();
+         let [ax, ay] = actor.get_transformed_position();
+         let aw = actor.get_width();
+         let ah = actor.get_height();
+         if(this._correctPlaceResize(mx, my, ax, ay, aw, ah)) {      
+            this._findMouseDeltha();
+            global.set_cursor(Cinnamon.Cursor.DND_MOVE);
+            this._doResize();
+         }
       }
    },
 
@@ -1849,18 +1855,31 @@ MyDesklet.prototype = {
          let [ax, ay] = this.actorResize.get_transformed_position();
          aw = this.actorResize.get_width();
          ah = this.actorResize.get_height();
-         // this.width = this.mainBox.get_width() + mx - ax //- this.mouseDx;
-         let height = ah + my - (ay + ah) //+ 4 - this.mouseDy;
-         //this.mainBox.set_width(this.width)
-         this.actorResize.set_height(height)
+         if(this.leftSide) {
+            if(MIN_WIDTH < aw + ax - mx - 10) {
+               this.actorResize.set_width(aw + ax - mx + 4);
+               this.actor.set_position(mx - 4, ay);
+            }
+         } else {
+            if(MIN_WIDTH < mx - ax - 10) {
+               this.actorResize.set_width(mx - ax + 4);
+            }
+         }
+         //this.mouseDx this.mouseDy;
+         if(MIN_HEIGHT < my - ay - 10) {
+            this.actorResize.set_height(my - ay  + 4);
+         }
       } else
          this._disableResize();
    },
 
    _correctPlaceResize: function(mx, my, ax, ay, aw, ah) {
-      return ((mx < ax + this.deltaMinResize)||(mx > ax + aw - this.deltaMinResize));
+      if(mx < ax + DELTA_MIN_RESIZE)
+         this.leftSide = true;
+      else if(mx > ax + aw - DELTA_MIN_RESIZE)
+         this.leftSide = false;
+      return ((mx < ax + DELTA_MIN_RESIZE)||(mx > ax + aw - DELTA_MIN_RESIZE));
    },
-*/
 
    renderFontFamily: function() {
       try {
