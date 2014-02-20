@@ -596,6 +596,7 @@ MyDesklet.prototype = {
          this.leftBox.add(this.maximizeButton, {x_fill: true, x_align: St.Align.END});
          this._changeHideTextBox(true);
          this.scrollArea.visible = false;
+         this.bottomBox.visible = false;
          this.mainBox.set_height(-1);
       }
       else {
@@ -604,6 +605,7 @@ MyDesklet.prototype = {
          this.leftBox.add(this.minimizeButton, {x_fill: true, x_align: St.Align.END}); 
          this._changeHideTextBox(false);
          this.scrollArea.visible = true;
+         this.bottomBox.visible = true;
          if(this._fSize) {
             this._onSizeChange();
          }
@@ -869,7 +871,6 @@ MyDesklet.prototype = {
       this.textAreaBox.set_style('min-width: ' + (MIN_WIDTH-30) + 'px;');
 
       this.bottomBox = new St.BoxLayout({ vertical:false, height: 6 });
-      this._enableResize();
 
       this.addButton = this._buttonCreation('list-add', _("Add new Note"), this._symbolicIcons);
       this.addButton.connect('clicked', Lang.bind(this, this._onAddNote));
@@ -934,7 +935,7 @@ MyDesklet.prototype = {
       this.textAreaBox.add(this.entry, { x_fill: true, y_fill: false, expand: true, x_align: St.Align.START, y_align: St.Align.START });
 
       this.transpBox = new St.BoxLayout({vertical:true});
-      this.endBoxBackGround = new St.BoxLayout({ vertical:true/*, style_class: 'sticky-top-box'*/ });
+      this.endBoxBackGround = new St.BoxLayout({vertical:true});
       this.endBox = new St.BoxLayout({vertical:false});
       this.endBoxBackGround.add(this.endBox, {x_fill: false, x_align: St.Align.MIDDLE});
 
@@ -962,6 +963,7 @@ MyDesklet.prototype = {
 //scroll
       this.rootBox.add(this.scrollBox, { x_fill: true, y_fill: true, expand: true, x_align: St.Align.START, y_align: St.Align.START });
       this.rootBox.add(this.bottomBox, { x_fill: true, y_fill: false, expand: false, y_align: St.Align.END });
+      this._enableResize();
    },
 
    _scrollFilter: function(actor, event) {
@@ -1029,16 +1031,19 @@ MyDesklet.prototype = {
       let bttIcon = new St.Icon({icon_name: icon, icon_type: iconType,
 				 style_class: 'popup-menu-icon' });
       let btt = new St.Button({ child: bttIcon });
+      btt.connect('button-release-event', Lang.bind(this, this._disableResize));
       btt.connect('notify::hover', Lang.bind(this, function(actor) {
-         if(actor.get_hover()) {
-            global.set_cursor(Cinnamon.Cursor.POINTING_HAND);
-            actor.set_style_class_name('menu-category-button-selected');
-            actor.add_style_class_name('sticky-button-selected');
-         }
-         else {
-            global.unset_cursor();
-            actor.set_style_class_name('menu-category-button');
-            actor.add_style_class_name('sticky-button');
+         if(!this.actorResize) {
+            if(actor.get_hover()) {
+               global.set_cursor(Cinnamon.Cursor.POINTING_HAND);
+               actor.set_style_class_name('menu-category-button-selected');
+               actor.add_style_class_name('sticky-button-selected');
+            }
+            else {
+               global.unset_cursor();
+               actor.set_style_class_name('menu-category-button');
+               actor.add_style_class_name('sticky-button');
+            }
          }
       }));
       btt.set_style_class_name('menu-category-button');
@@ -1875,14 +1880,16 @@ MyDesklet.prototype = {
       if(this.resizeIDSignal > 0)
          global.stage.disconnect(this.resizeIDSignal);
       this.resizeIDSignal = 0;
-      if(!this.deskletRaised) {
-         this._draggable.inhibit = false;
-         global.set_stage_input_mode(Cinnamon.StageInputMode.NORMAL);
-      }
-      this.actorResize = null;
       this._disableOverResizeIcon();
-      this._saveDeskletPosition();
-      this._saveDeskletSize();
+      if(this.actorResize) {
+         if(!this.deskletRaised) {
+            this._draggable.inhibit = false;
+            global.set_stage_input_mode(Cinnamon.StageInputMode.NORMAL);
+         }
+         this.actorResize = null;
+         this._saveDeskletPosition();
+         this._saveDeskletSize();
+      }
    },
 
    _onBeginResize: function(actor, event) {
