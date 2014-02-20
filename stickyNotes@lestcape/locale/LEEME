@@ -12,6 +12,9 @@ https://github.com/zagortenay333
 Este es un simple desklet para añadir notas en el escritorio.
 Las notas serán salvadas cuando el foco del editor de texto se pierda.
 
+IMPORTANTE: Usar con Cinnamon 2.1 o superior.  
+--------------
+
 Este programa es software libre:
 --------------
 Usted puede redistribuirlo y/o modificarlo bajo los términos de la Licencia General Pública GNU publicada por la Fundación de Software Libre, con los requerimientos de la versión 3 de la licencia, o (a su opción) alguna versión posterior.

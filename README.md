@@ -24,7 +24,8 @@ https://github.com/zagortenay333
 
 ![Alt text](/stickyNotes@lestcape/Capture.png)
 
-
+IMPORTANT: Use with Cinnamon 2.1 or higher.
+--------------
 
 This program is free software:
 --------------
