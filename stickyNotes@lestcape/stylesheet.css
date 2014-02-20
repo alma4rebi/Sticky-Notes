@@ -35,6 +35,7 @@
 }
 
 .sticky-title-label {
+        text-align: center;
         max-width: 100px;
         padding: 0px 4px 0px 4px;
 }

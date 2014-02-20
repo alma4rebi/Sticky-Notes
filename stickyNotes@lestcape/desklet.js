@@ -1,5 +1,5 @@
-// Desklet : Sticky Notes           Version      : v0.9.2-Beta
-// O.S.    : Cinnamon               Release Date : 17 February 2014.
+// Desklet : Sticky Notes           Version      : v0.9.3-Beta
+// O.S.    : Cinnamon               Release Date : 20 February 2014.
 // Author  : Lester Carballo Pérez  Email        : lestcape@gmail.com
 //
 // Website : https://github.com/lestcape/Sticky-Notes
@@ -142,6 +142,9 @@ MyDesklet.prototype = {
       this.deskletHide = false;
       this.actorResize = null;
       this.resizeIDSignal = 0;
+      this.eventLoopResize = 0;
+      this.eventLoop = 0;
+      this._timeOutResize = 0;
 
       try {
          //Main.themeManager.connect('theme-set', Lang.bind(this, this._onThemeChange));
@@ -153,10 +156,13 @@ MyDesklet.prototype = {
    },
 
    _onThemeChange: function() {
-     this._timeOutSettings = Mainloop.timeout_add(2000, Lang.bind(this, function() {
-         this.on_desklet_removed();
-         this._updateComplete();
-      }));
+      if(this._timeOutSettings == 0) {
+         this._timeOutSettings = Mainloop.timeout_add(2000, Lang.bind(this, function() {
+            this.on_desklet_removed();
+            this._updateComplete();
+            Mainloop.source_remove(this._timeOutSettings);
+         }));
+      }
       //this.multInstanceUpdate();
    },
 
@@ -182,8 +188,9 @@ MyDesklet.prototype = {
          //this.entry.connect('allocation_changed', Lang.bind(this, this._onAllocationChanged));
          this.scrollBox.connect('allocation_changed', Lang.bind(this, this._onAllocationChanged));
 
-         this._onFixWidth();
-         this._onFixHeight();
+         this._onSizeChange();
+         /*this._onFixWidth();
+         this._onFixHeight();*/
          this._onScrollVisibleChange();
          this._onScrollAutoChange();
          this._onSetAutoHideButtons();
@@ -597,8 +604,8 @@ MyDesklet.prototype = {
          this.leftBox.add(this.minimizeButton, {x_fill: true, x_align: St.Align.END}); 
          this._changeHideTextBox(false);
          this.scrollArea.visible = true;
-         if(this._fHeight) {
-            this.fixHeight(true);
+         if(this._fSize) {
+            this._onSizeChange();
          }
       }
    },
@@ -979,27 +986,6 @@ MyDesklet.prototype = {
       }
    },
 
-   fixHeight: function(fix) {
-      this._fHeight = fix;
-      if(fix) {
-         if(this.scrollArea.visible)
-            this.mainBox.set_height(this._height);
-      } else {
-         this.mainBox.set_height(-1);
-      }
-      this.enableScrolling(fix);
-   },
-
-   fixWidth: function(fix) {
-      this._fWidth = fix;
-      if(fix) {
-         this.mainBox.set_width(this._width);
-      }
-      else {
-         this.mainBox.set_width(-1);
-      }
-   },
-
    _onAllocationChanged: function() {
       //let availWidth = this.entry.get_width();
       let availWidth = this.scrollBox.get_width() - 2;
@@ -1125,7 +1111,7 @@ MyDesklet.prototype = {
          if (event.get_button() == 1) {
             global.set_stage_input_mode(Cinnamon.StageInputMode.FOCUSED);
             global.set_stage_input_mode(Cinnamon.StageInputMode.NORMAL);
-            this.fixWidth(this._fWidth);
+           // this.fixWidth(this._fWidth);
          }
          else if (event.get_button() == 3) {
             this._entryActiveMenu = true;
@@ -1404,12 +1390,45 @@ MyDesklet.prototype = {
       return "rgba("+r+","+g+","+b+","+(this._opacityBoxes)+")";
    },
 
-   _onFixWidth: function() {
-      this.fixWidth(this._fWidth);
-   },
-
-   _onFixHeight: function() {
-      this.fixHeight(this._fHeight);
+   _onSizeChange: function() {
+      if(this._fSize) {
+         if(this._multInstance) {
+            if(this._sameSize) {
+               this.mainBox.set_width(this._width);
+               if(this.scrollArea.visible)
+                 this.mainBox.set_height(this._height);
+            } else {
+               this._readListSize();
+               let strNote = "";
+               if(this.noteCurrent <= this.notesList.length)
+                  strNote += this.notesList[this.noteCurrent - 1][0];
+               if(this.sizes[strNote]) {
+                  this.mainBox.set_width(this.sizes[strNote][0]);
+                  if(this.scrollArea.visible)
+                     this.mainBox.set_height(this.sizes[strNote][1]);
+               } else {
+                  this.mainBox.set_width(this._width);
+                  if(this.scrollArea.visible)
+                    this.mainBox.set_height(this._height);
+               }
+            }
+         } else {
+            this.mainBox.set_width(this._width);
+            if(this.scrollArea.visible)
+               this.mainBox.set_height(this._height);
+         }
+      } else {
+         if(this._sameSize) { 
+            if(this.eventLoop == 0) {
+               this.eventLoop = Mainloop.timeout_add(1000, Lang.bind(this, function() {
+                  Mainloop.source_remove(this._eventLoop);
+                  this._sameSize = false;
+               }));
+            }
+         }
+         this.mainBox.set_width(-1);
+         this.mainBox.set_height(-1);
+      }
    },
 
    _onScrollVisibleChange: function() {
@@ -1491,6 +1510,8 @@ MyDesklet.prototype = {
          this.settings = new Settings.DeskletSettings(this, this.uuid, this.instance_id);
          this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "multi-instance", "_multInstance", this._onMultInstanceChange, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "auto-hide-buttons", "_autohideButtons", this._onSetAutoHideButtons, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "show-scroll", "_scrollVisible", this._onScrollVisibleChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "auto-scroll", "_scrollAuto", this._onScrollAutoChange, null);
          //this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "text", "_text", this._onTextSetting, null);
          /*"text": {
       "type": "entry",
@@ -1505,12 +1526,11 @@ MyDesklet.prototype = {
          this.settings.bindProperty(Settings.BindingDirection.IN, "raise-key", "_raiseKey", this._onRaiseKeyChange, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "hide-key", "_hideKey", this._onHideKeyChange, null);
 
-         this.settings.bindProperty(Settings.BindingDirection.IN, "fix-width", "_fWidth", this._onFixWidth, null);
-         this.settings.bindProperty(Settings.BindingDirection.IN, "width", "_width", this._onFixWidth, null);
-         this.settings.bindProperty(Settings.BindingDirection.IN, "fix-height", "_fHeight", this._onFixHeight, null);
-         this.settings.bindProperty(Settings.BindingDirection.IN, "height", "_height", this._onFixHeight, null);
-         this.settings.bindProperty(Settings.BindingDirection.IN, "show-scroll", "_scrollVisible", this._onScrollVisibleChange, null);
-         this.settings.bindProperty(Settings.BindingDirection.IN, "auto-scroll", "_scrollAuto", this._onScrollAutoChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "fix-size", "_fSize", this._onSizeChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "same-size", "_sameSize", this._onSizeChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "width", "_width", this._onSizeChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "height", "_height", this._onSizeChange, null);
+
 
          this.settings.bindProperty(Settings.BindingDirection.IN, "text-size", "_textSize", this._onStyleChange, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "font-family", "_fontFamily", this._onStyleChange, null);
@@ -1531,6 +1551,9 @@ MyDesklet.prototype = {
          this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "position-x", "_xPosition", null, null);
          this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "position-y", "_yPosition", null, null);
          this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "list-position", "_listPosition", null, null);
+
+         this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "list-size", "_listSize", null, null);
+
          this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "hide-text-box", "_hideTextBox", null, null);
          this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "list-hide-text-box", "_listHideTextBox", null, null);
       } catch (e) {
@@ -1662,7 +1685,8 @@ MyDesklet.prototype = {
             deskletC = listOfDesklets[i];
             if(!this.raisedBox.isSelected(deskletC)) {
                this.raisedBox.remove(deskletC);
-               Main.deskletContainer.addDesklet(deskletC.actor);
+               if(!Main.deskletContainer.contains(deskletC.actor))
+                  Main.deskletContainer.addDesklet(deskletC.actor);
             }
          }
 
@@ -1732,6 +1756,49 @@ MyDesklet.prototype = {
       }
    },
 
+   _readListSize: function() {
+      this.sizes = new Array();
+      let pos = 0;
+      let posString;
+      let listString = this._listSize.split(";;");
+      while(pos < listString.length) {
+         if(listString[pos] != "") {
+            posString = listString[pos].split("::");
+            if(this.isNoteInList(posString[0])) {
+               this.sizes[posString[0]] = [posString[1], posString[2]];
+            }
+         }
+         pos++;
+      }
+   },
+
+   _writeListSize: function() {
+      let stringList = "";
+      for(key in this.sizes) {
+         if(this.isNoteInList(key))
+            stringList += key + "::" + this.sizes[key][0] + "::" + this.sizes[key][1] + ";;";
+      }
+      this._listSize = stringList.substring(0, stringList.length - 2);//commit
+   },
+
+   _saveDeskletSize: function() {
+      this._width = this.mainBox.get_width();
+      this._height = this.mainBox.get_height();
+      if(this._multInstance) {
+         this._readListSize();
+         if(this._sameSize) {
+            for(key in this.sizes) {
+               this.sizes[key] = [this._width, this._height];
+            }
+            this._writeListSize();
+         } else if((this.noteCurrent > 0)&&(this.noteCurrent < this.notesList.length + 1)) {
+            let strNote = "" + this.notesList[this.noteCurrent - 1][0];
+            this.sizes[strNote] = [this._width, this._height];
+            this._writeListSize();
+         }
+      }
+   },
+
    _readListHideTextBox: function() {
       this.hideTextBox = new Array();
       let pos = 0;
@@ -1776,20 +1843,11 @@ MyDesklet.prototype = {
    },
 
    _enableResize: function() {
-      /*this.bottomBox.connect('motion-event', Lang.bind(this, this._onResizeMotionEvent));
-      this.bottomBox.connect('button-press-event', Lang.bind(this, this._onBeginResize));
-      this.bottomBox.connect('leave-event', Lang.bind(this, this._disableOverResizeIcon));*/
       this.rootBox.connect('motion-event', Lang.bind(this, this._onResizeMotionEvent));
       this.rootBox.connect('button-press-event', Lang.bind(this, this._onBeginResize));
       this.rootBox.connect('leave-event', Lang.bind(this, this._disableOverResizeIcon));
-      //global.state.connect('button-release-event', Lang.bind(this, this._disableResize));
-      //this.bottomBox.connect('key-focus-out', Lang.bind(this, this._onDisableFocusOut));
    },
-/*
-   _onDisableFocusOut: function(actor, event) {
-      Main.notify("out");
-   },
-*/
+
    _onResizeMotionEvent: function(actor, event) {
       if((this.scrollArea.visible)&&(!this.actorResize)) {
          let [mx, my] = event.get_coords();
@@ -1817,10 +1875,14 @@ MyDesklet.prototype = {
       if(this.resizeIDSignal > 0)
          global.stage.disconnect(this.resizeIDSignal);
       this.resizeIDSignal = 0;
-      this._draggable.inhibit = false;
+      if(!this.deskletRaised) {
+         this._draggable.inhibit = false;
+         global.set_stage_input_mode(Cinnamon.StageInputMode.NORMAL);
+      }
       this.actorResize = null;
       this._disableOverResizeIcon();
-      global.set_stage_input_mode(Cinnamon.StageInputMode.NORMAL);
+      this._saveDeskletPosition();
+      this._saveDeskletSize();
    },
 
    _onBeginResize: function(actor, event) {
@@ -1830,6 +1892,7 @@ MyDesklet.prototype = {
          let aw = actor.get_width();
          let ah = actor.get_height();
          if(this._correctPlaceResize(mx, my, ax, ay, aw, ah)) {
+            global.stage.set_key_focus(null);
             this.actorResize = this.mainBox;
             if(this.resizeIDSignal == 0) 
                this.resizeIDSignal = global.stage.connect('button-release-event', Lang.bind(this, this._disableResize));
@@ -1837,6 +1900,7 @@ MyDesklet.prototype = {
             this._draggable.inhibit = true;
             this._findMouseDeltha();
             global.set_cursor(Cinnamon.Cursor.DND_MOVE);
+            this._fSize = true;
             this._doResize();
          }
       }
@@ -1853,10 +1917,13 @@ MyDesklet.prototype = {
    },
 
    _doResize: function() {
+      if(this.eventLoopResize > 0)
+         Mainloop.source_remove(this.eventLoopResize);
+      this.eventLoopResize = 0;
       if(this.actorResize) {
          this._updatePosResize();
         // this._updateSize();
-         Mainloop.timeout_add(300, Lang.bind(this, this._doResize));
+         this.eventLoopResize = Mainloop.timeout_add(300, Lang.bind(this, this._doResize));
       } else
          this._disableResize();
    },
@@ -1865,8 +1932,8 @@ MyDesklet.prototype = {
       if(this.actorResize) {
          let [mx, my, mask] = global.get_pointer();
          let [ax, ay] = this.actorResize.get_transformed_position();
-         aw = this.actorResize.get_width();
-         ah = this.actorResize.get_height();
+         let aw = this.actorResize.get_width();
+         let ah = this.actorResize.get_height();
          if(this.leftSide) {
             if(MIN_WIDTH < aw + ax - mx - 10) {
                this.actorResize.set_width(aw + ax - mx + 4);

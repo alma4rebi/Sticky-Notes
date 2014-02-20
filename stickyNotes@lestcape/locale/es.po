@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Sticky-Notes 0.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-11-08 21:29-0600\n"
-"PO-Revision-Date: 2014-02-14 06:28-0600\n"
+"PO-Revision-Date: 2014-02-19 22:33-0600\n"
 "Last-Translator: Lester Carballo Pérez <lestcape@gmail.com>\n"
 "Language-Team: lestcape <lestcape@gmail.com>\n"
 "MIME-Version: 1.0\n"
@@ -186,14 +186,24 @@ msgstr "Tecla de acceso directo para elevar el desklet:"
 msgid "Shortcut key to hide the desklet:"
 msgstr "Tecla de acceso directo para esconder el desklet:"
 
-#. notes@lestcape->settings-schema.json->fix-width->description
-msgid "Fixed width."
-msgstr "Ajustar el ancho."
+#. notes@lestcape->settings-schema.json->fix-size->description
+msgid "Fixed size."
+msgstr "Ajustar el tamaño."
 
-#. notes@lestcape->settings-schema.json->fix-width->tooltip
-msgid "Check this if you want to control the width of desklet."
+#. notes@lestcape->settings-schema.json->fix-size->tooltip
+msgid "Check this if you want to control the size of all instances."
 msgstr ""
-"Seleccione esto si usted quiere tener el control sobre el ancho del Desklet."
+"Seleccione esto si usted quiere tener el control sobre todas las instancias."
+
+#. notes@lestcape->settings-schema.json->same-size->description
+msgid "All instace have the same fixed size."
+msgstr "Todas las instancias tienen el mismo tamaño."
+
+#. notes@lestcape->settings-schema.json->same-size->tooltip
+msgid "Check this if you want to have the same fixed size on all instances."
+msgstr ""
+"Seleccione esto si usted quiere tener el mismo tamaño para todas las "
+"instancias."
 
 #. notes@lestcape->settings-schema.json->width->description
 msgid "Width:"
@@ -201,24 +211,15 @@ msgstr "Ancho:"
 
 #. notes@lestcape->settings-schema.json->width->tooltip
 msgid "Increase or decrease the desklet width."
-msgstr "Incrementar o disminuir el ancho del Desklet."
-
-#. notes@lestcape->settings-schema.json->fix-height->description
-msgid "Fixed height."
-msgstr "Ajustar el alto."
-
-#. notes@lestcape->settings-schema.json->fix-height->tooltip
-msgid "Check this if you want to control the height of Note."
-msgstr ""
-"Seleccione esto si usted quiere tener el control sobre el alto de la Nota."
+msgstr "Incrementar o disminuir el ancho del desklet."
 
 #. notes@lestcape->settings-schema.json->height->description
 msgid "Height:"
 msgstr "Alto:"
 
 #. notes@lestcape->settings-schema.json->height->tooltip
-msgid "Increase or decrease the Note height."
-msgstr "Incrementar o disminuir el alto de la Nota."
+msgid "Increase or decrease the desklet height."
+msgstr "Incrementar o disminuir el alto del desklet."
 
 #. notes@lestcape->settings-schema.json->show-scroll->description
 msgid "Show scrolling area."

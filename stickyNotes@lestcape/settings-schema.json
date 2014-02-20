@@ -21,6 +21,18 @@
         "type": "checkbox",
         "tooltip": "Check this if you want to autohide the action buttons when mouse is outside of the desklet."
     },
+    "show-scroll": {
+        "default": true,
+        "description": "Show scrolling area.",
+        "type": "checkbox",
+        "tooltip": "Check this if you want to show the scrolling area or not."
+    },
+    "auto-scroll": {
+        "default": true,
+        "description": "Enable autoscrolling.",
+        "type": "checkbox",
+        "tooltip": "Check this if you want to enable smooth autoscrolling or not."
+    },
     "separator-layouts-top": {
        "type": "separator"
     },
@@ -104,11 +116,18 @@
     "separator-size-bottom": {
        "type": "separator"
     },
-    "fix-width": {
-        "default": true,
-        "description": "Fixed width.",
+    "fix-size": {
+        "default": false,
+        "description": "Fixed size.",
         "type": "checkbox",
-        "tooltip": "Check this if you want to control the width of desklet."
+        "tooltip": "Check this if you want to control the size of all instances."
+    },
+    "same-size": {
+        "default": true,
+        "description": "All instace have the same fixed size.",
+        "type": "checkbox",
+        "dependency": "fix-size",
+        "tooltip": "Check this if you want to have the same fixed size on all instances."
     },
     "width": {
         "default": 220,
@@ -119,14 +138,8 @@
         "units": "pixels",
         "step": 10,
         "indent": true,
-        "dependency": "fix-width",
+        "dependency": "same-size",
         "tooltip": "Increase or decrease the desklet width."
-    },
-    "fix-height": {
-        "default": true,
-        "description": "Fixed height.",
-        "type": "checkbox",
-        "tooltip": "Check this if you want to control the height of Note."
     },
     "height": {
         "default": 120,
@@ -137,24 +150,8 @@
         "units": "pixels",
         "step": 10,
         "indent": true,
-        "dependency": "fix-height",
-        "tooltip": "Increase or decrease the Note height."
-    },
-    "show-scroll": {
-        "default": true,
-        "description": "Show scrolling area.",
-        "type": "checkbox",
-        "indent": true,
-        "dependency": "fix-height",
-        "tooltip": "Check this if you want to show the scrolling area or not."
-    },
-    "auto-scroll": {
-        "default": true,
-        "description": "Enable autoscrolling.",
-        "type": "checkbox",
-        "indent": true,
-        "dependency": "fix-height",
-        "tooltip": "Check this if you want to enable smooth autoscrolling or not."
+        "dependency": "same-size",
+        "tooltip": "Increase or decrease the desklet height."
     },
     "separator-appearance-top": {
        "type": "separator"
@@ -409,13 +406,17 @@
     },
     "position-x": {
         "type": "generic",
-        "default": "0"
+        "default": 0
     },
     "position-y": {
         "type": "generic",
-        "default": "0"
+        "default": 0
     },
     "list-position": {
+        "type": "generic",
+        "default": ""
+    },
+    "list-size": {
         "type": "generic",
         "default": ""
     },
