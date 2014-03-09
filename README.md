@@ -27,6 +27,11 @@ https://github.com/zagortenay333
 IMPORTANT: Use with Cinnamon 2.1 or higher.
 --------------
 
+This applet not longer has support for Arch Linux.
+--------------
+The comunity of Arch Linux do not want that I or other Cinnamon developer, publish about Cinnamon, and receive the users feedback (necessary on the developing any app). When the comunity of Arch Linux, want to be open to the free software world, sure that I want to support Arch Linux again...
+
+
 This program is free software:
 --------------
 You can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
