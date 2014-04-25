@@ -56,7 +56,7 @@ msgstr ""
 
 #: desklet.js:187
 #: desklet.js:487
-msgid "Type to your note..."
+msgid "Type your note..."
 msgstr ""
 
 #: desklet.js:402

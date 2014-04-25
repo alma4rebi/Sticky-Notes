@@ -1,5 +1,5 @@
-// Desklet : Sticky Notes           Version      : v0.9.3-Beta
-// O.S.    : Cinnamon               Release Date : 20 February 2014.
+// Desklet : Sticky Notes           Version      : v1.0-Beta
+// O.S.    : Cinnamon               Release Date : 25 April 2014.
 // Author  : Lester Carballo Pérez  Email        : lestcape@gmail.com
 //
 // Website : https://github.com/lestcape/Sticky-Notes
@@ -64,6 +64,7 @@ MyDesklet.prototype = {
       Desklet.Desklet.prototype._init.call(this, metadata, desklet_id);
       this.metadata = metadata;
       this.uuid = this.metadata["uuid"];
+      this.newText = "";
       this.instance_id = desklet_id;
      // this.renderFontFamily();
       this.execInstallLanguage();
@@ -132,7 +133,9 @@ MyDesklet.prototype = {
       this._scrollVisible = true;
       this.focusIDSignal = 0;
       this.keyPressIDSignal = 0;
+      this.pressEventOutIDSignal = 0;
       this.textInsertIDSignal = 0;
+      this.textChangeIDSignal = 0;
       this.enterAutoHideButtonsIDSignal = 0;
       this.leaveAutoHideButtonsIDSignal = 0;
       this.scrollIDSignal = 0;
@@ -184,7 +187,7 @@ MyDesklet.prototype = {
          this.clutterText.connect('button-press-event', Lang.bind(this, this._onButtonPress));
          this.clutterText.connect('button-release-event', Lang.bind(this, this._onButtonRelease));
          this.textBox.connect('button-press-event', Lang.bind(this, this._onButtonPress));
-         this.textBox.connect('button-release-event', Lang.bind(this, this._onButtonRelease));
+         //this.textBox.connect('button-release-event', Lang.bind(this, this._onButtonRelease));
          //this.entry.connect('allocation_changed', Lang.bind(this, this._onAllocationChanged));
          this.scrollBox.connect('allocation_changed', Lang.bind(this, this._onAllocationChanged));
 
@@ -416,7 +419,7 @@ MyDesklet.prototype = {
    },
 
    newNote: function(noteMessage) {
-      if((noteMessage)&&(noteMessage != "")&&(noteMessage != _("Type to your note..."))) {
+      if((noteMessage)&&(noteMessage != "")&&(noteMessage != _("Type your note..."))) {
          if((this.notesList.length == 0)||(this.noteCurrent > this.notesList.length)) {
             try {
                let maxValue = this.maxValueNote();
@@ -850,7 +853,7 @@ MyDesklet.prototype = {
    },
 
    reset: function () {
-      this.titleNote.set_text(_("Type to your note..."));
+      this.titleNote.set_text(_("Type your note..."));
       this._getTextHeight();
       this.entry.text = "";
       this.setPencil(false);
@@ -929,7 +932,7 @@ MyDesklet.prototype = {
       this.bannerBox.add(this.buttonBanner, { x_fill: true, y_fill: false, expand: true, x_align: St.Align.MIDDLE, y_align: St.Align.MIDDLE });
       this.bannerBox.set_style('padding-top: 6px;');
 
-      this.entry = new St.Entry({ name: 'sticky-note-entry', hint_text: _("Type to your note..."), track_hover: false, can_focus: true});
+      this.entry = new St.Entry({ name: 'sticky-note-entry', hint_text: _("Type your note..."), track_hover: false, can_focus: true});
       //this.textBox.add(this.entry, {x_fill: true, y_fill: false, expand: true, x_align: St.Align.START, y_align: St.Align.START});
       this.textBox.add(this.textAreaBox, { x_fill: true, y_fill: true, expand: true, x_align: St.Align.START, y_align: St.Align.START });
       this.textAreaBox.add(this.entry, { x_fill: true, y_fill: false, expand: true, x_align: St.Align.START, y_align: St.Align.START });
@@ -1012,6 +1015,9 @@ MyDesklet.prototype = {
       if(this.textInsertIDSignal > 0)
          this.clutterText.disconnect(this.textInsertIDSignal);
       this.textInsertIDSignal = 0;
+      if(this.textChangeIDSignal > 0)
+         this.clutterText.disconnect(this.textChangeIDSignal);
+      this.textChangeIDSignal = 0;
       if(this.enterAutoHideButtonsIDSignall > 0)
          this.actor.disconnect(this.enterAutoHideButtonsIDSignal);
       this.enterAutoHideButtonsIDSignal = 0;
@@ -1088,6 +1094,9 @@ MyDesklet.prototype = {
          if(this.textInsertIDSignal > 0)
             this.clutterText.disconnect(this.textInsertIDSignal);
          this.textInsertIDSignal = 0;
+         if(this.textChangeIDSignal > 0)
+            this.clutterText.disconnect(this.textChangeIDSignal);
+         this.textChangeIDSignal = 0;
          this.newNote(this.entry.text);
          this._text = this.entry.text;
          this.titleNote.set_text(this.entry.text);
@@ -1103,6 +1112,19 @@ MyDesklet.prototype = {
       }
    },
 
+   _onPressEventOut: function(actor, event) {
+      if(event.type() == Clutter.EventType.BUTTON_PRESS) {
+         if(this.pressEventOutIDSignal > 0)
+            global.stage.disconnect(this.pressEventOutIDSignal);
+         this.pressEventOutIDSignal = 0;
+         global.set_stage_input_mode(Cinnamon.StageInputMode.FOCUSED);
+         global.set_stage_input_mode(Cinnamon.StageInputMode.NORMAL);
+         if(!this.entry.contains(event.get_source())) {
+            this._onFocusOut(actor, event);
+         }
+      }
+   },
+
    _onButtonPress: function(actor, event) {
       try {
          if(this.focusIDSignal == 0)
@@ -1111,17 +1133,21 @@ MyDesklet.prototype = {
             this.keyPressIDSignal = this.clutterText.connect('key-press-event', Lang.bind(this, this._onKeyPress));
          if(this.textInsertIDSignal == 0)
             this.textInsertIDSignal = this.clutterText.connect('insert-text', Lang.bind(this, this._onInsertText));
+         if(this.textChangeIDSignal == 0)
+            this.textChangeIDSignal = this.clutterText.connect('text-changed', Lang.bind(this, this._onChangedText));
          this.setPencil(true);
          global.stage.set_key_focus(this.clutterText);
-         if (event.get_button() == 1) {
-            global.set_stage_input_mode(Cinnamon.StageInputMode.FOCUSED);
-            global.set_stage_input_mode(Cinnamon.StageInputMode.NORMAL);
-           // this.fixWidth(this._fWidth);
-         }
-         else if (event.get_button() == 3) {
+         global.set_stage_input_mode(Cinnamon.StageInputMode.FOCUSED);
+         global.set_stage_input_mode(Cinnamon.StageInputMode.NORMAL);
+         global.set_stage_input_mode(Cinnamon.StageInputMode.FULLSCREEN);
+         
+         if(event.get_button() == 3) {
             this._entryActiveMenu = true;
             this._updateCopyItem();
             this._updatePasteItem();
+         } else {
+            if(this.pressEventOutIDSignal == 0)
+               this.pressEventOutIDSignal = global.stage.connect('captured-event', Lang.bind(this, this._onPressEventOut));
          }
       } catch(e) {
          this.showErrorMessage(e.message);
@@ -1130,18 +1156,58 @@ MyDesklet.prototype = {
 
    _onButtonRelease: function(actor, event) {
       if(this._entryActiveMenu) {
-          this._onButtonReleaseEvent(this.actor, event);
-          if(this.selection) {
+         this._onButtonReleaseEvent(this.actor, event);
+         if(this.selection) {
             let len = this.selection.length;
             let lenClutter = this.clutterText.text.length;
             if((len > 0)&&(this.selectBounds >= 0)&&(this.selectBounds <= lenClutter))
                this.clutterText.set_selection(this.selectBounds - this.selection.length, this.selectBounds);
          }
       } 
-      else if(this._menu.isOpen)
-         this._onButtonReleaseEvent(this.actor, event);
+      /*else if(this._menu.isOpen)
+         this._onButtonReleaseEvent(this.actor, event);*/
       this._entryActiveMenu = false;
    },
+/*
+   _onButtonPressEvent: function(actor, event) {
+      //block the new way handdle event on cinnamon..
+      return true;
+   },*/
+
+
+   _onButtonReleaseEvent: function(actor, event) {//block the new way handdle event on cinnamon...
+      if(event.get_button() == 3) {
+         this._menu.toggle();
+         // Check if menu gets out of monitor. Move menu to left side if so
+
+         // Find x-position of right edge of monitor
+         let rightEdge;
+         for(let i = 0; i < Main.layoutManager.monitors.length; i++) {
+            let monitor = Main.layoutManager.monitors[i];
+
+            if(monitor.x <= this.actor.x && monitor.y <= this.actor.y &&
+               monitor.x + monitor.width > this.actor.x &&
+               monitor.y + monitor.height > this.actor.y) {
+               rightEdge = monitor.x + monitor.width;
+               break;
+            }
+         }
+
+         if(this.actor.x + this.actor.width + this._menu.actor.width > rightEdge) {
+            this._menu.setArrowSide(St.Side.RIGHT);
+         } else {
+            this._menu.setArrowSide(St.Side.LEFT);
+         }
+
+      } else {
+         if(this._menu.isOpen) {
+            this._menu.toggle();
+         }
+         this.on_desklet_clicked(event);
+      }
+      return true;
+   },
+
 /*
    _deleteSelection: function(actor, event) {
       this.selection = "";
@@ -1177,7 +1243,7 @@ MyDesklet.prototype = {
    _updatePasteItem: function() {
       this._clipboard.get_text(Lang.bind(this,
          function(clipboard, text) {
-            this.pasteMenuItem.setSensitive(text && text != '' && this.clutterText.text != '' && this._isActivated());
+            this.pasteMenuItem.setSensitive(text && text != '' && this._isActivated());
          }));
     },
 
@@ -1188,11 +1254,17 @@ MyDesklet.prototype = {
    _onPasteActivated: function() {
       this._clipboard.get_text(Lang.bind(this,
          function(clipboard, text) {
-            if (!text)
-               return;
-            this.clutterText.delete_selection();
-            let pos = this.clutterText.get_cursor_position();
-            this.clutterText.insert_text(text, pos);
+            if(text) {
+               global.stage.set_key_focus(this.entry);
+               if(this.clutterText.text == _("Type your note...")) {
+                  this.clutterText.set_text("");
+               }
+               this.clutterText.delete_selection();
+               let pos = this.clutterText.get_cursor_position();
+               this.clutterText.insert_text(text, pos);
+               this.entry.set_text(this.clutterText.text);
+               this._onFocusOut();
+            }
          }));
    },
 
@@ -1234,8 +1306,6 @@ MyDesklet.prototype = {
             return true;
          }
       }
-
-
       if(this.symbol == Clutter.Escape) {
          if(this._isActivated()) {
             this.reset();
@@ -1261,8 +1331,8 @@ MyDesklet.prototype = {
       return false;
    },
 
-   _onInsertText: function(actor, newText, length) {
-      if((new Date().getTime() - this.keyPress < 50)&&(Keymap.get_caps_lock_state())) {
+   _onChangedText: function(actor) {
+      if((this.newText != "")&&(Keymap.get_caps_lock_state())) {
          let position = -1;
          let newEntryText = actor.get_text();
          for(let i = 0; i < newEntryText.length; i++) {
@@ -1272,13 +1342,35 @@ MyDesklet.prototype = {
             }
          }
          if(position != -1) {
-            //this.keyPress = false;
+            actor.delete_text(position, position + 1);
+            actor.insert_text(this.newText.toUpperCase(), position);
+            actor.set_cursor_position(position);
+            actor.set_selection(position, position);
+            this.newText = "";
+            this.keyPress = 0; 
+         }
+      }
+      this.newText = "";
+   },
+
+   _onInsertText: function(actor, newText, length) {
+      if((new Date().getTime() - this.keyPress < 20)&&(Keymap.get_caps_lock_state())) {
+         this.newText = newText;
+         let position = -1;
+         let newEntryText = actor.get_text();
+         for(let i = 0; i < newEntryText.length; i++) {
+            if(this.oldEntryText.charAt(i) != newEntryText.charAt(i)) {
+               position = i;
+               break;
+            }
+         }
+         if(position != -1) {
+            this.newText = "";
+            this.keyPress = 0;
             actor.delete_text(position, position + 1);
             actor.insert_text(newText.toUpperCase(), position);
          }
       }
-      //this.keyPress = false;
-      return false;
    },
 
    _onMultInstanceChange: function() {

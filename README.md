@@ -1,11 +1,11 @@
 Sticky Notes
 =====
 
-Desklet: Sticky Notes Version: v0.9.3-Beta
+Desklet: Sticky Notes Version: v1.0-Beta
 
 O.S.: Cinnamon 
 
-Release Date: 20 February 2014.
+Release Date: 25 April 2014.
 
 Author: Lester Carballo Pérez
 
@@ -24,13 +24,8 @@ https://github.com/zagortenay333
 
 ![Alt text](/stickyNotes@lestcape/Capture.png)
 
-IMPORTANT: Use with Cinnamon 2.1 or higher.
+IMPORTANT: Use with Cinnamon 2.0 or higher.
 --------------
-
-This applet not longer has support for Arch Linux.
---------------
-The comunity of Arch Linux do not want that I or other Cinnamon developer, publish about Cinnamon, and receive the users feedback (necessary on the developing any app). When the comunity of Arch Linux, want to be open to the free software world, sure that I want to support Arch Linux again...
-
 
 This program is free software:
 --------------
@@ -50,6 +45,10 @@ Installation Instructions:
 
 Change Log:
 --------------
+v1.0- Beta
+    - Included compatibility with cinnamon 2.2.
+    - Fixed some minor issues.
+
 v0.9.3- Beta
    - Now the desklet allow resize with the mouse.
    - The resizer mechanism was re-implemented.
