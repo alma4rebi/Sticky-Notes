@@ -1,5 +1,5 @@
-// Desklet : Sticky Notes           Version      : v1.0-Beta
-// O.S.    : Cinnamon               Release Date : 25 April 2014.
+// Desklet : Sticky Notes           Version      : v1.1-Beta
+// O.S.    : Cinnamon               Release Date : 05 June 2014.
 // Author  : Lester Carballo Pérez  Email        : lestcape@gmail.com
 //
 // Website : https://github.com/lestcape/Sticky-Notes
@@ -47,10 +47,15 @@ const Signals = imports.signals;
 const MIN_WIDTH = 200;
 const MIN_HEIGHT = 80;
 const DELTA_MIN_RESIZE = 10;
+const Gettext = imports.gettext;
 
 
 function _(str) {
-   return Gettext.dgettext("stickyNotes@lestcape", str);
+   let resultConf = Gettext.dgettext("stickyNotes@lestcape", str);
+   if(resultConf != str) {
+      return resultConf;
+   }
+   return Gettext.gettext(str);
 }
 
 function MyDesklet(metadata, desklet_id){
@@ -68,8 +73,8 @@ MyDesklet.prototype = {
       this.instance_id = desklet_id;
      // this.renderFontFamily();
       this.execInstallLanguage();
-      _ = imports.gettext.domain(this.uuid).gettext;
-      imports.gettext.bindtextdomain(this.uuid, GLib.get_home_dir() + "/.local/share/locale");
+      //_ = imports.gettext.domain(this.uuid).gettext;
+      Gettext.bindtextdomain(this.uuid, GLib.get_home_dir() + "/.local/share/locale");
       this.setHeader(_("Sticky Notes"));
 
       if(!Main.deskletContainer.contains(this.actor)) 

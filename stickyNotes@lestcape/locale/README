@@ -1,5 +1,5 @@
-Desklet : Sticky Notes           Version      : v1.0-Beta
-O.S.    : Cinnamon               Release Date : 25 April 2014.
+Desklet : Sticky Notes           Version      : v1.1-Beta
+O.S.    : Cinnamon               Release Date : 05 June 2014.
 Author  : Lester Carballo Pérez  Email        : lestcape@gmail.com
 
 Website : https://github.com/lestcape/Sticky-Notes
@@ -40,6 +40,9 @@ Installation Instructions:
 
 Change Log:
 --------------
+v1.1- Beta
+    - Better support for translation.
+
 v1.0- Beta
     - Included compatibility with cinnamon 2.2.
     - Fixed some minor issues.
