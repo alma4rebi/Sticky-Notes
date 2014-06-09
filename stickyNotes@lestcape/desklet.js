@@ -1407,6 +1407,8 @@ MyDesklet.prototype = {
    },
 
    _onOpacityBoxesChange: function() {
+      if(this._opacityBoxes == 0)
+         this._opacityBoxes = 0.01;
       this._onOpacityRootChange();
       this._onOpacityTextChange();
       return true;
