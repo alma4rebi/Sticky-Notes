@@ -730,11 +730,10 @@ MyDesklet.prototype = {
    setStyle: function() {
       this.setStaples();
       this.setStripe();
-
       if(this._overrideTheme) {
-         let _colorBox = (this._boxColor.replace(')',',' + this._opacityBoxes + ')')).replace('rgb','rgba');
-         let _colorText = (this._textBoxColor.replace(')',',' + this._opacityBoxes + ')')).replace('rgb','rgba');
-         let _colorBanner = (this._boxColor.replace(')',',' + 0.1 + ')')).replace('rgb','rgba');
+         let _colorBox = this.textRGBToRGBA(this._boxColor, this._opacityBoxes);
+         let _colorText = this.textRGBToRGBA(this._textBoxColor, this._opacityBoxes);
+         let _colorBanner = this.textRGBToRGBA(this._boxColor, 0.1);
          this.rootBox.set_style_class_name('');
          if(this._themeStaples != "none") {
             this.rootBox.set_style('background-color: ' + _colorBox + '; color: ' + this._fontColor + '; border: ' +
@@ -1407,8 +1406,6 @@ MyDesklet.prototype = {
    },
 
    _onOpacityBoxesChange: function() {
-      if(this._opacityBoxes == 0)
-         this._opacityBoxes = 0.01;
       this._onOpacityRootChange();
       this._onOpacityTextChange();
       return true;
@@ -1417,7 +1414,7 @@ MyDesklet.prototype = {
    _onOpacityRootChange: function() {
       let newStyle;
       if(this._overrideTheme) {
-         let _colorBox = (this._boxColor.replace(')',',' + this._opacityBoxes + ')')).replace('rgb','rgba');
+         let _colorBox = this.textRGBToRGBA(this._boxColor, this._opacityBoxes);
          if(this._themeStaples != "none")
             newStyle = 'background-color: ' + _colorBox + '; color: ' + this._fontColor + '; border: ' +
                         this._borderBoxWidth + 'px solid ' + this._borderBoxColor +
@@ -1436,17 +1433,17 @@ MyDesklet.prototype = {
          let defColor = new Clutter.Color().to_string();
          let boxColor = themeNode.get_color('background-color').to_string();
          if(defColor != boxColor) {
-            remplaceColor = this.updateOpacityColor(boxColor);
-            newStyle += ' background-color: ' + remplaceColor + ';';
+            remplaceColor = this.updateOpacityColor(boxColor, this._opacityBoxes);
+            newStyle += 'background-color: ' + remplaceColor + ';';
          }
          boxColor = themeNode.get_color('background-gradient-start').to_string();
          if(defColor != boxColor) {
-            remplaceColor = this.updateOpacityColor(boxColor);
+            remplaceColor = this.updateOpacityColor(boxColor, this._opacityBoxes);
             newStyle += ' background-gradient-start: ' + remplaceColor + ';';
          }
          boxColor = themeNode.get_color('background-gradient-end').to_string();
          if(defColor != boxColor) {
-            remplaceColor = this.updateOpacityColor(boxColor);
+            remplaceColor = this.updateOpacityColor(boxColor, this._opacityBoxes);
             newStyle += ' background-gradient-end: ' + remplaceColor + ';';
          }
       }
@@ -1458,7 +1455,7 @@ MyDesklet.prototype = {
    _onOpacityTextChange: function() {
       let newStyle = '';
       if(this._overrideTheme) {
-         let _colorText = (this._textBoxColor.replace(')',',' + this._opacityBoxes + ')')).replace('rgb','rgba');
+         let _colorText = this.textRGBToRGBA(this._textBoxColor, this._opacityBoxes);
          newStyle = 'background-color: ' + _colorText + '; background:' + _colorText + ';';
       } else {
          let remplaceColor;
@@ -1466,17 +1463,17 @@ MyDesklet.prototype = {
          let defColor = new Clutter.Color().to_string();
          let boxColor = themeNode.get_color('background-color').to_string();
          if(defColor != boxColor) {
-            remplaceColor = this.updateOpacityColor(boxColor);
-            newStyle += ' background-color: ' + remplaceColor + ';';
+            remplaceColor = this.updateOpacityColor(boxColor, this._opacityBoxes);
+            newStyle += 'background-color: ' + remplaceColor + ';';
          }
          boxColor = themeNode.get_color('background-gradient-start').to_string();
          if(defColor != boxColor) {
-            remplaceColor = this.updateOpacityColor(boxColor);
+            remplaceColor = this.updateOpacityColor(boxColor, this._opacityBoxes);
             newStyle += ' background-gradient-start: ' + remplaceColor + ';';
          }
          boxColor = themeNode.get_color('background-gradient-end').to_string();
          if(defColor != boxColor) {
-            remplaceColor = this.updateOpacityColor(boxColor);
+            remplaceColor = this.updateOpacityColor(boxColor, this._opacityBoxes);
             newStyle += ' background-gradient-end: ' + remplaceColor + ';';
          }
       }
@@ -1486,12 +1483,22 @@ MyDesklet.prototype = {
       }
    },
 
-   updateOpacityColor: function(color) {
+   updateOpacityColor: function(color, opacity) {
+      if((!opacity)||(opacity == 0))
+         opacity = "0.01";
       let r = parseInt(color.substring(1,3),16);
       let g = parseInt(color.substring(3,5),16);
       let b = parseInt(color.substring(5,7),16);
       //let a = parseInt(color.substring(7,9),16);
-      return "rgba("+r+","+g+","+b+","+(this._opacityBoxes)+")";
+      //Main.notify("rgba("+r+","+g+","+b+","+(opacity)+")");
+      return "rgba("+r+","+g+","+b+","+opacity+")";
+   },
+
+   textRGBToRGBA: function(textRGB, opacity) {
+      if((!opacity)||(opacity == 0))
+         opacity = "0.0";
+      //Main.notify((textRGB.replace(')',',' + opacity + ')')).replace('rgb','rgba'));
+      return (textRGB.replace(')',',' + opacity + ')')).replace('rgb','rgba');
    },
 
    _onSizeChange: function() {
