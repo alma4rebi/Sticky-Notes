@@ -46,78 +46,78 @@ Installation Instructions:
 Change Log:
 --------------
 v1.1- Beta
-    - Better support for translation.
-    - Added a confirmation dialog to delete notes.
-    - Added the Desklet Applet Manager.
-    - Improved switching between modes.
-    - Better support to resize option.
-    - Several bugs fixed.
+  - Better support for translation.
+  - Added a confirmation dialog to delete notes.
+  - Added the Desklet Applet Manager.
+  - Improved switching between modes.
+  - Better support to resize option.
+  - Several bugs fixed.
 
 v1.0- Beta
-    - Included compatibility with cinnamon 2.2.
-    - Fixed some minor issues.
+  - Included compatibility with cinnamon 2.2.
+  - Fixed some minor issues.
 
 v0.9.3- Beta
-   - Now the desklet allow resize with the mouse.
-   - The resizer mechanism was re-implemented.
-   - Fixed some minors problems.
+  - Now the desklet allow resize with the mouse.
+  - The resizer mechanism was re-implemented.
+  - Fixed some minors problems.
 
 v0.9.2- Beta
-   - Allow override the Cinnamon theme without restart Cinnamon.
+  - Allow override the Cinnamon theme without restart Cinnamon.
 
 v0.9.1- Beta
-   - Added Cinnamon theme support.
-   - Allow auto scroll.
-   - Allow override Cinnamon theme.
-   - Remember all desklets positions on the change to multiple instance.
-   - Remember all minimized desklets.
-   - Now you can launch all instances of desklets to the top of all apps.
-   - You can hide the desklets.
-   - Was improved the settings.
-   - The images are on svg format now.
-   - Improved the code and fixed some bugs.
+  - Added Cinnamon theme support.
+  - Allow auto scroll.
+  - Allow override Cinnamon theme.
+  - Remember all desklets positions on the change to multiple instance.
+  - Remember all minimized desklets.
+  - Now you can launch all instances of desklets to the top of all apps.
+  - You can hide the desklets.
+  - Was improved the settings.
+  - The images are on svg format now.
+  - Improved the code and fixed some bugs.
 
 0.9- Beta
-   - Fixed the caps lock bug in St.Entry(ClutterText).
+  - Fixed the caps lock bug in St.Entry(ClutterText).
 
 0.8- Beta
-   - The buttons now react visually.
+  - The buttons now react visually.
 
 0.7- Beta
-   - Changed the UUID.
-   - Update some images.
+  - Changed the UUID.
+  - Update some images.
 
 0.6- Beta
-   - Fixed a bug in the desklet start.
-   - Now you can control the height of the note using the scroll.
-   - No longer cuts the image in the theme of the staples.
+  - Fixed a bug in the desklet start.
+  - Now you can control the height of the note using the scroll.
+  - No longer cuts the image in the theme of the staples.
 
 0.5- Beta
-   - Was fixed a bug that appear when you don't have any notes.
+  - Was fixed a bug that appear when you don't have any notes.
 
 0.4- Beta
-   - Option for multiple instances was added.
-   - Pencil to mark the edition of current note was  added.
-   - Support for themes of pencils was implemented.
-   - You can now auto hide the buttons of actions.
-   - Added new buttons of actions.
-   - Added new themes.
-   - Visual improvements.
-   - Some bug fixes.
+  - Option for multiple instances was added.
+  - Pencil to mark the edition of current note was  added.
+  - Support for themes of pencils was implemented.
+  - You can now auto hide the buttons of actions.
+  - Added new buttons of actions.
+  - Added new themes.
+  - Visual improvements.
+  - Some bug fixes.
 
 0.3- Beta
-   - Moved the staple themes to vertical position due a bug in St.Entry.
+  - Moved the staple themes to vertical position due a bug in St.Entry.
 
 0.2- Beta
-   - Added support for language.
-   - Added Spanish language.
-   - Themes selection mechanism was implemented.
-   - The popup menus was merged in only one menu.
-   - Fixed some error in text selection.
-   - Sort notes by date.
+  - Added support for language.
+  - Added Spanish language.
+  - Themes selection mechanism was implemented.
+  - The popup menus was merged in only one menu.
+  - Fixed some error in text selection.
+  - Sort notes by date.
 
 0.1- Beta
-   - Initial release.
+  - Initial release.
 
 ==============
 To report problems, request new features, languages, or anything you want in the desklet, visit:
