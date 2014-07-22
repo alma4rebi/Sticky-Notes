@@ -33,6 +33,44 @@
         "type": "checkbox",
         "tooltip": "Check this if you want to enable smooth autoscrolling or not."
     },
+    "raise-new-note": {
+        "default": true,
+        "description": "Raise the new note.",
+        "type": "checkbox",
+        "tooltip": "Check this if you want to raise the new note or not."
+    },
+    "separator-applet-top": {
+       "type": "separator"
+    },
+    "header-applet": {
+        "type": "header",
+        "description": "Applet Manager:"
+    },
+    "separator-applet-bottom": {
+       "type": "separator"
+    },
+    "applet-manager": {
+        "default": false,
+        "description": "Show Applet Manager.",
+        "type": "checkbox",
+        "tooltip": "Check this if you want to show the Applet Manager."
+    },
+    "applet-collapsed": {
+        "default": false,
+        "description": "Collapsed Applet Manager.",
+        "type": "checkbox",
+        "dependency": "applet-manager",
+        "indent": true,
+        "tooltip": "Check this if you want to collapsed the Applet Manager."
+    },
+    "applet-symbolic": {
+        "default": false,
+        "description": "Show symbolic icons in the Applet Manager.",
+        "type": "checkbox",
+        "dependency": "applet-manager",
+        "indent": true,
+        "tooltip": "Check this if you want to show symbolic icons in the Applet Manager."
+    },
     "separator-layouts-top": {
        "type": "separator"
     },
@@ -427,5 +465,9 @@
     "list-hide-text-box": {
         "type": "generic",
         "default": ""
+    },
+    "applet-manager-order": {
+        "type": "generic",
+        "default": "panel1:right:0"
     }
 }
