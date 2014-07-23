@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Sticky-Notes 0.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-11-08 21:29-0600\n"
-"PO-Revision-Date: 2014-07-22 11:54-0600\n"
+"PO-Revision-Date: 2014-07-22 21:15-0600\n"
 "Last-Translator: Lester Carballo Pérez <lestcape@gmail.com>\n"
 "Language-Team: lestcape <lestcape@gmail.com>\n"
 "MIME-Version: 1.0\n"
@@ -78,13 +78,25 @@ msgstr "Raise Notes"
 msgid "Hide Notes"
 msgstr "Hide Notes"
 
+#: desklet.js:458
+msgid "Collapse"
+msgstr "Collapse"
+
 #: desklet.js:459
+msgid "Expand"
+msgstr "Expand"
+
+#: desklet.js:460
 msgid "Minimize Note"
 msgstr "Minimize Note"
 
 #: desklet.js:461
 msgid "Maximize Note"
 msgstr "Maximize Note"
+
+#: desklet.js:462
+msgid "Single Instance"
+msgstr "Single Instance"
 
 #: desklet.js:463
 msgid "Do you want to delete this note?"

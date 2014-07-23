@@ -276,16 +276,16 @@ MyDesklet.prototype = {
       this._timeOutResize = 0;
       this.myManager = null;
 
+      this._untrackMouse();
       try {
          //Main.themeManager.connect('theme-set', Lang.bind(this, this._onThemeChange));
          Mainloop.idle_add(Lang.bind(this, function() {
-         this._updateComplete();
+            this._updateComplete();
+            this._trackMouse();
          }));
       } catch(e) {
          this.showErrorMessage(e.message);
       }
-
-      this._trackMouse();
    },
 
    _onThemeChange: function() {
@@ -1904,7 +1904,7 @@ MyDesklet.prototype = {
       "tooltip": "The current note."
        },*/
          this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "applet-manager", "_appletManager", this._onAppletManagerChange, null);
-         this.settings.bindProperty(Settings.BindingDirection.IN, "applet-collapsed", "_appletCollapsed", this._onSetAppletType, null);
+         this.settings.bindProperty(Settings.BindingDirection.IBIDIRECTIONA, "applet-collapsed", "_appletCollapsed", this._onSetAppletType, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "applet-symbolic", "_appletSymbolic", this._onSetAppletType, null); 
 
          this.settings.bindProperty(Settings.BindingDirection.IN, "stripe-layout", "_themeStripe", this._onStyleChange, null);

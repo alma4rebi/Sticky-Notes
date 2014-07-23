@@ -79,12 +79,24 @@ msgstr ""
 msgid "Hide Notes"
 msgstr ""
 
+#: desklet.js:458
+msgid "Collapse"
+msgstr ""
+
 #: desklet.js:459
+msgid "Expand"
+msgstr ""
+
+#: desklet.js:460
 msgid "Minimize Note"
 msgstr ""
 
 #: desklet.js:461
 msgid "Maximize Note"
+msgstr ""
+
+#: desklet.js:462
+msgid "Single Instance"
 msgstr ""
 
 #: desklet.js:463
