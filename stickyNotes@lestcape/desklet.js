@@ -146,12 +146,14 @@ DeskletAppletManager.prototype = {
    },
 
    _onEnabledAppletsChanged: function() {
-      let pName = this.applet._panelLocation.get_name();
-      let zone_string = this.applet._panelLocation.get_name().substring(5, pName.length).toLowerCase();
-      let panel_string = "panel1";
-      if((Main.panel2)&&(Main.panel2["_"+zone_string+"Box"] == this.applet._panelLocation))
-         panel_string = "panel2";
-      this.desklet.appletManagerOrder = panel_string+":"+zone_string+":"+this.applet._order;
+      if(this.applet) {
+         let pName = this.applet._panelLocation.get_name();
+         let zone_string = this.applet._panelLocation.get_name().substring(5, pName.length).toLowerCase();
+         let panel_string = "panel1";
+         if((Main.panel2)&&(Main.panel2["_"+zone_string+"Box"] == this.applet._panelLocation))
+            panel_string = "panel2";
+         this.desklet.appletManagerOrder = panel_string+":"+zone_string+":"+this.applet._order;
+      }
    },
 
    destroyInstance: function() {

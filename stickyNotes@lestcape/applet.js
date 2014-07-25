@@ -157,9 +157,12 @@ MyApplet.prototype = {
                this.appletNote = this.appletBox.add_applet_icon_name("text-editor");
                this.set_applet_tooltip(_("Sticky Notes Manager"));
                this.appletNote.connect('button-press-event', Lang.bind(this, function(actor, event) {
+                  if((this._draggable)&&(!this._draggable.inhibit))
+                     return false;
                   if(event.get_button() == 1) {
                      this.menu.toggle();
                   }
+                  return false;
                }));
                //this.mainBox.add(this.appletBox.actor, { y_align: St.Align.MIDDLE, y_fill: false });
             }
@@ -170,9 +173,12 @@ MyApplet.prototype = {
    },
 
    addNewNote: function (actor, event) {
+      if((this._draggable)&&(!this._draggable.inhibit))
+         return false;
       if(event.get_button() == 1) {
          this.desklet._onAddNote();
       }
+      return false;
    },
 
    tryRaiseNotes: function (actor, event) {
@@ -185,22 +191,31 @@ MyApplet.prototype = {
    },
 
    raiseNotes: function (actor, event) {
+      if((this._draggable)&&(!this._draggable.inhibit))
+         return false;
       if(event.get_button() == 1) {
          //Main.notify("Hola Raise");
          this.desklet.toggleRaise();
       }
+      return false;
    },
 
    hideNotes: function (actor, event) {
+      if((this._draggable)&&(!this._draggable.inhibit))
+         return false;
       if(event.get_button() == 1) {
          this.desklet.toggleHide();
       }
+      return false;
    },
 
    tryMultInstance: function (actor, event) {
+      if((this._draggable)&&(!this._draggable.inhibit))
+         return false;
       if(event.get_button() == 1) {
          this.multInstance();
       }
+      return false;
    },
 
    multInstance: function () {
