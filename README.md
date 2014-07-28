@@ -1,11 +1,11 @@
 Sticky Notes
 =====
 
-Desklet: Sticky Notes Version: v1.1-Beta
+Desklet: Sticky Notes Version: v1.2-Beta
 
 O.S.: Cinnamon 
 
-Release Date: 22 July 2014.
+Release Date: 28 July 2014.
 
 Author: Lester Carballo Pérez
 
@@ -45,6 +45,11 @@ Installation Instructions:
 
 Change Log:
 --------------
+v1.2- Beta
+  - Support the new change of dnd.js.
+  - Improved the start speed of the desklet (only copy the languages file when it's needed). Thanks to jake-phy.
+  - Some bugs fixed.
+
 v1.1- Beta
   - Better support for translation.
   - Added a confirmation dialog to delete notes.

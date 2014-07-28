@@ -1,5 +1,5 @@
-// Desklet : Sticky Notes           Version      : v1.1-Beta
-// O.S.    : Cinnamon               Release Date : 05 June 2014.
+// Desklet : Sticky Notes           Version      : v1.2-Beta
+// O.S.    : Cinnamon               Release Date : 28 June 2014.
 // Author  : Lester Carballo Pérez  Email        : lestcape@gmail.com
 //
 // Website : https://github.com/lestcape/Sticky-Notes
@@ -25,6 +25,7 @@
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+const DND = imports.ui.dnd;
 const Lang = imports.lang;
 const Gio = imports.gi.Gio;
 const St = imports.gi.St;
@@ -188,7 +189,8 @@ MyDesklet.prototype = {
    __proto__: Desklet.Desklet.prototype,
 
    _init: function(metadata, desklet_id) {
-      Desklet.Desklet.prototype._init.call(this, metadata, desklet_id);
+      //Desklet.Desklet.prototype._init.call(this, metadata, desklet_id);
+      this._myInit(metadata, desklet_id);
       this.metadata = metadata;
       this._uuid = this.metadata["uuid"];
       this.newText = "";
@@ -290,6 +292,78 @@ MyDesklet.prototype = {
       }
    },
 
+   _myInit: function(metadata, desklet_id) {
+        this.metadata = metadata;
+        this.instance_id = desklet_id;
+        this.actor = new St.BoxLayout({reactive: true, track_hover: true, vertical: true});
+
+        this._header = new St.Bin({style_class: 'desklet-header'});
+        this._header_label = new St.Label();
+        this._header_label.set_text('Desklet');
+        this._header.set_child(this._header_label);
+
+        this.content = new St.Bin();
+
+        this.actor.add_actor(this._header);
+        this.actor.add_actor(this.content);
+
+        this._updateDecoration();
+        global.settings.connect('changed::desklet-decorations', Lang.bind(this, this._updateDecoration));
+
+        this._menu = new PopupMenu.PopupMenu(this.actor, 0.0, St.Side.LEFT, 0);
+        this._menuManager = new PopupMenu.PopupMenuManager(this);
+        this._menuManager.addMenu(this._menu);
+        Main.uiGroup.add_actor(this._menu.actor);
+        this._menu.actor.hide();
+
+        this.actor.connect('button-press-event', Lang.bind(this, this._onButtonPressEvent));
+
+        this._uuid = null;
+        this._dragging = false;
+        this._dragOffset = [0, 0];
+        this.actor._desklet = this;
+        this.actor._delegate = this;
+
+        this._draggable = DND.makeDraggable(this.actor, {restoreOnSuccess: true, manualMode: true}, Main.deskletContainer.actor);
+        this.idPress = this.actor.connect('button-press-event',
+                               Lang.bind(this._draggable, this._draggable._onButtonPress));
+
+        this._draggable.connect('drag-begin', Lang.bind(this, this._onDragBegin));
+        this._draggable.connect('drag-end', Lang.bind(this, this._onDragEnd));
+        this._draggable.connect('drag-cancelled', Lang.bind(this, this._onDragEnd));
+
+        this._drag_end_ids = {"drag-end": 0, "drag-cancelled": 0};
+        this._drag_end_ids["drag-end"] = this._draggable.connect('drag-end', Lang.bind(this, function() {
+           if(Main._findModal(this.actor) >= 0)
+              Main.popModal(this.actor, global.get_current_time());
+           else {
+              global.stage.set_key_focus(null);
+              global.end_modal(global.get_current_time());
+              global.set_stage_input_mode(Cinnamon.StageInputMode.NORMAL);
+           }
+        }));
+
+        this._drag_end_ids["drag-cancelled"] = this._draggable.connect('drag-cancelled', Lang.bind(this, function() {
+           if(Main._findModal(this.actor) >= 0)
+              Main.popModal(this.actor, global.get_current_time());
+           else {
+              global.stage.set_key_focus(null);
+              global.end_modal(global.get_current_time());
+              global.set_stage_input_mode(Cinnamon.StageInputMode.NORMAL);
+           }
+        }));
+   },
+
+   _onDragBegin: function() {
+      global.set_stage_input_mode(Cinnamon.StageInputMode.FULLSCREEN);
+   },
+
+   _onDragEnd: function() {
+      global.set_stage_input_mode(Cinnamon.StageInputMode.NORMAL);
+      this._trackMouse();
+      this._saveDeskletPosition();
+   },
+
    _onThemeChange: function() {
       if(this._timeOutSettings == 0) {
          this._timeOutSettings = Mainloop.timeout_add(2000, Lang.bind(this, function() {
@@ -322,7 +396,6 @@ MyDesklet.prototype = {
          //this.textBox.connect('button-release-event', Lang.bind(this, this._onButtonRelease));
          //this.entry.connect('allocation_changed', Lang.bind(this, this._onAllocationChanged));
          this.scrollBox.connect('allocation_changed', Lang.bind(this, this._onAllocationChanged));
-
          this._onSizeChange();
          /*this._onFixWidth();
          this._onFixHeight();*/
@@ -2059,7 +2132,7 @@ MyDesklet.prototype = {
          deskletC.raisedBox = this.raisedBox;
          deskletC.deskletRaised = true;
          deskletC._untrackMouse();
-         deskletC._draggable.inhibit = true;
+         this._inhibitDragable(deskletC);
       }
       if(listOfDesklets.length == 1) {
         this.raisedBox._actionClose(listOfDesklets[0]);
@@ -2093,7 +2166,7 @@ MyDesklet.prototype = {
       deskletC.raisedBox = this.raisedBox;
       deskletC.deskletRaised = true;
       deskletC._untrackMouse();
-      deskletC._draggable.inhibit = true;
+      this._inhibitDragable(deskletC);
 
       this.raisedBox._actionClose(deskletC);
       this.raisedBox.show();
@@ -2118,6 +2191,7 @@ MyDesklet.prototype = {
          for(let i = 0; i < listOfDesklets.length; i++) {
             deskletC = listOfDesklets[i];
             if(!this.raisedBox.isSelected(deskletC)) {
+
                this.raisedBox.remove(deskletC);
                if(!Main.deskletContainer.contains(deskletC.actor))
                   Main.deskletContainer.addDesklet(deskletC.actor);
@@ -2131,12 +2205,8 @@ MyDesklet.prototype = {
                deskletC = listOfDesklets[i];
                deskletC.raisedBox = null;
                deskletC.deskletRaised = false;
-
-               if(deskletC._draggable._dragActor) {
-                  deskletC._draggable._dragActor.destroy();
-               }
                deskletC._trackMouse();
-               deskletC._draggable.inhibit = false;
+               this._enabledDragable(deskletC);
             }
          }
       }
@@ -2144,10 +2214,20 @@ MyDesklet.prototype = {
       this.changingRaiseState = false;
    },
 
-   _onDragEnd: function() {
-      global.set_stage_input_mode(Cinnamon.StageInputMode.NORMAL);
-      this._trackMouse();
-      this._saveDeskletPosition();
+   _enabledDragable: function(deskletC) {
+      deskletC._draggable.inhibit = false;
+      if(!deskletC.idPress) {
+         deskletC.idPress = deskletC.actor.connect('button-press-event',
+                               Lang.bind(deskletC._draggable, deskletC._draggable._onButtonPress));
+      }
+   },
+
+   _inhibitDragable: function(deskletC) {
+      deskletC._draggable.inhibit = true;
+      if(deskletC.idPress) {
+         deskletC.actor.disconnect(deskletC.idPress);
+         deskletC.idPress = null;
+      }
    },
 
    _readListPosition: function() {
@@ -2184,7 +2264,7 @@ MyDesklet.prototype = {
             this.positions[strNote] = [ax, ay];
             this._writeListPosition();
          }
-      } else { 
+      } else {
          this._xPosition = ax;
          this._yPosition = ay;
       }
@@ -2312,7 +2392,7 @@ MyDesklet.prototype = {
       this._disableOverResizeIcon();
       if(this.actorResize) {
          if(!this.deskletRaised) {
-            this._draggable.inhibit = false;
+            this._enabledDragable(this);
             global.set_stage_input_mode(Cinnamon.StageInputMode.NORMAL);
          }
          this.actorResize = null;
@@ -2333,7 +2413,7 @@ MyDesklet.prototype = {
             if(this.resizeIDSignal == 0) 
                this.resizeIDSignal = global.stage.connect('button-release-event', Lang.bind(this, this._disableResize));
             global.set_stage_input_mode(Cinnamon.StageInputMode.FULLSCREEN);
-            this._draggable.inhibit = true;
+            this._inhibitDragable(this);
             this._findMouseDeltha();
             global.set_cursor(Cinnamon.Cursor.DND_MOVE);
             this._fSize = true;
@@ -2466,34 +2546,34 @@ MyDesklet.prototype = {
       try {
          let _shareFolder = GLib.get_home_dir() + "/.local/share/";
          let _localeFolder = Gio.file_new_for_path(_shareFolder + "locale/");
-         let _moFolder = Gio.file_new_for_path(_shareFolder + "cinnamon/desklets/" + this._uuid + "/locale/mo/");
-
-         let children = _moFolder.enumerate_children('standard::name,standard::type',
-                                          Gio.FileQueryInfoFlags.NONE, null);
+         let _moFolder = Gio.file_new_for_path(_shareFolder + "cinnamon/applets/" + this._uuid + "/locale/mo/");
+         let children = _moFolder.enumerate_children('standard::name,standard::type,time::modified',
+                                                     Gio.FileQueryInfoFlags.NONE, null);
          let info, child, _moFile, _moLocale, _moPath;
-                   
-         while ((info = children.next_file(null)) != null) {
+         while((info = children.next_file(null)) != null) {
             let type = info.get_file_type();
-            if (type == Gio.FileType.REGULAR) {
+            let modified = info.get_modification_time().tv_sec;
+            if(type == Gio.FileType.REGULAR) {
                _moFile = info.get_name();
-               if (_moFile.substring(_moFile.lastIndexOf(".")) == ".mo") {
+               if(_moFile.substring(_moFile.lastIndexOf(".")) == ".mo") {
                   _moLocale = _moFile.substring(0, _moFile.lastIndexOf("."));
                   _moPath = _localeFolder.get_path() + "/" + _moLocale + "/LC_MESSAGES/";
                   let src = Gio.file_new_for_path(String(_moFolder.get_path() + "/" + _moFile));
                   let dest = Gio.file_new_for_path(String(_moPath + this._uuid + ".mo"));
+                  let destModified = dest.query_info('time::modified', Gio.FileQueryInfoFlags.NONE, null).get_modification_time().tv_sec;
                   try {
-                     //if(!this.equalsFile(dest.get_path(), src.get_path())) {
+                     if(modified > destModified) {
                         this._makeDirectoy(dest.get_parent());
                         src.copy(dest, Gio.FileCopyFlags.OVERWRITE, null, null);
-                     //}
+                     }
                   } catch(e) {
-                     this.showErrorMessage(e.message);
+                     global.logError(e);
                   }
                }
             }
          }
       } catch(e) {
-         this.showErrorMessage(e.message);
+         global.logError(e);
       }
    }
 };
@@ -2639,8 +2719,9 @@ RaisedBox.prototype = {
    },
 
    _actionCloseAll: function() {
-      if(this.deskletSelected)
+      if(this.deskletSelected) {
          this.deskletSelected.actor.set_position(this.positionSelected[0], this.positionSelected[1]);
+      }
       this.deskletSelected = null;
       this.emit("closed");
    },
