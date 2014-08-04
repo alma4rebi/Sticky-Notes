@@ -1777,20 +1777,20 @@ MyDesklet.prototype = {
             newStyle = 'border-top: none; padding-top: 0px;';
          else
             newStyle = '';
-         let defColor = new Clutter.Color().to_string();
-         let boxColor = themeNode.get_color('background-color').to_string();
-         if(defColor != boxColor) {
-            remplaceColor = this.updateOpacityColor(boxColor, this._opacityBoxes);
+
+         let [have_color, box_color] = themeNode.lookup_color('background-color', false);
+         if(have_color) {
+            remplaceColor = this.updateOpacityColor(box_color.to_string(), this._opacityBoxes);
             newStyle += 'background-color: ' + remplaceColor + ';';
          }
-         boxColor = themeNode.get_color('background-gradient-start').to_string();
-         if(defColor != boxColor) {
-            remplaceColor = this.updateOpacityColor(boxColor, this._opacityBoxes);
+         let [have_color_start, box_color_start] = themeNode.lookup_color('background-gradient-start', false);
+         if(have_color_start) {
+            remplaceColor = this.updateOpacityColor(box_color_start.to_string(), this._opacityBoxes);
             newStyle += ' background-gradient-start: ' + remplaceColor + ';';
          }
-         boxColor = themeNode.get_color('background-gradient-end').to_string();
-         if(defColor != boxColor) {
-            remplaceColor = this.updateOpacityColor(boxColor, this._opacityBoxes);
+         let [have_color_end, box_color_end] = themeNode.lookup_color('background-gradient-end', false);
+         if(have_color_end) {
+            remplaceColor = this.updateOpacityColor(box_color_end.to_string(), this._opacityBoxes);
             newStyle += ' background-gradient-end: ' + remplaceColor + ';';
          }
       }
@@ -1807,20 +1807,19 @@ MyDesklet.prototype = {
       } else {
          let remplaceColor;
          let themeNode = this.textBox.get_theme_node();
-         let defColor = new Clutter.Color().to_string();
-         let boxColor = themeNode.get_color('background-color').to_string();
-         if(defColor != boxColor) {
-            remplaceColor = this.updateOpacityColor(boxColor, this._opacityBoxes);
+         let [have_color, box_color] = themeNode.lookup_color('background-color', false);
+         if(have_color) {
+            remplaceColor = this.updateOpacityColor(box_color.to_string(), this._opacityBoxes);
             newStyle += 'background-color: ' + remplaceColor + ';';
          }
-         boxColor = themeNode.get_color('background-gradient-start').to_string();
-         if(defColor != boxColor) {
-            remplaceColor = this.updateOpacityColor(boxColor, this._opacityBoxes);
+         let [have_color_start, box_color_start] = themeNode.lookup_color('background-gradient-start', false);
+         if(have_color_start) {
+            remplaceColor = this.updateOpacityColor(box_color_start.to_string(), this._opacityBoxes);
             newStyle += ' background-gradient-start: ' + remplaceColor + ';';
          }
-         boxColor = themeNode.get_color('background-gradient-end').to_string();
-         if(defColor != boxColor) {
-            remplaceColor = this.updateOpacityColor(boxColor, this._opacityBoxes);
+         let [have_color_end, box_color_end] = themeNode.lookup_color('background-gradient-end', false);
+         if(have_color_end) {
+            remplaceColor = this.updateOpacityColor(box_color_end.to_string(), this._opacityBoxes);
             newStyle += ' background-gradient-end: ' + remplaceColor + ';';
          }
       }
