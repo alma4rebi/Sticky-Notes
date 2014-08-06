@@ -126,9 +126,8 @@ DeskletAppletManager.prototype = {
       try {
          global.settings.connect('changed::enabled-applets', Lang.bind(this, this._onEnabledAppletsChanged));
          let uuid = this.desklet.metadata["uuid"];
-         this.settingsExt = global.settings;
-         let newAppletID = this.settingsExt.get_int("next-applet-id");
-         this.settingsExt.set_int("next-applet-id", newAppletID + 1);
+         let newAppletID = global.settings.get_int("next-applet-id");
+         global.settings.set_int("next-applet-id", newAppletID + 1);
          let dir = new Gio.file_new_for_path(GLib.get_home_dir() + "/.local/share/cinnamon/desklets/"+uuid);
          let extCreate = new ExtensionExtended(dir, Extension.Type.APPLET);
          let appletDef = ('%s:%s:%s').format(this.desklet.appletManagerOrder, uuid, newAppletID);
@@ -136,9 +135,9 @@ DeskletAppletManager.prototype = {
          AppletManager.addAppletToPanels(extCreate, appletDefinition);
          this.applet = AppletManager.appletObj[newAppletID];
          //Main.notify(""  + newAppletID);
-         /*let enabledApplets = this.settingsExt.get_strv('enabled-applets');
+         /*let enabledApplets = global.settings.get_strv('enabled-applets');
          enabledApplets.push(appletDef);
-         this.settingsExt.set_strv('enabled-applets', enabledApplets);*/
+         global.settings.set_strv('enabled-applets', enabledApplets);*/
          this.applet.setParentDesklet(this.desklet);
          //Main.notify("finished" + this.applet._uuid);// this.applet.instance_id);
       } catch (e) {
@@ -279,14 +278,9 @@ MyDesklet.prototype = {
       this.eventLoop = 0;
       this._timeOutResize = 0;
       this.myManager = null;
-
-      this._untrackMouse();
       try {
-         //Main.themeManager.connect('theme-set', Lang.bind(this, this._onThemeChange));
-         Mainloop.idle_add(Lang.bind(this, function() {
-            this._updateComplete();
-            this._trackMouse();
-         }));
+         this._updateComplete();
+         this._trackMouse();
       } catch(e) {
          this.showErrorMessage(e.message);
       }
@@ -364,38 +358,22 @@ MyDesklet.prototype = {
       this._saveDeskletPosition();
    },
 
-   _onThemeChange: function() {
-      if(this._timeOutSettings == 0) {
-         this._timeOutSettings = Mainloop.timeout_add(2000, Lang.bind(this, function() {
-            this.on_desklet_removed();
-            this._updateComplete();
-            Mainloop.source_remove(this._timeOutSettings);
-         }));
-      }
-      //this.multInstanceUpdate();
-   },
-
    _updateComplete: function() {
       if(this._timeOutSettings > 0) {
          Mainloop.source_remove(this._timeOutSettings);
          this._timeOutSettings = 0;
       }
 
-      this.settingsExt = global.settings;
       this._initSettings();
       this._initDeskletContruction();
       this.setContent(this.mainBox);
 
       if(this.initDeskletType()) {
-         this.rootBoxChangeIdSignal = this.rootBox.connect('style-changed', Lang.bind(this, this._onOpacityRootChange));
-         this.textBoxChangeIdSignal = this.textBox.connect('style-changed', Lang.bind(this, this._onOpacityTextChange));
-         this._keyFocusNotifyIDSignal = global.stage.connect('notify::key-focus', Lang.bind(this, this._onKeyFocusChanged));
          this.clutterText.connect('button-press-event', Lang.bind(this, this._onButtonPress));
          this.clutterText.connect('button-release-event', Lang.bind(this, this._onButtonRelease));
          this.textBox.connect('button-press-event', Lang.bind(this, this._onButtonPress));
          //this.textBox.connect('button-release-event', Lang.bind(this, this._onButtonRelease));
          //this.entry.connect('allocation_changed', Lang.bind(this, this._onAllocationChanged));
-         this.scrollBox.connect('allocation_changed', Lang.bind(this, this._onAllocationChanged));
          this._onSizeChange();
          /*this._onFixWidth();
          this._onFixHeight();*/
@@ -409,12 +387,16 @@ MyDesklet.prototype = {
          this.multInstanceMenuItem._switch.setToggleState(this._multInstance);
          this._onStyleChange();
          Mainloop.idle_add(Lang.bind(this, function() {
-            //this._onStyleChange();
+           // this._onStyleChange();
             if(this.instance_id == this.getMasterInstance()) {
                Main.settingsManager.register(this._uuid, this._uuid, this.settings);
             }
             this._createAppletManager();
             this._onAppletManagerChange();
+            this.rootBoxChangeIdSignal = this.rootBox.connect('style-changed', Lang.bind(this, this._onOpacityRootChange));
+            this.textBoxChangeIdSignal = this.textBox.connect('style-changed', Lang.bind(this, this._onOpacityTextChange));
+            this._keyFocusNotifyIDSignal = global.stage.connect('notify::key-focus', Lang.bind(this, this._onKeyFocusChanged));
+            this.scrollBox.connect('allocation_changed', Lang.bind(this, this._onAllocationChanged));
          }));
       }
    },
@@ -501,48 +483,53 @@ MyDesklet.prototype = {
    multInstanceUpdate: function() {
       try {
          this.removeAllInstances();
-         this.createNewInstance();
+         this.createNewInstance(1);
       } catch(e) {
          this.showErrorMessage(e.message);
       }
    },
 
-   createNewInstance: function() {
-      try {
-         let newDeskletID = this.settingsExt.get_int("next-desklet-id");
-         //Main.notify(""  + newDeskletID);
-         this.settingsExt.set_int("next-desklet-id", newDeskletID + 1);
-         let deskletDef;
-         if(this._multInstance) {
-            let monitor = Main.layoutManager.focusMonitor;
-            let countMaxDesklet = monitor.width/this.mainBox.get_width();
-            let numberInstance = this.getCountInstance();
-            let posY = 100*Math.floor(numberInstance/countMaxDesklet) + this._processPanelSize();
-            if(posY > monitor.height)
-               posY = 100;
-            let posX = Math.floor(numberInstance % countMaxDesklet)*this.mainBox.get_width();
-            
-            let storePos;
-            if(this.notesList[this.getCountInstance()])
-               storePos = this.positions["" + this.notesList[this.getCountInstance()][0]];
-            if(storePos)
-               deskletDef = (this._uuid + ':%s:%s:%s').format(newDeskletID, storePos[0], storePos[1]);
-            else
-               deskletDef = (this._uuid + ':%s:%s:%s').format(newDeskletID, posX, posY);
+   createNewInstance: function(index) {
+      let signalWait = Mainloop.timeout_add(index*100, Lang.bind(this, function(signalWait) {
+         try {
+            if(signalWait) {
+               Mainloop.source_remove(signalWait);
+            }
+            let newDeskletID = global.settings.get_int("next-desklet-id");
+            //Main.notify(""  + newDeskletID);
+            global.settings.set_int("next-desklet-id", newDeskletID + 1);
+            let deskletDef;
+            if(this._multInstance) {
+               let monitor = Main.layoutManager.focusMonitor;
+               let countMaxDesklet = monitor.width/this.mainBox.get_width();
+               let numberInstance = this.getCountInstance();
+               let posY = 100*Math.floor(numberInstance/countMaxDesklet) + this._processPanelSize();
+               if(posY > monitor.height)
+                  posY = 100;
+               let posX = Math.floor(numberInstance % countMaxDesklet)*this.mainBox.get_width();
+
+               let storePos;
+               if(this.notesList[this.getCountInstance()])
+                  storePos = this.positions["" + this.notesList[this.getCountInstance()][0]];
+               if(storePos)
+                  deskletDef = (this._uuid + ':%s:%s:%s').format(newDeskletID, storePos[0], storePos[1]);
+               else
+                  deskletDef = (this._uuid + ':%s:%s:%s').format(newDeskletID, posX, posY);
+            }
+            else {
+               deskletDef = (this._uuid + ':%s:%s:%s').format(newDeskletID, this._xPosition, this._yPosition);
+            }
+            let enabledDesklets = global.settings.get_strv("enabled-desklets");
+            enabledDesklets.push(deskletDef);
+            global.settings.set_strv("enabled-desklets", enabledDesklets);
+         } catch (e) {
+            this.showErrorMessage(e.message);
          }
-         else {
-            deskletDef = (this._uuid + ':%s:%s:%s').format(newDeskletID, this._xPosition, this._yPosition);
-         }
-         let enabledDesklets = this.settingsExt.get_strv("enabled-desklets");
-         enabledDesklets.push(deskletDef);
-         this.settingsExt.set_strv("enabled-desklets", enabledDesklets);
-      } catch (e) {
-         this.showErrorMessage(e.message);
-      }
+      }));
    },
 
    removeAllInstances: function() {
-      let enabledDesklets = this.settingsExt.get_strv("enabled-desklets");
+      let enabledDesklets = global.settings.get_strv("enabled-desklets");
       let def, id;
       for(idPos in enabledDesklets) {
          def = this._getDeskletDefinition(enabledDesklets[idPos]);
@@ -573,14 +560,14 @@ MyDesklet.prototype = {
    openAllMulInstance: function() {
       try {
          if(this._multInstance) {
-            let enabledDesklets = this.settingsExt.get_strv("enabled-desklets");
+            let enabledDesklets = global.settings.get_strv("enabled-desklets");
             let listDesklet = this.findNotesFromFile();
             let initNumber = this.getCountInstance();
             if(listDesklet.length == 0)
-               this.createNewInstance();
+               this.createNewInstance(1);
             else {
                for(let index = initNumber; index < listDesklet.length; index++)
-                  this.createNewInstance();
+                  this.createNewInstance(index);
             }
          }
       } catch(e) {
@@ -592,7 +579,7 @@ MyDesklet.prototype = {
       let currentInstance = parseInt(this.instance_id);
       let resultNumber = 0;
       try {
-         let enabledDesklets = this.settingsExt.get_strv("enabled-desklets");
+         let enabledDesklets = global.settings.get_strv("enabled-desklets");
          let def, id;
          for(idPos in enabledDesklets) {
             def = this._getDeskletDefinition(enabledDesklets[idPos]);
@@ -612,7 +599,7 @@ MyDesklet.prototype = {
    getAllInstanceObject: function() {
       let resultObject = new Array();
       try {
-         let enabledDesklets = this.settingsExt.get_strv("enabled-desklets");
+         let enabledDesklets = global.settings.get_strv("enabled-desklets");
          let def, id;
          for(idPos in enabledDesklets) {
             def = this._getDeskletDefinition(enabledDesklets[idPos]);
@@ -630,7 +617,7 @@ MyDesklet.prototype = {
    getCountInstance: function() {
       let resultNumber = 0;
       try {
-         let enabledDesklets = this.settingsExt.get_strv("enabled-desklets");
+         let enabledDesklets = global.settings.get_strv("enabled-desklets");
          let def, id;
          for(idPos in enabledDesklets) {
             def = this._getDeskletDefinition(enabledDesklets[idPos]);
@@ -648,7 +635,7 @@ MyDesklet.prototype = {
    getMasterInstance: function() {
       let currentInstance = parseInt(this.instance_id);
       try {
-         let enabledDesklets = this.settingsExt.get_strv("enabled-desklets");
+         let enabledDesklets = global.settings.get_strv("enabled-desklets");
          let def, id;
          for(idPos in enabledDesklets) {
             def = this._getDeskletDefinition(enabledDesklets[idPos]);
@@ -851,7 +838,7 @@ MyDesklet.prototype = {
       if(actor)
          this._effectIcon(actor, 0.2);
       if(this._multInstance) {
-        this.createNewInstance();
+        this.createNewInstance(1);
       }
       else {
          this.reset();
