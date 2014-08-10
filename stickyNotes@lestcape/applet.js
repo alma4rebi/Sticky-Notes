@@ -1,3 +1,30 @@
+// Desklet : Sticky Notes           Version      : v1.2-Beta
+// O.S.    : Cinnamon               Release Date : 10 August 2014.
+// Author  : Lester Carballo Pérez  Email        : lestcape@gmail.com
+//
+// Website : https://github.com/lestcape/Sticky-Notes
+//
+// Based on: https://github.com/linuxmint/Cinnamon/pull/2119
+//
+// This is a simple desklet to add sticky notes in the desktop.
+// The notes will be saved when a focus of the text editor was lost.
+//
+//    This program is free software:
+//
+//    You can redistribute it and/or modify it under the terms of the
+//    GNU General Public License as published by the Free Software
+//    Foundation, either version 3 of the License, or (at your option)
+//    any later version.
+//
+//    This program is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+//
+//    You should have received a copy of the GNU General Public License
+//    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
+
 const PopupMenu = imports.ui.popupMenu;
 const Util = imports.misc.util;
 const AppletManager = imports.ui.appletManager;

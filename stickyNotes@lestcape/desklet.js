@@ -1,5 +1,5 @@
 // Desklet : Sticky Notes           Version      : v1.2-Beta
-// O.S.    : Cinnamon               Release Date : 28 June 2014.
+// O.S.    : Cinnamon               Release Date : 10 August 2014.
 // Author  : Lester Carballo Pérez  Email        : lestcape@gmail.com
 //
 // Website : https://github.com/lestcape/Sticky-Notes
