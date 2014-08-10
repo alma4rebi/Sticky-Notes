@@ -5,7 +5,7 @@ Desklet: Sticky Notes Version: v1.2-Beta
 
 O.S.: Cinnamon 
 
-Release Date: 28 July 2014.
+Release Date: 10 August 2014.
 
 Author: Lester Carballo Pérez
 
@@ -47,7 +47,7 @@ Change Log:
 --------------
 v1.2- Beta
   - Support the new change of dnd.js.
-  - Improved the start speed of the desklet (only copy the languages file when it's needed). Thanks to jake-phy.
+  - Allow a more faster start of cinnamon now, thanks to a change in the handled mode of the language files(thanks to [jake-phy](https://github.com/jake-phy)).
   - Some bugs fixed.
 
 v1.1- Beta
