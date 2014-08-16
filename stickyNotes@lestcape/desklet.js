@@ -1,5 +1,5 @@
-// Desklet : Sticky Notes           Version      : v1.2-Beta
-// O.S.    : Cinnamon               Release Date : 10 August 2014.
+// Desklet : Sticky Notes           Version      : v1.3-Beta
+// O.S.    : Cinnamon               Release Date : 15 August 2014.
 // Author  : Lester Carballo Pérez  Email        : lestcape@gmail.com
 //
 // Website : https://github.com/lestcape/Sticky-Notes
@@ -69,47 +69,50 @@ function ExtensionExtended(dir, type) {
 ExtensionExtended.prototype = {
    __proto__: Extension.Extension.prototype,
    _init: function(dir, type) {
-        this.uuid = dir.get_basename();
-        this.dir = dir;
-        this.type = type;
-        this.lowerType = type.name.toLowerCase();
-        this.theme = null;
-        this.stylesheet = null;
-        this.meta = Extension.createMetaDummy(this.uuid, dir.get_path(), Extension.State.INITIALIZING);
-        this.startTime = new Date().getTime();
+      this.uuid = dir.get_basename();
+      this.dir = dir;
+      this.type = type;
+      this.lowerType = type.name.toLowerCase();
+      this.theme = null;
+      this.stylesheet = null;
+      this.meta = Extension.createMetaDummy(this.uuid, dir.get_path(), Extension.State.INITIALIZING);
+      this.startTime = new Date().getTime();
 
-        this.loadMetaData(dir.get_child('metadata.json'));
-        this.validateMetaData();
+      this.loadMetaData(dir.get_child('metadata.json'));
+      this.validateMetaData();
 
-        this.ensureFileExists(dir.get_child(this.lowerType + '.js'));
-        this.loadStylesheet(dir.get_child('stylesheet.css'));
+      this.ensureFileExists(dir.get_child(this.lowerType + '.js'));
+      this.loadStylesheet(dir.get_child('stylesheet.css'));
         
-        if (this.stylesheet) {
-            Main.themeManager.connect('theme-set', Lang.bind(this, function() {
-                this.loadStylesheet(this.dir.get_child('stylesheet.css'));
-            }));
-        }
+      if(this.stylesheet) {
+         Main.themeManager.connect('theme-set', Lang.bind(this, function() {
+            this.loadStylesheet(this.dir.get_child('stylesheet.css'));
+         }));
+      }
 
-        try {
+      try {
+         if(global.add_extension_importer)
             global.add_extension_importer('imports.ui.extension.importObjects', this.uuid, this.meta.path);
-        } catch (e) {
-            throw this.logError('Error importing extension ' + this.uuid + ' from path ' + this.meta.path, e);
-        }
+         else {
+            imports.gi.CinnamonJS.add_extension_importer('imports.ui.extension.importObjects', this.uuid, this.meta.path);
+         }
+      } catch (e) {
+         throw this.logError('Error importing extension ' + this.uuid + ' from path ' + this.meta.path, e);
+      }
 
-        try {
-            this.module = Extension.importObjects[this.uuid][this.lowerType]; // get [extension/applet/desklet].js
-        } catch (e) {
-            throw this.logError('Error importing ' + this.lowerType + '.js from ' + this.uuid, e);
-        }
+      try {
+         this.module = Extension.importObjects[this.uuid][this.lowerType]; // get [extension/applet/desklet].js
+      } catch (e) {
+         throw this.logError('Error importing ' + this.lowerType + '.js from ' + this.uuid, e);
+      }
 
-        for (let i = 0; i < this.type.requiredFunctions.length; i++) {
-            let func = this.type.requiredFunctions[i];
-            if (!this.module[func]) {
-                throw this.logError('Function "' + func + '" is missing');
-            }
-        }
-
-        //objects[this.uuid] = this;
+      for(let i = 0; i < this.type.requiredFunctions.length; i++) {
+         let func = this.type.requiredFunctions[i];
+         if(!this.module[func]) {
+            throw this.logError('Function "' + func + '" is missing');
+         }
+      }
+      //objects[this.uuid] = this;
    }
 };
 
@@ -128,18 +131,13 @@ DeskletAppletManager.prototype = {
          let uuid = this.desklet.metadata["uuid"];
          let newAppletID = global.settings.get_int("next-applet-id");
          global.settings.set_int("next-applet-id", newAppletID + 1);
-         let dir = new Gio.file_new_for_path(GLib.get_home_dir() + "/.local/share/cinnamon/desklets/"+uuid);
+         let dir = Gio.file_new_for_path(GLib.get_home_dir() + "/.local/share/cinnamon/desklets/"+uuid);
          let extCreate = new ExtensionExtended(dir, Extension.Type.APPLET);
          let appletDef = ('%s:%s:%s').format(this.desklet.appletManagerOrder, uuid, newAppletID);
          let appletDefinition = AppletManager.getAppletDefinition(appletDef);
          AppletManager.addAppletToPanels(extCreate, appletDefinition);
          this.applet = AppletManager.appletObj[newAppletID];
-         //Main.notify(""  + newAppletID);
-         /*let enabledApplets = global.settings.get_strv('enabled-applets');
-         enabledApplets.push(appletDef);
-         global.settings.set_strv('enabled-applets', enabledApplets);*/
          this.applet.setParentDesklet(this.desklet);
-         //Main.notify("finished" + this.applet._uuid);// this.applet.instance_id);
       } catch (e) {
          Main.notify("error", e.message);
       }
@@ -195,7 +193,6 @@ MyDesklet.prototype = {
       this.newText = "";
      // this.renderFontFamily();
       this.execInstallLanguage();
-      //_ = imports.gettext.domain(this._uuid).gettext;
       Gettext.bindtextdomain(this._uuid, GLib.get_home_dir() + "/.local/share/locale");
       this.setHeader(_("Sticky Notes"));
 
@@ -268,6 +265,7 @@ MyDesklet.prototype = {
       this.scrollIDSignal = 0;
       this.rootBoxChangeIdSignal = 0;
       this.textBoxChangeIdSignal = 0;
+      this.visibleNote = true;
       this._multInstance = true;
       this._timeOutSettings = 0;
       this.deskletRaised = false;
@@ -372,11 +370,7 @@ MyDesklet.prototype = {
          this.clutterText.connect('button-press-event', Lang.bind(this, this._onButtonPress));
          this.clutterText.connect('button-release-event', Lang.bind(this, this._onButtonRelease));
          this.textBox.connect('button-press-event', Lang.bind(this, this._onButtonPress));
-         //this.textBox.connect('button-release-event', Lang.bind(this, this._onButtonRelease));
-         //this.entry.connect('allocation_changed', Lang.bind(this, this._onAllocationChanged));
          this._onSizeChange();
-         /*this._onFixWidth();
-         this._onFixHeight();*/
          this._onScrollVisibleChange();
          this._onScrollAutoChange();
          this._onSetAutoHideButtons();
@@ -387,7 +381,6 @@ MyDesklet.prototype = {
          this.multInstanceMenuItem._switch.setToggleState(this._multInstance);
          this._onStyleChange();
          Mainloop.idle_add(Lang.bind(this, function() {
-           // this._onStyleChange();
             if(this.instance_id == this.getMasterInstance()) {
                Main.settingsManager.register(this._uuid, this._uuid, this.settings);
             }
@@ -496,7 +489,6 @@ MyDesklet.prototype = {
                Mainloop.source_remove(signalWait);
             }
             let newDeskletID = global.settings.get_int("next-desklet-id");
-            //Main.notify(""  + newDeskletID);
             global.settings.set_int("next-desklet-id", newDeskletID + 1);
             let deskletDef;
             if(this._multInstance) {
@@ -531,14 +523,10 @@ MyDesklet.prototype = {
    removeAllInstances: function() {
       let enabledDesklets = global.settings.get_strv("enabled-desklets");
       let def, id;
-      for(idPos in enabledDesklets) {
+      for(let idPos in enabledDesklets) {
          def = this._getDeskletDefinition(enabledDesklets[idPos]);
          if((def)&&(def.uuid == this._uuid)) {
             let id = parseInt(def.desklet_id);
-            /*let desk = DeskletManager.deskletObj[def.desklet_id];
-            if((desk)&&(desk.myManager)&&(desk.myManager != this.myManager))
-               desk.myManager.destroyInstance();
-            desk.myManager = null;*/
             DeskletManager.removeDesklet(this._uuid, id);
          }
       }
@@ -581,7 +569,7 @@ MyDesklet.prototype = {
       try {
          let enabledDesklets = global.settings.get_strv("enabled-desklets");
          let def, id;
-         for(idPos in enabledDesklets) {
+         for(let idPos in enabledDesklets) {
             def = this._getDeskletDefinition(enabledDesklets[idPos]);
             if((def)&&(def.uuid == this._uuid)) {
                let id = parseInt(def.desklet_id);
@@ -601,7 +589,7 @@ MyDesklet.prototype = {
       try {
          let enabledDesklets = global.settings.get_strv("enabled-desklets");
          let def, id;
-         for(idPos in enabledDesklets) {
+         for(let idPos in enabledDesklets) {
             def = this._getDeskletDefinition(enabledDesklets[idPos]);
             if((def)&&(def.uuid == this._uuid)) {
                let id = parseInt(def.desklet_id);
@@ -619,7 +607,7 @@ MyDesklet.prototype = {
       try {
          let enabledDesklets = global.settings.get_strv("enabled-desklets");
          let def, id;
-         for(idPos in enabledDesklets) {
+         for(let idPos in enabledDesklets) {
             def = this._getDeskletDefinition(enabledDesklets[idPos]);
             if((def)&&(def.uuid == this._uuid)) {
                resultNumber++;
@@ -637,7 +625,7 @@ MyDesklet.prototype = {
       try {
          let enabledDesklets = global.settings.get_strv("enabled-desklets");
          let def, id;
-         for(idPos in enabledDesklets) {
+         for(let idPos in enabledDesklets) {
             def = this._getDeskletDefinition(enabledDesklets[idPos]);
             if((def)&&(def.uuid == this._uuid)) {
                let id = parseInt(def.desklet_id);
@@ -731,11 +719,10 @@ MyDesklet.prototype = {
             let output_file = Gio.file_new_for_path(GLib.get_home_dir() + "/.local/share/notes/" + this.notesList[pos][0] + ".note");
             this._makeDirectoy(output_file.get_parent());
             this.deleteNote(pos);
-            let fstream = output_file.replace("", false, Gio.FileCreateFlags.NONE, null);
-            let dstream = new Gio.DataOutputStream.new(fstream);   
-
-            dstream.put_string(this.notesList[pos][1], null);
-            fstream.close(null);
+            let raw = output_file.replace(null, false, Gio.FileCreateFlags.NONE, null);
+            let out_file = Gio.BufferedOutputStream.new_sized (raw, 4096);
+            Cinnamon.write_string_to_stream(out_file, this.notesList[pos][1]);
+            out_file.close(null);
             return true;
          } catch(e) {
             this.showErrorMessage(e.message);
@@ -748,7 +735,7 @@ MyDesklet.prototype = {
       if((pos > -1)&&(pos < this.notesList.length)) {
          let file = Gio.file_new_for_path(GLib.get_home_dir() + "/.local/share/notes/" + this.notesList[pos][0] + ".note");
          if(file.query_exists(null))
-            return file.delete(null);
+            return file.delete(null, null);
       } 
       return false;
    },
@@ -769,12 +756,9 @@ MyDesklet.prototype = {
          if(file.query_exists(null))
          {
             try {
-               let fstream = file.read(null);
-               let dstream = new Gio.DataInputStream.new(fstream);
-               let data = dstream.read_until("", null);
-               fstream.close(null);
-               if(data[0])
-                  this.notesList[pos][1] = data[0];
+               let data = Cinnamon.get_file_contents_utf8_sync(file.get_path());
+               if(data)
+                  this.notesList[pos][1] = data;
                else
                   this.notesList[pos][1] = "";
             } catch(e) {
@@ -820,7 +804,7 @@ MyDesklet.prototype = {
 
    _sorting: function(notes) {
       let valueL, valueF, tempSwap;
-      for(let posF=0; posF < notes.length - 1; posF++) {
+      for(let posF = 0; posF < notes.length - 1; posF++) {
          valueF = parseInt(notes[posF][0]);
          for(let posL=posF + 1; posL < notes.length; posL++) {
             valueL = parseInt(notes[posL][0]);
@@ -849,28 +833,47 @@ MyDesklet.prototype = {
       }
    },
 
-   _onVisibleNoteChange: function(actor) {
-      if((actor)&&(actor.get_parent() == this.leftBox))
-         this.leftBox.remove_actor(actor);
-      if(this.minimizeButton == actor) {
-         this.rootBox.remove_style_pseudo_class('open');
-         this.rootBox.set_style('');
-         this.leftBox.add(this.maximizeButton, {x_fill: true, x_align: St.Align.END});
-         this._changeHideTextBox(true);
-         this.scrollArea.visible = false;
-         this.bottomBox.visible = false;
-         this.mainBox.set_height(-1);
-      }
-      else {
-         this.rootBox.add_style_pseudo_class('open');
-         this.rootBox.set_style('');
-         this.leftBox.add(this.minimizeButton, {x_fill: true, x_align: St.Align.END}); 
-         this._changeHideTextBox(false);
-         this.scrollArea.visible = true;
-         this.bottomBox.visible = true;
-         if(this._fSize) {
-            this._onSizeChange();
+   _onVisibleNoteChange: function(actor, event) {
+      this.setVisibleNote(!this.visibleNote);
+   },
+
+   setVisibleNote: function(visible) {
+      if(this.visibleNote != visible) {
+         this.visibleNote = visible;
+         if(visible) {
+            this.minimizeButton.child.set_icon_name('go-up');
+            this.rootBox.add_style_pseudo_class('open');
+            this.rootBox.set_style(' ');
+            this._changeHideTextBox(true);
+            this.scrollArea.visible = true;
+            this.bottomBox.visible = true;
+            if(this._fSize) {
+               this._onSizeChange();
+            }
          }
+         else {
+            this.minimizeButton.child.set_icon_name('go-down');
+            this.rootBox.remove_style_pseudo_class('open');
+            this.rootBox.set_style(' ');
+            this._changeHideTextBox(false);
+            this.scrollArea.visible = false;
+            this.bottomBox.visible = false;
+            this.mainBox.set_height(-1);
+         }
+      }
+   },
+
+   _changeHideTextBox: function(value) {
+      if(this._multInstance) {
+         if((this.noteCurrent > 0)&&(this.noteCurrent < this.notesList.length + 1)) {
+            this._readListHideTextBox();
+            let strNote = "" + this.notesList[this.noteCurrent - 1][0];
+            this.hideTextBox[strNote] = value;
+            this._writeListHideTextBox();
+         }
+      }      
+      else {
+         this._hideTextBox = value;
       }
    },
 
@@ -998,8 +1001,8 @@ MyDesklet.prototype = {
    },
 
    setStyle: function() {
-      this.setStaples();
       this.setStripe();
+      this.setStaples();
       if(this._overrideTheme) {
          let _colorBox = this.textRGBToRGBA(this._boxColor, this._opacityBoxes);
          let _colorText = this.textRGBToRGBA(this._textBoxColor, this._opacityBoxes);
@@ -1026,7 +1029,7 @@ MyDesklet.prototype = {
          this.buttonBanner.set_style_class_name('');
          this.buttonBanner.set_style('background-color: ' + _colorBanner);
       } else {
-         this.rootBox.set_style('');
+         this.rootBox.set_style(' ');
          this.rootBox.set_style_class_name('desklet-with-borders');
          if(this._themeStaples != "none") {
             this.rootBox.add_style_class_name('sticky-main-box-staples');
@@ -1037,15 +1040,12 @@ MyDesklet.prototype = {
 
          this.textBox.set_style_class_name('sticky-text-box');
          this.buttonBanner.set_style_class_name('sticky-button-box');
-         this.buttonBanner.set_style('');
-         this.textBox.set_style('');
+         this.buttonBanner.set_style(' ');
+         this.textBox.set_style(' ');
       }
    },
 
    setStripe: function() {
-     // desc.set_family("Monospace"); 13
-     // desc.set_family("UnPilgi"); 13
-     // desc.set_family("Times New Roman"); 14
       let fontTag = '';
       if((this._fontFamily)&&(this._fontFamily != ""))
          fontTag = 'font-family: ' + this._fontFamily + ';';
@@ -1080,7 +1080,6 @@ MyDesklet.prototype = {
          }
       } else {
          this.textAreaBox.set_style('min-width: ' + (MIN_WIDTH-30) + 'px;');
-         //this.textAreaBox.set_style('');
       }
    },
 
@@ -1098,12 +1097,13 @@ MyDesklet.prototype = {
          this.transpBox.set_height(0);
          this.endBox.set_height(0);
       }
+      this._onAllocationChanged();
    },
 
    setPencil: function(activePencil) {
       if(activePencil) {
          this.textBox.add_style_pseudo_class('active');
-         this.textBox.set_style('');
+         this.textBox.set_style(' ');
          if(this._themePencil != "none") {
             let image = GLib.get_home_dir() + "/.local/share/cinnamon/desklets/" + this._uuid + "/pencil/" + this._themePencil + ".svg";
             this.pencilBox.set_style(' background-image: url(\'' + image + '\'); background-size:' + this.pencilBox.width +'px ' +
@@ -1113,7 +1113,7 @@ MyDesklet.prototype = {
          }
       } else {
          this.textBox.remove_style_pseudo_class('active');
-         this.textBox.set_style('');
+         this.textBox.set_style(' ');
          this.pencilBox.set_style('max-width: 200px; min-width: 60px; padding: 0px 10px 0px 10px');
       }
    },
@@ -1153,10 +1153,8 @@ MyDesklet.prototype = {
       this.addButton.connect('clicked', Lang.bind(this, this._onAddNote));
       this.leftBox.add(this.addButton, {x_fill: true, x_align: St.Align.END});
 
-      this.minimizeButton = this._buttonCreation('go-up', _("Minimize Note"), this._symbolicIcons);
+      this.minimizeButton = this._buttonCreation('go-up', _("Minimize or Maximize the Note"), this._symbolicIcons);
       this.minimizeButton.connect('clicked', Lang.bind(this, this._onVisibleNoteChange));
-      this.maximizeButton = this._buttonCreation('go-down', _("Maximize Note"), this._symbolicIcons);
-      this.maximizeButton.connect('clicked', Lang.bind(this, this._onVisibleNoteChange));
       this.leftBox.add(this.minimizeButton, {x_fill: true, x_align: St.Align.END});
 
       this.currentNote = new St.Label({ style_class: 'sticky-information-label' });
@@ -1207,7 +1205,6 @@ MyDesklet.prototype = {
       this.bannerBox.set_style('padding-top: 6px;');
 
       this.entry = new St.Entry({ name: 'sticky-note-entry', hint_text: _("Type your note..."), track_hover: false, can_focus: true});
-      //this.textBox.add(this.entry, {x_fill: true, y_fill: false, expand: true, x_align: St.Align.START, y_align: St.Align.START});
       this.textBox.add(this.textAreaBox, { x_fill: true, y_fill: true, expand: true, x_align: St.Align.START, y_align: St.Align.START });
       this.textAreaBox.add(this.entry, { x_fill: true, y_fill: false, expand: true, x_align: St.Align.START, y_align: St.Align.START });
 
@@ -1252,7 +1249,7 @@ MyDesklet.prototype = {
          let currHeight = this.mainBox.get_height();
          this.mainBox.set_width(-1);
          this.mainBox.set_height(-1);
-         this._onVisibleNoteChange(this.maximizeButton);
+         this.setVisibleNote(true);
          this._messageContainer = new St.BoxLayout({vertical:true});
  
          let _information = new St.Label();
@@ -1279,8 +1276,8 @@ MyDesklet.prototype = {
                   this.mainBox.set_width(currWidth);
                   this.mainBox.set_height(currHeight);
                }
-               this._onVisibleNoteChange(this.minimizeButton);
-               this._onVisibleNoteChange(this.maximizeButton);
+               //this.setVisibleNote(false);
+               this.setVisibleNote(true);
 
                btClickedCallBack(btClick.label.substring(4, btClick.label.length - 4));
             }));
@@ -1317,7 +1314,6 @@ MyDesklet.prototype = {
    },
 
    _onAllocationChanged: function() {
-      //let availWidth = this.entry.get_width();
       let availWidth = this.scrollBox.get_width() - 2;
       if(availWidth < MIN_WIDTH - 30)
          availWidth = MIN_WIDTH - 30;
@@ -1343,10 +1339,10 @@ MyDesklet.prototype = {
       if(this.textChangeIDSignal > 0)
          this.clutterText.disconnect(this.textChangeIDSignal);
       this.textChangeIDSignal = 0;
-      if(this.enterAutoHideButtonsIDSignall > 0)
+      if(this.enterAutoHideButtonsIDSignal > 0)
          this.actor.disconnect(this.enterAutoHideButtonsIDSignal);
       this.enterAutoHideButtonsIDSignal = 0;
-      if(this.leaveAutoHideButtonsIDSignall > 0)
+      if(this.leaveAutoHideButtonsIDSignal > 0)
          this.actor.disconnect(this.leaveAutoHideButtonsIDSignal);
       this.leaveAutoHideButtonsIDSignal = 0;
       if(this.scrollIDSignal > 0)
@@ -1491,8 +1487,6 @@ MyDesklet.prototype = {
                this.clutterText.set_selection(this.selectBounds - this.selection.length, this.selectBounds);
          }
       } 
-      /*else if(this._menu.isOpen)
-         this._onButtonReleaseEvent(this.actor, event);*/
       this._entryActiveMenu = false;
    },
 /*
@@ -1506,7 +1500,6 @@ MyDesklet.prototype = {
       if(event.get_button() == 3) {
          this._menu.toggle();
          // Check if menu gets out of monitor. Move menu to left side if so
-
          // Find x-position of right edge of monitor
          let rightEdge;
          for(let i = 0; i < Main.layoutManager.monitors.length; i++) {
@@ -1535,13 +1528,6 @@ MyDesklet.prototype = {
       return true;
    },
 
-/*
-   _deleteSelection: function(actor, event) {
-      this.selection = "";
-      this.selectBounds = 0;
-      this.clutterText.set_selection(0,0);
-   },
-*/
    _updateMenu: function(menu, open) {
       if(open) {
          if(!this._entryActiveMenu) {
@@ -1699,7 +1685,6 @@ MyDesklet.prototype = {
       if((this.instance_id == this.getMasterInstance())&&
          (this._multInstance != this.multInstanceMenuItem._switch.state)) {
          Mainloop.idle_add(Lang.bind(this, function() {
-            //Main.notify("change:" + this._multInstance + " active:" + this.multInstanceMenuItem._switch.state + " instance_id:" + this.instance_id);
             this.multInstanceUpdate();
          }));
       }
@@ -1715,7 +1700,6 @@ MyDesklet.prototype = {
             this.multInstanceUpdate();
          }));
       }
-      //Main.notify("change");
    },
 
    _onStyleChange: function() {
@@ -1728,7 +1712,6 @@ MyDesklet.prototype = {
       else iconType = St.IconType.FULLCOLOR;
       this.addButton.child.set_icon_type(iconType);
       this.minimizeButton.child.set_icon_type(iconType);
-      this.maximizeButton.child.set_icon_type(iconType);
       this.nextButton.child.set_icon_type(iconType);
       this.backButton.child.set_icon_type(iconType);
       this.configButton.child.set_icon_type(iconType);
@@ -1811,7 +1794,6 @@ MyDesklet.prototype = {
          }
       }
       if(newStyle != this.textBox.get_style()) {
-         //Main.notify("newStyle:" + newStyle);
          this.textBox.set_style(newStyle);
       }
    },
@@ -1822,15 +1804,12 @@ MyDesklet.prototype = {
       let r = parseInt(color.substring(1,3),16);
       let g = parseInt(color.substring(3,5),16);
       let b = parseInt(color.substring(5,7),16);
-      //let a = parseInt(color.substring(7,9),16);
-      //Main.notify("rgba("+r+","+g+","+b+","+(opacity)+")");
       return "rgba("+r+","+g+","+b+","+opacity+")";
    },
 
    textRGBToRGBA: function(textRGB, opacity) {
       if((!opacity)||(opacity == 0))
          opacity = "0.0";
-      //Main.notify((textRGB.replace(')',',' + opacity + ')')).replace('rgb','rgba'));
       return (textRGB.replace(')',',' + opacity + ')')).replace('rgb','rgba');
    },
 
@@ -1895,7 +1874,7 @@ MyDesklet.prototype = {
       if(this._autohideButtons) {
          let focusedActor = global.stage.get_key_focus();
          if((focusedActor)&&(this.entry.contains(focusedActor)))
-            this._onAutoHideButtons(true);
+            this.buttonBanner.visible = true;
          else
             this.buttonBanner.visible = hide;
       } else {
@@ -1910,20 +1889,20 @@ MyDesklet.prototype = {
             this.enterAutoHideButtonsIDSignal = this.actor.connect('enter-event', Lang.bind(this, function(actor) {
                this._onAutoHideButtons(true);
                this.rootBox.add_style_pseudo_class('hover');
-               this.rootBox.set_style('');
+               this.rootBox.set_style(' ');
             }));
          }
          if(this.leaveAutoHideButtonsIDSignal == 0) {
             this.leaveAutoHideButtonsIDSignal = this.actor.connect('leave-event', Lang.bind(this, function(actor) {
                this._onAutoHideButtons(false);
                this.rootBox.remove_style_pseudo_class('hover');
-               this.rootBox.set_style('');
+               this.rootBox.set_style(' ');
             }));
          }
       } else {
-         if(this.enterAutoHideButtonsIDSignall > 0)
+         if(this.enterAutoHideButtonsIDSignal > 0)
             this.actor.disconnect(this.enterAutoHideButtonsIDSignal);
-         if(this.leaveAutoHideButtonsIDSignall > 0)
+         if(this.leaveAutoHideButtonsIDSignal > 0)
             this.actor.disconnect(this.leaveAutoHideButtonsIDSignal);
          this.enterAutoHideButtonsIDSignal = 0;
          this.leaveAutoHideButtonsIDSignal = 0;
@@ -1936,16 +1915,13 @@ MyDesklet.prototype = {
          if((this.noteCurrent > 0)&&(this.noteCurrent < this.notesList.length + 1)) {
             this._readListHideTextBox();
             let hideNote = this.hideTextBox["" + this.notesList[this.noteCurrent - 1][0]];
-            if(hideNote)
-               this._onVisibleNoteChange(this.minimizeButton);
+            if(hideNote != null)
+               this.setVisibleNote(hideNote);
             else
-               this._onVisibleNoteChange(this.maximizeButton);
+               this.setVisibleNote(true);
          }
       } else {
-         if(this._hideTextBox)
-            this._onVisibleNoteChange(this.minimizeButton);
-         else
-            this._onVisibleNoteChange(this.maximizeButton);
+         this.setVisibleNote(this._hideTextBox);
       }
    }, 
 
@@ -2234,7 +2210,7 @@ MyDesklet.prototype = {
 
    _writeListPosition: function() {
       let stringList = "";
-      for(key in this.positions) {
+      for(let key in this.positions) {
          if(this.isNoteInList(key))
             stringList += key + "::" + this.positions[key][0] + "::" + this.positions[key][1] + ";;";
       }
@@ -2274,7 +2250,7 @@ MyDesklet.prototype = {
 
    _writeListSize: function() {
       let stringList = "";
-      for(key in this.sizes) {
+      for(let key in this.sizes) {
          if(this.isNoteInList(key))
             stringList += key + "::" + this.sizes[key][0] + "::" + this.sizes[key][1] + ";;";
       }
@@ -2287,7 +2263,7 @@ MyDesklet.prototype = {
       if(this._multInstance) {
          this._readListSize();
          if(this._sameSize) {
-            for(key in this.sizes) {
+            for(let key in this.sizes) {
                this.sizes[key] = [this._width, this._height];
             }
             this._writeListSize();
@@ -2317,7 +2293,7 @@ MyDesklet.prototype = {
 
    _writeListHideTextBox: function() {
       let stringList = "";
-      for(key in this.hideTextBox) {
+      for(let key in this.hideTextBox) {
          if(this.isNoteInList(key)) {
             if(this.hideTextBox[key])
                stringList += key + "::true;;";
@@ -2326,20 +2302,6 @@ MyDesklet.prototype = {
          }
       }
       this._listHideTextBox = stringList.substring(0, stringList.length - 2);//commit
-   },
-
-   _changeHideTextBox: function(value) {
-      if(this._multInstance) {
-         if((this.noteCurrent > 0)&&(this.noteCurrent < this.notesList.length + 1)) {
-            this._readListHideTextBox();
-            let strNote = "" + this.notesList[this.noteCurrent - 1][0];
-            this.hideTextBox[strNote] = value;
-            this._writeListHideTextBox();
-         }
-      }      
-      else {
-         this._hideTextBox = value;
-      }
    },
 
    _enableResize: function() {
@@ -2532,9 +2494,10 @@ MyDesklet.prototype = {
       try {
          let _shareFolder = GLib.get_home_dir() + "/.local/share/";
          let _localeFolder = Gio.file_new_for_path(_shareFolder + "locale/");
-         let _moFolder = Gio.file_new_for_path(_shareFolder + "cinnamon/applets/" + this._uuid + "/locale/mo/");
+         let _moFolder = Gio.file_new_for_path(_shareFolder + "cinnamon/desklets/" + this._uuid + "/locale/mo/");
          let children = _moFolder.enumerate_children('standard::name,standard::type,time::modified',
                                                      Gio.FileQueryInfoFlags.NONE, null);
+                     
          let info, child, _moFile, _moLocale, _moPath, _src, _dest, _modified, _destModified;
          while((info = children.next_file(null)) != null) {
             let _modified = info.get_modification_time().tv_sec;
@@ -2548,7 +2511,7 @@ MyDesklet.prototype = {
                   try {
                      if(_dest.query_exists(null)) {
                         _destModified = _dest.query_info('time::modified', Gio.FileQueryInfoFlags.NONE, null).get_modification_time().tv_sec;
-                        if((_modified > _destModified)) {
+                        if(_modified > _destModified) {
                            _src.copy(_dest, Gio.FileCopyFlags.OVERWRITE, null, null);
                         }
                      } else {
@@ -2562,6 +2525,7 @@ MyDesklet.prototype = {
             }
          }
       } catch(e) {
+         Main.notify("Error", e.message);
          global.logError(e);
       }
    }
@@ -2621,11 +2585,13 @@ RaisedBox.prototype = {
 
    show: function() {
       global.set_stage_input_mode(Cinnamon.StageInputMode.FULLSCREEN);
+      //Main.pushModal(this.actor);
       this.actor.show();
    },
 
    destroy: function() {
-      global.set_stage_input_mode(Cinnamon.StageInputMode.NORMAL)
+      global.set_stage_input_mode(Cinnamon.StageInputMode.NORMAL);
+      //Main.popModal(this.actor);
       global.focus_manager.remove_group(this.actor);
       Main.uiGroup.remove_actor(this.actor);
       for(let i = 0; i < this.stageEventIds.length; i++)

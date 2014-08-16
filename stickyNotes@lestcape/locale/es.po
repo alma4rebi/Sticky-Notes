@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Sticky-Notes 0.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-11-08 21:29-0600\n"
-"PO-Revision-Date: 2014-07-22 21:15-0600\n"
+"PO-Revision-Date: 2014-08-15 23:58-0600\n"
 "Last-Translator: Lester Carballo Pérez <lestcape@gmail.com>\n"
 "Language-Team: lestcape <lestcape@gmail.com>\n"
 "MIME-Version: 1.0\n"
@@ -90,12 +90,8 @@ msgid "Expand"
 msgstr "Expandir"
 
 #: desklet.js:460
-msgid "Minimize Note"
-msgstr "Minimizar Nota"
-
-#: desklet.js:461
-msgid "Maximize Note"
-msgstr "Maximizar Nota"
+msgid "Minimize or Maximize the Note"
+msgstr "Minimizar o maximizar la Nota"
 
 #: desklet.js:462
 msgid "Single Instance"

@@ -88,11 +88,7 @@ msgid "Expand"
 msgstr ""
 
 #: desklet.js:460
-msgid "Minimize Note"
-msgstr ""
-
-#: desklet.js:461
-msgid "Maximize Note"
+msgid "Minimize or Maximize the Note"
 msgstr ""
 
 #: desklet.js:462
