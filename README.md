@@ -5,7 +5,7 @@ Desklet: Sticky Notes Version: v1.3-Beta
 
 O.S.: Cinnamon 
 
-Release Date: 15 August 2014.
+Release Date: 18 August 2014.
 
 Author: Lester Carballo Pérez
 
@@ -48,7 +48,7 @@ Change Log:
 v1.3- Beta
   - Compatibility with Cinnamon 2.3.
   - Remove several warnings.
-  - Some bugs fixed.
+  - Some hard bugs was fixed.
 
 v1.2- Beta
   - Support the new change of dnd.js.

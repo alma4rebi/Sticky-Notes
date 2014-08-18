@@ -1,5 +1,5 @@
 // Desklet : Sticky Notes           Version      : v1.3-Beta
-// O.S.    : Cinnamon               Release Date : 15 August 2014.
+// O.S.    : Cinnamon               Release Date : 18 August 2014.
 // Author  : Lester Carballo Pérez  Email        : lestcape@gmail.com
 //
 // Website : https://github.com/lestcape/Sticky-Notes
@@ -362,7 +362,6 @@ MyDesklet.prototype = {
          Mainloop.source_remove(this._timeOutSettings);
          this._timeOutSettings = 0;
       }
-
       this._initSettings();
       this._initDeskletContruction();
       this.setContent(this.mainBox);
@@ -381,17 +380,17 @@ MyDesklet.prototype = {
          this._onSymbolicIcons();
          this.multInstanceMenuItem._switch.setToggleState(this._multInstance);
          this._onStyleChange();
+         this.rootBoxChangeIdSignal = this.rootBox.connect('style-changed', Lang.bind(this, this._onOpacityRootChange));
+         this.textBoxChangeIdSignal = this.textBox.connect('style-changed', Lang.bind(this, this._onOpacityTextChange));
+         this._keyFocusNotifyIDSignal = global.stage.connect('notify::key-focus', Lang.bind(this, this._onKeyFocusChanged));
+         this._allocationSignal = this.scrollBox.connect('allocation_changed', Lang.bind(this, this._onAllocationChanged));
          if(this.instance_id == this.getMasterInstance()) {
             Main.settingsManager.register(this._uuid, this._uuid, this.settings);
+            Mainloop.idle_add(Lang.bind(this, function() {
+               this._createAppletManager();
+               this.setVisibleAppletManager(this._appletManager);
+            }));
          }
-         this._createAppletManager();
-         this._onAppletManagerChange();
-         Mainloop.idle_add(Lang.bind(this, function() {
-            this.rootBoxChangeIdSignal = this.rootBox.connect('style-changed', Lang.bind(this, this._onOpacityRootChange));
-            this.textBoxChangeIdSignal = this.textBox.connect('style-changed', Lang.bind(this, this._onOpacityTextChange));
-            this._keyFocusNotifyIDSignal = global.stage.connect('notify::key-focus', Lang.bind(this, this._onKeyFocusChanged));
-            this._allocationSignal = this.scrollBox.connect('allocation_changed', Lang.bind(this, this._onAllocationChanged));
-         }));
       }
    },
 
@@ -406,7 +405,6 @@ MyDesklet.prototype = {
             }
             if(!this.myManager) {
                this.myManager = new DeskletAppletManager(this);
-               //log("Create Applet Manager");
             }
          }
       } catch(e) {
@@ -460,8 +458,11 @@ MyDesklet.prototype = {
             this.notesList.push([this.maxValueNote() + 1, ""]);
             this.noteCurrent = numberInstance + 1;
             this.reset();
-            if(this._raiseNewNote)
-               this.raiseInstance(this);
+            if(this._raiseNewNote) {
+               Mainloop.idle_add(Lang.bind(this, function() {
+                  this.raiseInstance(this);
+               }));
+            }
          }
          return true;
       }
@@ -470,9 +471,10 @@ MyDesklet.prototype = {
          this.loadNote(0);
          return true;
       }
-      DeskletManager.removeDesklet(this._uuid, this.instance_id);
-      this.destroyDesklet();
       Main.notify("Invalid instances " + this.instance_id + " of " + this._uuid + " called.");
+      Mainloop.idle_add(Lang.bind(this, function() {
+         DeskletManager.removeDesklet(this._uuid, this.instance_id);
+      }));
       return false;
    },
 
@@ -489,7 +491,6 @@ MyDesklet.prototype = {
 
    openAllInstances: function(currentInstances) {
       try {
-         //log("Begin load");
          let enabledDesklets = global.settings.get_strv("enabled-desklets");
          let newDeskletID = global.settings.get_int("next-desklet-id");
          let deskletDef, nextDeskletId;
@@ -516,16 +517,13 @@ MyDesklet.prototype = {
                enabledDesklets.push(deskletDef);
                newDeskletID++;
             }
-            //log("load multiple desklet");
          } else {
             nextDeskletId = newDeskletID + 1;
             deskletDef = (this._uuid + ':%s:%s:%s').format(newDeskletID, this._xPosition, this._yPosition);
             enabledDesklets.push(deskletDef);
-            //log("load one desklet");
          }
          global.settings.set_strv("enabled-desklets", enabledDesklets);
          global.settings.set_int("next-desklet-id", nextDeskletId);
-         //log("End load");
       } catch (e) {
          this.showErrorMessage(e.message);
       }
@@ -544,7 +542,6 @@ MyDesklet.prototype = {
       if(this.myManager)
           this.myManager.destroyAppletInstance();
       this.myManager = null;
-      //log("remove all");
    },
 
    destroyDesklet: function() {
@@ -554,16 +551,20 @@ MyDesklet.prototype = {
       this._menuManager = null;
       this.actor.destroy();
       this.emit('destroy');
-      log("destroy");
    },
 
    on_desklet_removed: function() {
+      this.scrollArea.set_auto_scrolling(false);
+      try {
+         this.settings.finalize();
+      } catch(e) {}
       this._untrackMouse();
-      this.reset();
-      this.settings.finalize();
+      //this.reset();
       if(this.getCountInstances() == 0)
          this.setVisibleAppletManager(false);
-      
+      if(this.pressEventOutIDSignal > 0)
+         global.stage.disconnect(this.pressEventOutIDSignal);
+      this.pressEventOutIDSignal = 0;
       if(this.scrollIDSignal > 0)
          this.scrollBox.disconnect(this.scrollIDSignal);
       this.scrollIDSignal = 0;
@@ -591,7 +592,6 @@ MyDesklet.prototype = {
       if(this.leaveAutoHideButtonsIDSignal > 0)
          this.actor.disconnect(this.leaveAutoHideButtonsIDSignal);
       this.leaveAutoHideButtonsIDSignal = 0;
-     // log("remove");
    },
 
    getInstanceNumber: function() {
@@ -853,10 +853,9 @@ MyDesklet.prototype = {
       if(actor)
          this._effectIcon(actor, 0.2);
       if(this._multInstance) {
-         Mainloop.idle_add(Lang.bind(this, function() {
-            let countInstances = this.notesList.length;
-            this.openAllInstances(countInstances - 1);
-         }));
+         let countInstances = this.notesList.length;
+         this.openAllInstances(countInstances - 1);
+         return true;
       }
       else {
          this.reset();
@@ -864,7 +863,9 @@ MyDesklet.prototype = {
          this.currentNote.set_text(this.noteCurrent.toString());
          if(this._raiseNewNote)
             this.raiseInstance(this);
+        return true;
       }
+      return false
    },
 
    _onVisibleNoteChange: function(actor, event) {
@@ -914,7 +915,23 @@ MyDesklet.prototype = {
    _onRemoveNote: function(actor) {
       try {
          this._effectIcon(actor, 0.2);
-         this.showMessageDelete();
+         let exist = false;
+         let pos = this.noteCurrent - 1;
+         if((pos > -1)&&(pos < this.notesList.length)) {
+            let file = Gio.file_new_for_path(GLib.get_home_dir() + "/.local/share/notes/" + this.notesList[pos][0] + ".note");
+            exist = file.query_exists(null);
+         }
+         if(this.deskletRaised)
+            this.toggleRaise();
+         if(exist) {
+            Mainloop.idle_add(Lang.bind(this, function() {
+               this.showMessageDelete();
+            }));
+         } else {
+            Mainloop.idle_add(Lang.bind(this, function() {
+               DeskletManager.removeDesklet(this._uuid, this.instance_id); 
+            }));
+         }
       } catch(e) {
          this.showErrorMessage(e.message);
       }
@@ -928,19 +945,20 @@ MyDesklet.prototype = {
       }));
    },
 
+   _onRemoveDesklet: function() {
+      this.removeAllInstances();
+   },
+
    _deleteNote: function() {
       try {
          if(this._multInstance) {
-            if(this.deskletRaised)
-               this.toggleRaise();
-            this.deleteNote(this.noteCurrent - 1);
             if(this.getCountInstances() > 1) {
-               //Mainloop.idle_add(Lang.bind(this, function() {
+              // Mainloop.idle_add(Lang.bind(this, function() {
                   DeskletManager.removeDesklet(this._uuid, this.instance_id);
-              // }));
-            } else {
-               this.reset();
+               //}));
             }
+            this.reset();
+            this.deleteNote(this.noteCurrent - 1);
          } else {
             if(this.notesList.length > 1) { 
                if((this.noteCurrent != 0)&&(this.noteCurrent <= this.notesList.length)) {
@@ -975,6 +993,7 @@ MyDesklet.prototype = {
          this.showErrorMessage(e.message);
       }
    },
+
    _onBackNote: function(actor) {
       if(this.notesList.length != 0) {
          this._effectIcon(actor, 0.2);
@@ -1164,7 +1183,6 @@ MyDesklet.prototype = {
 
    reset: function () {
       this.titleNote.set_text(_("Type your note..."));
-      this._getTextHeight();
       this.entry.text = "";
       this.setPencil(false);
       global.stage.set_key_focus(null);
@@ -1266,9 +1284,9 @@ MyDesklet.prototype = {
       this.scrollArea.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC);
 
       this.scrollBox = new St.BoxLayout({vertical:true});
-      this.scrollBox.add(this.scrollArea, { x_fill: true, y_fill: true, expand: true, x_align: St.Align.START, y_align: St.Align.START });
       this.scrollBox.set_style('padding-top: 6px;');
-
+      this.scrollBox.add(this.scrollArea, { x_fill: true, y_fill: true, expand: true, x_align: St.Align.START, y_align: St.Align.START });
+     
       this.scrollArea.add_actor(this.textBox);
 //scroll
       this.rootBox.add(this.scrollBox, { x_fill: true, y_fill: true, expand: true, x_align: St.Align.START, y_align: St.Align.START });
@@ -1687,13 +1705,10 @@ MyDesklet.prototype = {
    },
 
    _onMultInstanceChange: function() {
-      //log("begin change multi");
       if((this.instance_id == this.getMasterInstance())&&
          (this._multInstance != this.multInstanceMenuItem._switch.state)) {
          Mainloop.idle_add(Lang.bind(this, function() {
-            //log("try change multi");
             this.multInstanceUpdate();
-            //log("change multi");
          }));
       }
    },
