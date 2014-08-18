@@ -13,7 +13,7 @@
         "default": false,
         "description": "Multiple Instances.",
         "type": "checkbox",
-        "tooltip": "Check this if you want to have different instances of this desklet for for each note."
+        "tooltip": "Check this if you want to have different instances of this desklet for each note."
     },
     "auto-hide-buttons": {
         "default": false,

@@ -309,8 +309,9 @@ MyApplet.prototype = {
    },
 
    removedFromPanel: function() {
-      if(this.desklet)
+      if(this.desklet) {
          this.desklet.on_applet_removed_from_panel();
+      }
    },
 
    on_applet_removed_from_panel: function() {

@@ -123,23 +123,26 @@ function DeskletAppletManager(desklet) {
 DeskletAppletManager.prototype = {
    _init: function(desklet) {
       this.desklet = desklet;
+      this.applet = null;
    },
 
-   createNewInstance: function() {
-      try {
-         global.settings.connect('changed::enabled-applets', Lang.bind(this, this._onEnabledAppletsChanged));
-         let uuid = this.desklet.metadata["uuid"];
-         let newAppletID = global.settings.get_int("next-applet-id");
-         global.settings.set_int("next-applet-id", newAppletID + 1);
-         let dir = Gio.file_new_for_path(GLib.get_home_dir() + "/.local/share/cinnamon/desklets/"+uuid);
-         let extCreate = new ExtensionExtended(dir, Extension.Type.APPLET);
-         let appletDef = ('%s:%s:%s').format(this.desklet.appletManagerOrder, uuid, newAppletID);
-         let appletDefinition = AppletManager.getAppletDefinition(appletDef);
-         AppletManager.addAppletToPanels(extCreate, appletDefinition);
-         this.applet = AppletManager.appletObj[newAppletID];
-         this.applet.setParentDesklet(this.desklet);
-      } catch (e) {
-         Main.notify("error", e.message);
+   createAppletInstance: function() {
+      if(!this.applet) {
+         try {
+            global.settings.connect('changed::enabled-applets', Lang.bind(this, this._onEnabledAppletsChanged));
+            let uuid = this.desklet.metadata["uuid"];
+            let newAppletID = global.settings.get_int("next-applet-id");
+            global.settings.set_int("next-applet-id", newAppletID + 1);
+            let dir = Gio.file_new_for_path(GLib.get_home_dir() + "/.local/share/cinnamon/desklets/"+uuid);
+            let extCreate = new ExtensionExtended(dir, Extension.Type.APPLET);
+            let appletDef = ('%s:%s:%s').format(this.desklet._appletManagerOrder, uuid, newAppletID);
+            let appletDefinition = AppletManager.getAppletDefinition(appletDef);
+            AppletManager.addAppletToPanels(extCreate, appletDefinition);
+            this.applet = AppletManager.appletObj[newAppletID];
+            this.applet.setParentDesklet(this.desklet);
+         } catch (e) {
+            Main.notify("error", e.message);
+         }
       }
    },
 
@@ -150,30 +153,28 @@ DeskletAppletManager.prototype = {
          let panel_string = "panel1";
          if((Main.panel2)&&(Main.panel2["_"+zone_string+"Box"] == this.applet._panelLocation))
             panel_string = "panel2";
-         this.desklet.appletManagerOrder = panel_string+":"+zone_string+":"+this.applet._order;
+         this.desklet._appletManagerOrder = panel_string+":"+zone_string+":"+this.applet._order;
       }
    },
 
-   destroyInstance: function() {
-      try {
-         if(this.applet) {
+   destroyAppletInstance: function() {
+      if(this.applet) {
+         try {
             try {
                this.applet._onAppletRemovedFromPanel();
             } catch (e) {
                global.logError("Error during on_applet_removed_from_panel() call on applet: " + this.applet._uuid + "/" + this.applet.instance_id, e);
             }
-
             if(this.applet._panelLocation != null) {
                this.applet._panelLocation.remove_actor(this.applet.actor);
                this.applet._panelLocation = null;
             }
-
             delete this.applet._extension._loadedDefinitions[this.applet.instance_id];
             delete AppletManager.appletObj[this.applet.instance_id];
             this.applet = null; 
+         } catch (e) {
+            Main.notify("error", e.message);
          }
-      } catch (e) {
-         Main.notify("error", e.message);
       }
    }
 };
@@ -237,12 +238,9 @@ MyDesklet.prototype = {
       this._entryActiveMenu = false;
       this._menu.connect('open-state-changed', Lang.bind(this, this._updateMenu));
 
-      this.keyPress = 0;
       this._themeStaples = "none";
       this._themeStripe = "none";
       this._themePencil = "bluepencil";
-      this._text = "";
-      this.noteCurrent = 0;
       this._boxColor = "#000000";
       this._opacityBoxes = 0.5;
       this._borderBoxWidth = 1;
@@ -250,11 +248,13 @@ MyDesklet.prototype = {
       this._textSize = 12;
       this._fontFamily = ""; //Default Font family
       this._fontColor= "#ffffff";
-      this._fWidth = true;
       this._width = 220;
-      this._fHeight = true;
       this._height = 120;
+      //this._multInstance = true;
       this._scrollVisible = true;
+      this._text = "";
+      this.keyPress = 0;
+      this.noteCurrent = 0;     
       this.focusIDSignal = 0;
       this.keyPressIDSignal = 0;
       this.pressEventOutIDSignal = 0;
@@ -266,8 +266,6 @@ MyDesklet.prototype = {
       this.rootBoxChangeIdSignal = 0;
       this.textBoxChangeIdSignal = 0;
       this.visibleNote = true;
-      this._multInstance = true;
-      this._timeOutSettings = 0;
       this.deskletRaised = false;
       this.deskletHide = false;
       this.actorResize = null;
@@ -275,10 +273,13 @@ MyDesklet.prototype = {
       this.eventLoopResize = 0;
       this.eventLoop = 0;
       this._timeOutResize = 0;
+      this._timeOutSettings = 0;
       this.myManager = null;
+     // this._untrackMouse();
       try {
          this._updateComplete();
          this._trackMouse();
+         this._onAllocationChanged();
       } catch(e) {
          this.showErrorMessage(e.message);
       }
@@ -380,16 +381,16 @@ MyDesklet.prototype = {
          this._onSymbolicIcons();
          this.multInstanceMenuItem._switch.setToggleState(this._multInstance);
          this._onStyleChange();
+         if(this.instance_id == this.getMasterInstance()) {
+            Main.settingsManager.register(this._uuid, this._uuid, this.settings);
+         }
+         this._createAppletManager();
+         this._onAppletManagerChange();
          Mainloop.idle_add(Lang.bind(this, function() {
-            if(this.instance_id == this.getMasterInstance()) {
-               Main.settingsManager.register(this._uuid, this._uuid, this.settings);
-            }
-            this._createAppletManager();
-            this._onAppletManagerChange();
             this.rootBoxChangeIdSignal = this.rootBox.connect('style-changed', Lang.bind(this, this._onOpacityRootChange));
             this.textBoxChangeIdSignal = this.textBox.connect('style-changed', Lang.bind(this, this._onOpacityTextChange));
             this._keyFocusNotifyIDSignal = global.stage.connect('notify::key-focus', Lang.bind(this, this._onKeyFocusChanged));
-            this.scrollBox.connect('allocation_changed', Lang.bind(this, this._onAllocationChanged));
+            this._allocationSignal = this.scrollBox.connect('allocation_changed', Lang.bind(this, this._onAllocationChanged));
          }));
       }
    },
@@ -405,6 +406,7 @@ MyDesklet.prototype = {
             }
             if(!this.myManager) {
                this.myManager = new DeskletAppletManager(this);
+               //log("Create Applet Manager");
             }
          }
       } catch(e) {
@@ -413,18 +415,17 @@ MyDesklet.prototype = {
    },
 
    _onAppletManagerChange: function() {
-      if(this.instance_id ==  this.getMasterInstance()) {
+      if(this.instance_id == this.getMasterInstance()) {
          this.setVisibleAppletManager(this._appletManager);
       }
    },
 
    setVisibleAppletManager: function(visible) {
-      this._appletManager = visible;
       if(this.myManager) {
          if(visible) {
-            this.myManager.createNewInstance();
+            this.myManager.createAppletInstance();
          } else {
-            this.myManager.destroyInstance();
+            this.myManager.destroyAppletInstance();
          }
       }
    },
@@ -436,6 +437,7 @@ MyDesklet.prototype = {
 
    on_applet_removed_from_panel: function() {
       this.setVisibleAppletManager(false);
+      this._appletManager = false;
    },
 
    showErrorMessage: function(menssage) {
@@ -445,11 +447,11 @@ MyDesklet.prototype = {
    initDeskletType: function() {
       this.notesList = this.findNotesFromFile();
       this._readListPosition();
+      let countInstances = this.getCountInstances();
       if(this._multInstance) {
          let numberInstance = this.getInstanceNumber();
-         if((numberInstance == 0)&&(this.notesList.length > 1)&&(this.getCountInstance() == 1)) {
-            this.openAllMulInstance();
-            
+         if((numberInstance == 0)&&(this.notesList.length > 1)&&(countInstances == 1)) {
+             this.openAllInstances(countInstances);
          }
          if(numberInstance < this.notesList.length) {
             this.readNoteFromFile(numberInstance);
@@ -463,61 +465,70 @@ MyDesklet.prototype = {
          }
          return true;
       }
-      else if(this.getCountInstance() == 1) {
+      else if(countInstances == 1) {
          this.readNotesFromFile();
          this.loadNote(0);
          return true;
       }
       DeskletManager.removeDesklet(this._uuid, this.instance_id);
       this.destroyDesklet();
+      Main.notify("Invalid instances " + this.instance_id + " of " + this._uuid + " called.");
       return false;
    },
 
    multInstanceUpdate: function() {
       try {
          this.removeAllInstances();
-         this.createNewInstance(1);
+         Mainloop.idle_add(Lang.bind(this, function() {
+            this.openAllInstances(0);
+         }));
       } catch(e) {
          this.showErrorMessage(e.message);
       }
    },
 
-   createNewInstance: function(index) {
-      let signalWait = Mainloop.timeout_add(index*100, Lang.bind(this, function(signalWait) {
-         try {
-            if(signalWait) {
-               Mainloop.source_remove(signalWait);
-            }
-            let newDeskletID = global.settings.get_int("next-desklet-id");
-            global.settings.set_int("next-desklet-id", newDeskletID + 1);
-            let deskletDef;
-            if(this._multInstance) {
+   openAllInstances: function(currentInstances) {
+      try {
+         //log("Begin load");
+         let enabledDesklets = global.settings.get_strv("enabled-desklets");
+         let newDeskletID = global.settings.get_int("next-desklet-id");
+         let deskletDef, nextDeskletId;
+         if(this._multInstance) {
+            let countDesklet = this.notesList.length;
+            if(countDesklet == 0)
+               countDesklet++;
+            nextDeskletId = newDeskletID + countDesklet - currentInstances;
+            for(let numberInstance = currentInstances; numberInstance < countDesklet; numberInstance++) {
                let monitor = Main.layoutManager.focusMonitor;
                let countMaxDesklet = monitor.width/this.mainBox.get_width();
-               let numberInstance = this.getCountInstance();
                let posY = 100*Math.floor(numberInstance/countMaxDesklet) + this._processPanelSize();
                if(posY > monitor.height)
                   posY = 100;
                let posX = Math.floor(numberInstance % countMaxDesklet)*this.mainBox.get_width();
 
                let storePos;
-               if(this.notesList[this.getCountInstance()])
-                  storePos = this.positions["" + this.notesList[this.getCountInstance()][0]];
+               if(this.notesList[numberInstance])
+                  storePos = this.positions["" + this.notesList[numberInstance][0]];
                if(storePos)
                   deskletDef = (this._uuid + ':%s:%s:%s').format(newDeskletID, storePos[0], storePos[1]);
                else
                   deskletDef = (this._uuid + ':%s:%s:%s').format(newDeskletID, posX, posY);
+               enabledDesklets.push(deskletDef);
+               newDeskletID++;
             }
-            else {
-               deskletDef = (this._uuid + ':%s:%s:%s').format(newDeskletID, this._xPosition, this._yPosition);
-            }
-            let enabledDesklets = global.settings.get_strv("enabled-desklets");
+            //log("load multiple desklet");
+         } else {
+            nextDeskletId = newDeskletID + 1;
+            deskletDef = (this._uuid + ':%s:%s:%s').format(newDeskletID, this._xPosition, this._yPosition);
             enabledDesklets.push(deskletDef);
-            global.settings.set_strv("enabled-desklets", enabledDesklets);
-         } catch (e) {
-            this.showErrorMessage(e.message);
+            //log("load one desklet");
          }
-      }));
+         global.settings.set_strv("enabled-desklets", enabledDesklets);
+         global.settings.set_int("next-desklet-id", nextDeskletId);
+         //log("End load");
+      } catch (e) {
+         this.showErrorMessage(e.message);
+      }
    },
 
    removeAllInstances: function() {
@@ -531,36 +542,56 @@ MyDesklet.prototype = {
          }
       }
       if(this.myManager)
-          this.myManager.destroyInstance();
+          this.myManager.destroyAppletInstance();
       this.myManager = null;
-      DeskletManager.removeDesklet(this._uuid, this.instance_id);
+      //log("remove all");
    },
 
    destroyDesklet: function() {
       this.on_desklet_removed();
-      this.actor.destroy();
       this._menu.destroy();
       this._menu = null;
       this._menuManager = null;
+      this.actor.destroy();
       this.emit('destroy');
+      log("destroy");
    },
 
-   openAllMulInstance: function() {
-      try {
-         if(this._multInstance) {
-            let enabledDesklets = global.settings.get_strv("enabled-desklets");
-            let listDesklet = this.findNotesFromFile();
-            let initNumber = this.getCountInstance();
-            if(listDesklet.length == 0)
-               this.createNewInstance(1);
-            else {
-               for(let index = initNumber; index < listDesklet.length; index++)
-                  this.createNewInstance(index);
-            }
-         }
-      } catch(e) {
-         this.showErrorMessage(e.message);
-      }
+   on_desklet_removed: function() {
+      this._untrackMouse();
+      this.reset();
+      this.settings.finalize();
+      if(this.getCountInstances() == 0)
+         this.setVisibleAppletManager(false);
+      
+      if(this.scrollIDSignal > 0)
+         this.scrollBox.disconnect(this.scrollIDSignal);
+      this.scrollIDSignal = 0;
+      if(this._allocationSignal > 0)
+         this.scrollBox.disconnect(this._allocationSignal);
+      this._allocationSignal = 0;
+      if(this._keyFocusNotifyIDSignal > 0)
+         global.stage.disconnect(this._keyFocusNotifyIDSignal);
+      this._keyFocusNotifyIDSignal = 0;
+      if(this.focusIDSignal > 0)
+         this.clutterText.disconnect(this.focusIDSignal);
+      this.focusIDSignal = 0;
+      if(this.keyPressIDSignal > 0)
+         this.clutterText.disconnect(this.keyPressIDSignal);
+      this.keyPressIDSignal = 0;
+      if(this.textInsertIDSignal > 0)
+         this.clutterText.disconnect(this.textInsertIDSignal);
+      this.textInsertIDSignal = 0;
+      if(this.textChangeIDSignal > 0)
+         this.clutterText.disconnect(this.textChangeIDSignal);
+      this.textChangeIDSignal = 0;
+      if(this.enterAutoHideButtonsIDSignal > 0)
+         this.actor.disconnect(this.enterAutoHideButtonsIDSignal);
+      this.enterAutoHideButtonsIDSignal = 0;
+      if(this.leaveAutoHideButtonsIDSignal > 0)
+         this.actor.disconnect(this.leaveAutoHideButtonsIDSignal);
+      this.leaveAutoHideButtonsIDSignal = 0;
+     // log("remove");
    },
 
    getInstanceNumber: function() {
@@ -602,7 +633,7 @@ MyDesklet.prototype = {
       return resultObject;
    },
 
-   getCountInstance: function() {
+   getCountInstances: function() {
       let resultNumber = 0;
       try {
          let enabledDesklets = global.settings.get_strv("enabled-desklets");
@@ -822,7 +853,10 @@ MyDesklet.prototype = {
       if(actor)
          this._effectIcon(actor, 0.2);
       if(this._multInstance) {
-        this.createNewInstance(1);
+         Mainloop.idle_add(Lang.bind(this, function() {
+            let countInstances = this.notesList.length;
+            this.openAllInstances(countInstances - 1);
+         }));
       }
       else {
          this.reset();
@@ -900,10 +934,13 @@ MyDesklet.prototype = {
             if(this.deskletRaised)
                this.toggleRaise();
             this.deleteNote(this.noteCurrent - 1);
-            if(this.getCountInstance() > 1)
-               DeskletManager.removeDesklet(this._uuid, this.instance_id);
-            else
+            if(this.getCountInstances() > 1) {
+               //Mainloop.idle_add(Lang.bind(this, function() {
+                  DeskletManager.removeDesklet(this._uuid, this.instance_id);
+              // }));
+            } else {
                this.reset();
+            }
          } else {
             if(this.notesList.length > 1) { 
                if((this.noteCurrent != 0)&&(this.noteCurrent <= this.notesList.length)) {
@@ -1097,7 +1134,6 @@ MyDesklet.prototype = {
          this.transpBox.set_height(0);
          this.endBox.set_height(0);
       }
-      this._onAllocationChanged();
    },
 
    setPencil: function(activePencil) {
@@ -1276,7 +1312,7 @@ MyDesklet.prototype = {
                   this.mainBox.set_width(currWidth);
                   this.mainBox.set_height(currHeight);
                }
-               //this.setVisibleNote(false);
+               this.setVisibleNote(false);
                this.setVisibleNote(true);
 
                btClickedCallBack(btClick.label.substring(4, btClick.label.length - 4));
@@ -1320,37 +1356,6 @@ MyDesklet.prototype = {
       let diff = (availWidth % 18);
       this.transpBox.set_width(availWidth - diff);
       this.endBox.set_width(availWidth - diff);
-   },
-
-   on_desklet_removed: function() {
-      this.reset();
-      if(this._keyFocusNotifyIDSignal > 0)
-         global.stage.disconnect(this._keyFocusNotifyIDSignal);
-      this._keyFocusNotifyIDSignal = 0;
-      if(this.focusIDSignal > 0)
-         this.clutterText.disconnect(this.focusIDSignal);
-      this.focusIDSignal = 0;
-      if(this.keyPressIDSignal > 0)
-         this.clutterText.disconnect(this.keyPressIDSignal);
-      this.keyPressIDSignal = 0;
-      if(this.textInsertIDSignal > 0)
-         this.clutterText.disconnect(this.textInsertIDSignal);
-      this.textInsertIDSignal = 0;
-      if(this.textChangeIDSignal > 0)
-         this.clutterText.disconnect(this.textChangeIDSignal);
-      this.textChangeIDSignal = 0;
-      if(this.enterAutoHideButtonsIDSignal > 0)
-         this.actor.disconnect(this.enterAutoHideButtonsIDSignal);
-      this.enterAutoHideButtonsIDSignal = 0;
-      if(this.leaveAutoHideButtonsIDSignal > 0)
-         this.actor.disconnect(this.leaveAutoHideButtonsIDSignal);
-      this.leaveAutoHideButtonsIDSignal = 0;
-      if(this.scrollIDSignal > 0)
-         this.scrollBox.disconnect(this.scrollIDSignal);
-      this.scrollIDSignal = 0;
-      this.settings.finalize();
-      if(this.getCountInstance() == 0)
-         this.on_applet_removed_from_panel();
    },
 
    _buttonCreation: function(icon, toolTip, iconSymbolic) {
@@ -1682,23 +1687,23 @@ MyDesklet.prototype = {
    },
 
    _onMultInstanceChange: function() {
+      //log("begin change multi");
       if((this.instance_id == this.getMasterInstance())&&
          (this._multInstance != this.multInstanceMenuItem._switch.state)) {
          Mainloop.idle_add(Lang.bind(this, function() {
+            //log("try change multi");
             this.multInstanceUpdate();
+            //log("change multi");
          }));
       }
    },
 
    _onMultInstanceActivated: function() {
+      if(this._menu.isOpen)
+         this._menu.close(false);
       if(this._multInstance != this.multInstanceMenuItem._switch.state) {
-         if(this._menu.isOpen) {
-            this._menu.toggle();
-         }
          this._multInstance = this.multInstanceMenuItem._switch.state;
-         Mainloop.idle_add(Lang.bind(this, function() {
-            this.multInstanceUpdate();
-         }));
+         this.multInstanceUpdate();
       }
    },
 
@@ -1941,7 +1946,7 @@ MyDesklet.prototype = {
       "tooltip": "The current note."
        },*/
          this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "applet-manager", "_appletManager", this._onAppletManagerChange, null);
-         this.settings.bindProperty(Settings.BindingDirection.IBIDIRECTIONA, "applet-collapsed", "_appletCollapsed", this._onSetAppletType, null);
+         this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "applet-collapsed", "_appletCollapsed", this._onSetAppletType, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "applet-symbolic", "_appletSymbolic", this._onSetAppletType, null); 
 
          this.settings.bindProperty(Settings.BindingDirection.IN, "stripe-layout", "_themeStripe", this._onStyleChange, null);
@@ -1981,7 +1986,7 @@ MyDesklet.prototype = {
 
          this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "hide-text-box", "_hideTextBox", null, null);
          this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "list-hide-text-box", "_listHideTextBox", null, null);
-         this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "applet-manager-order", "appletManagerOrder", null, null);
+         this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "applet-manager-order", "_appletManagerOrder", null, null);
       } catch (e) {
          this.showErrorMessage(e.message);
          global.logError(e);

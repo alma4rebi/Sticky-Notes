@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Sticky-Notes 0.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-11-08 21:29-0600\n"
-"PO-Revision-Date: 2014-07-22 21:15-0600\n"
+"PO-Revision-Date: 2014-08-17 20:02-0600\n"
 "Last-Translator: Lester Carballo Pérez <lestcape@gmail.com>\n"
 "Language-Team: lestcape <lestcape@gmail.com>\n"
 "MIME-Version: 1.0\n"
@@ -158,6 +158,14 @@ msgstr "Apariencia Avanzada:"
 msgid "Multiple Instances."
 msgstr "Instancias Múltiples."
 
+#. notes@lestcape->settings-schema.json->multi-instance->tooltip
+msgid ""
+"Check this if you want to have different instances of this desklet for each "
+"note."
+msgstr ""
+"Seleccione si desea tener diferentes instancias de este desklet para cada "
+"nota."
+
 #. notes@lestcape->settings-schema.json->auto-hide-buttonss->description
 msgid "Auto hide buttons."
 msgstr "Auto ocultar botones."
@@ -169,14 +177,6 @@ msgid ""
 msgstr ""
 "Seleccione si usted quiere que los botones de acciones se auto oculten "
 "cuando el cursor está afuera del área del desklet."
-
-#. notes@lestcape->settings-schema.json->multi-instance->tooltip
-msgid ""
-"Check this if you want to have different instances of this desklet for for "
-"each note."
-msgstr ""
-"Seleccione esto si usted quiere tener diferentes instancias de este desklet "
-"para cada nota."
 
 #. notes@lestcape->settings-schema.json->stripe-layout->description
 msgid "Selected theme of paper sheet:"

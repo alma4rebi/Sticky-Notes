@@ -157,7 +157,7 @@ msgid "Multiple Instances."
 msgstr ""
 
 #. notes@lestcape->settings-schema.json->multi-instance->tooltip
-msgid "Check this if you want to have different instances of this desklet for for each note."
+msgid "Check this if you want to have different instances of this desklet for each note."
 msgstr ""
 
 #. notes@lestcape->settings-schema.json->auto-hide-buttons->description
