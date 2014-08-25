@@ -131,10 +131,10 @@ DeskletAppletManager.prototype = {
          try {
             global.settings.connect('changed::enabled-applets', Lang.bind(this, this._onEnabledAppletsChanged));
             let uuid = this.desklet.metadata["uuid"];
-            let newAppletID = global.settings.get_int("next-applet-id");
-            global.settings.set_int("next-applet-id", newAppletID + 1);
             let dir = Gio.file_new_for_path(GLib.get_home_dir() + "/.local/share/cinnamon/desklets/"+uuid);
             let extCreate = new ExtensionExtended(dir, Extension.Type.APPLET);
+            let newAppletID = global.settings.get_int("next-applet-id");
+            global.settings.set_int("next-applet-id", newAppletID + 1);
             let appletDef = ('%s:%s:%s').format(this.desklet._appletManagerOrder, uuid, newAppletID);
             let appletDefinition = AppletManager.getAppletDefinition(appletDef);
             AppletManager.addAppletToPanels(extCreate, appletDefinition);
@@ -399,7 +399,7 @@ MyDesklet.prototype = {
          if(!this.myManager) {
             for(let desklet_id in DeskletManager.deskletObj) {
                let desk = DeskletManager.deskletObj[desklet_id];
-               if((desk)&&(desk.myManager)) {
+               if((desk)&&(desk._uuid == this._uuid)&&(desk.myManager)) {
                   this.myManager = desk.myManager;
                }
             }
