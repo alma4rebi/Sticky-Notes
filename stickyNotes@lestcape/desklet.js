@@ -309,7 +309,8 @@ MyDesklet.prototype = {
         Main.uiGroup.add_actor(this._menu.actor);
         this._menu.actor.hide();
 
-        this.actor.connect('button-press-event', Lang.bind(this, this._onButtonPressEvent));
+        if(this._onButtonPressEvent)
+           this.actor.connect('button-press-event', Lang.bind(this, this._onButtonPressEvent));
 
         this._uuid = null;
         this._dragging = false;
@@ -385,7 +386,8 @@ MyDesklet.prototype = {
          this._keyFocusNotifyIDSignal = global.stage.connect('notify::key-focus', Lang.bind(this, this._onKeyFocusChanged));
          this._allocationSignal = this.scrollBox.connect('allocation_changed', Lang.bind(this, this._onAllocationChanged));
          if(this.instance_id == this.getMasterInstance()) {
-            Main.settingsManager.register(this._uuid, this._uuid, this.settings);
+            if(Main.settingsManager)
+               Main.settingsManager.register(this._uuid, this._uuid, this.settings);
             Mainloop.idle_add(Lang.bind(this, function() {
                this._createAppletManager();
                this.setVisibleAppletManager(this._appletManager);
