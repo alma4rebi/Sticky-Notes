@@ -1,5 +1,5 @@
-Desklet : Sticky Notes           Version              : v1.3-Beta
-S.O.    : Cinnamon               Fecha de lanzamiento : 18 de Agosto de 2014.
+Desklet : Sticky Notes           Version              : v1.4-Beta
+S.O.    : Cinnamon               Fecha de lanzamiento : 7 de Septiembre de 2014.
 Autor   : Lester Carballo Pérez  Correo electrónico   : lestcape@gmail.com
 
 Sitio Web : https://github.com/lestcape/Sticky-Notes
@@ -31,6 +31,10 @@ Instrucciones de instalación:
 
 Registro de cambios:
 --------------
+v1.4-Beta
+   - Compatibilidad con Cinnamon 2.3.
+   - Algunos errores solucionados.
+
 v1.3- Beta
    - Compatibilidad con Cinnamon 2.3.
    - Eliminadas muchas advertencias.

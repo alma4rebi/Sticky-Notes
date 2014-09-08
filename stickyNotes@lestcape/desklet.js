@@ -1,5 +1,5 @@
-// Desklet : Sticky Notes           Version      : v1.3-Beta
-// O.S.    : Cinnamon               Release Date : 18 August 2014.
+// Desklet : Sticky Notes           Version      : v1.4-Beta
+// O.S.    : Cinnamon               Release Date : 7 August 2014.
 // Author  : Lester Carballo Pérez  Email        : lestcape@gmail.com
 //
 // Website : https://github.com/lestcape/Sticky-Notes
@@ -309,8 +309,7 @@ MyDesklet.prototype = {
         Main.uiGroup.add_actor(this._menu.actor);
         this._menu.actor.hide();
 
-        if(this._onButtonPressEvent)
-           this.actor.connect('button-press-event', Lang.bind(this, this._onButtonPressEvent));
+        this.actor.connect('button-release-event', Lang.bind(this, this._onButtonReleaseEvent));
 
         this._uuid = null;
         this._dragging = false;
@@ -1514,12 +1513,6 @@ MyDesklet.prototype = {
       } 
       this._entryActiveMenu = false;
    },
-/*
-   _onButtonPressEvent: function(actor, event) {
-      //block the new way handdle event on cinnamon..
-      return true;
-   },*/
-
 
    _onButtonReleaseEvent: function(actor, event) {//block the new way handdle event on cinnamon...
       if(event.get_button() == 3) {
