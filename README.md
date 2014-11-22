@@ -1,6 +1,6 @@
 Cinnamon Desklet: Sticky Notes Version: v1.5
 
-Last version release date: 21 November 2014.
+Last version release date: 22 November 2014.
 ***
 Author: [Lester Carballo Pérez](https://github.com/lestcape).
 
@@ -15,7 +15,7 @@ Special thanks to:
 --------------
 Author of language translation:
 --------------
-- Bulgaro(Bg):      ???(???@gmail.com)
+- Bulgarian(Bg):    Peyu Yovev (spacy01) (spacy00001@gmail.com)
 - English(En):      Lester Carballo Pérez(lestcape@gmail.com)
 - Spanish(Es):      Lester Carballo Pérez(lestcape@gmail.com)
 
@@ -48,7 +48,7 @@ Installation Instructions:
 Change Log:
 --------------
 v1.5-Beta
-   - Añadido el idioma Bulgaro, thanks ???...
+   - Added Bulgarian language, thanks to Peyu Yovev.
    - Compatibility with Cinnamon 2.4.
    - Some bugs was fixed.
 
