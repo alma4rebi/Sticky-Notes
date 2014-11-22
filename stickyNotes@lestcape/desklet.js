@@ -1,10 +1,7 @@
-// Desklet : Sticky Notes           Version      : v1.4-Beta
-// O.S.    : Cinnamon               Release Date : 7 August 2014.
-// Author  : Lester Carballo Pérez  Email        : lestcape@gmail.com
-//
+// Desklet : Sticky Notes
+// Author  : Lester Carballo Pérez
+// Email   : lestcape@gmail.com
 // Website : https://github.com/lestcape/Sticky-Notes
-//
-// Based on: https://github.com/linuxmint/Cinnamon/pull/2119
 //
 // This is a simple desklet to add sticky notes in the desktop.
 // The notes will be saved when a focus of the text editor was lost.
@@ -202,10 +199,12 @@ MyDesklet.prototype = {
 
       this._clipboard = St.Clipboard.get_default();
 
-      this.helpFile = GLib.get_home_dir() + "/.local/share/cinnamon/desklets/"+this._uuid+"/locale/" + _("README");
+      this.helpFile = Gio.file_new_for_path(GLib.get_home_dir() + "/.local/share/cinnamon/desklets/"+this._uuid+"/locale/" + _("README"));
+      if (!this.helpFile.query_exists(null))
+          this.helpFile = Gio.file_new_for_path(GLib.get_home_dir() + "/.local/share/cinnamon/desklets/"+this._uuid+"/locale/" + "README");
 		
       this._menu.addAction(_("Help"), Lang.bind(this, function() {
-         Util.spawnCommandLine("xdg-open " + this.helpFile);
+         Util.spawnCommandLine("xdg-open " + this.helpFile.get_path());
       }));
       this._menu.addAction(_("Website"), Lang.bind(this, function() {
          Util.spawnCommandLine("xdg-open http://github.com/lestcape/Sticky-Notes");
@@ -430,7 +429,7 @@ MyDesklet.prototype = {
    },
 
    _onSetAppletType: function() {
-      if((this.myManager)&&(this.instance_id == this.getMasterInstance()))
+      if((this.myManager)&&(this.myManager.applet)&&(this.instance_id == this.getMasterInstance()))
          this.myManager.applet._onSetAppletType(this._appletCollapsed, this._appletSymbolic);
    },
 
@@ -1543,6 +1542,7 @@ MyDesklet.prototype = {
          }
          this.on_desklet_clicked(event);
       }
+      this._disableResize();
       return true;
    },
 
@@ -2045,7 +2045,7 @@ MyDesklet.prototype = {
          deskletC.deskletHide = false;
       }
       this.changingHideState = false;
-      if(this.myManager)
+      if((this.myManager)&&(this.myManager.applet))
          this.myManager.applet.setHideStatus(false);
    },
 
@@ -2065,7 +2065,7 @@ MyDesklet.prototype = {
          deskletC.actor.visible = false;
          deskletC.deskletHide = true;
       }
-      if(this.myManager)
+      if((this.myManager)&&(this.myManager.applet))
          this.myManager.applet.setHideStatus(true);
       this.changingHideState = false;
    },
@@ -2074,12 +2074,12 @@ MyDesklet.prototype = {
       try {
          if((this.deskletRaised)&&(this.raisedBox)) {
             this.raisedBox._actionCloseAll();
-            if(this.myManager)
+            if((this.myManager)&&(this.myManager.applet))
                this.myManager.applet.setRaiseStatus(false);
          }
          else {
             this.raise();
-            if(this.myManager)
+            if((this.myManager)&&(this.myManager.applet))
                this.myManager.applet.setRaiseStatus(true);
          }
          //throw "works";   
@@ -2358,6 +2358,8 @@ MyDesklet.prototype = {
             this._enabledDragable(this);
             global.set_stage_input_mode(Cinnamon.StageInputMode.NORMAL);
          }
+         //if((Main.popModal)&&(Main._findModal(this.actorResize) >= 0))
+         //   Main.popModal(this.actorResize, global.get_current_time());
          this.actorResize = null;
          this._saveDeskletPosition();
          this._saveDeskletSize();
@@ -2376,6 +2378,8 @@ MyDesklet.prototype = {
             if(this.resizeIDSignal == 0) 
                this.resizeIDSignal = global.stage.connect('button-release-event', Lang.bind(this, this._disableResize));
             global.set_stage_input_mode(Cinnamon.StageInputMode.FULLSCREEN);
+            //if(Main.pushModal)
+            //    Main.pushModal(this.actorResize);
             this._inhibitDragable(this);
             this._findMouseDeltha();
             global.set_cursor(Cinnamon.Cursor.DND_MOVE);
@@ -2503,6 +2507,13 @@ MyDesklet.prototype = {
       } catch(e) {
          this.showErrorMessage(e.message);
       }
+   },
+
+   finalizeContextMenu: function() {
+      Desklet.Desklet.prototype.finalizeContextMenu.call(this);
+      let items = this._menu._getMenuItems();
+      for(let pos in items)
+         items[pos].focusOnHover = false;
    },
 
    execInstallLanguage: function() {

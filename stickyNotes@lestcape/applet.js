@@ -1,10 +1,7 @@
-// Desklet : Sticky Notes           Version      : v1.4-Beta
-// O.S.    : Cinnamon               Release Date : 7 September 2014.
-// Author  : Lester Carballo Pérez  Email        : lestcape@gmail.com
-//
+// Desklet : Sticky Notes
+// Author  : Lester Carballo Pérez
+// Email   : lestcape@gmail.com
 // Website : https://github.com/lestcape/Sticky-Notes
-//
-// Based on: https://github.com/linuxmint/Cinnamon/pull/2119
 //
 // This is a simple desklet to add sticky notes in the desktop.
 // The notes will be saved when a focus of the text editor was lost.
@@ -291,7 +288,7 @@ MyApplet.prototype = {
          if(hide) {
             this.menuHideNotes._icon = "starred";
             this.menuHideNotes.icon.set_icon_name(this.menuHideNotes._icon);
-            this.menuHideNotes._text = ("Show Notes");
+            this.menuHideNotes._text = _("Show Notes");
             this.menuHideNotes.label.set_text(this.menuHideNotes._text);
          }
          else {

@@ -34,6 +34,14 @@ msgstr ""
 msgid "Multiple Instances"
 msgstr ""
 
+#: applet.js:138 applet.js:294 applet.js:172
+msgid "Show Notes"
+msgstr "Show Notes"
+
+#: applet.js:185
+msgid "Sticky Notes Manager"
+msgstr "Sticky Notes Manager"
+
 #: desklet.js:144
 msgid "Sticky Notes"
 msgstr ""

@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Sticky-Notes 0.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-11-08 21:29-0600\n"
-"PO-Revision-Date: 2014-09-07 09:37-0600\n"
+"PO-Revision-Date: 2014-11-21 19:28-0600\n"
 "Last-Translator: Lester Carballo Pérez <lestcape@gmail.com>\n"
 "Language-Team: lestcape <lestcape@gmail.com>\n"
 "MIME-Version: 1.0\n"
@@ -33,6 +33,14 @@ msgstr "Delete"
 #: desklet.js:100
 msgid "Multiple Instances"
 msgstr "Multiple Instances"
+
+#: applet.js:138 applet.js:294 applet.js:172
+msgid "Show Notes"
+msgstr "Show Notes"
+
+#: applet.js:185
+msgid "Sticky Notes Manager"
+msgstr "Sticky Notes Manager"
 
 #: desklet.js:144
 msgid "Sticky Notes"

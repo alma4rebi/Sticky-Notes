@@ -4,7 +4,7 @@
     "contributors": "Author: Lester Carballo P\u00e9rez,Visual Concepts: Zagortenay333,Some Ideas: Stephen Collins", 
     "uuid": "stickyNotes@lestcape", 
     "comments": "This is not just a desklet, also has inside an applet  that manages notes on the desktop. Allow resize the notes, raise above all windows, and you can customise like you want.", 
-    "version": "1.4-Beta", 
+    "version": "1.5-Beta", 
     "last-edited": "1408344619", 
     "prevent-decorations": true, 
     "description": "Sticky notes desklet."

@@ -1,13 +1,20 @@
-Desklet : Sticky Notes           Version              : v1.4-Beta
-S.O.    : Cinnamon               Fecha de lanzamiento : 7 de Septiembre de 2014.
-Autor   : Lester Carballo Pérez  Correo electrónico   : lestcape@gmail.com
-
+Desklet   : Sticky Notes           Version              : v1.5
+S.O.      : Cinnamon               Fecha de lanzamiento : 21 de Noviembre de 2014.
+Autor     : Lester Carballo Pérez  Correo electrónico   : lestcape@gmail.com
 Sitio Web : https://github.com/lestcape/Sticky-Notes
 
-Basado en: https://github.com/linuxmint/Cinnamon/pull/2119
+--------------
+Un agradecimiento especial a:
+--------------
+- Bernard            (https://github.com/zagortenay33) Ayuda con varias ideas acerca de los aspectos visuales.
+- Stephen Collins    (https://github.com/collinss)     El comportamiento de Elevar las Notas.
 
-Gracias por las ideas en el aspecto visual a:
-https://github.com/zagortenay333
+--------------
+Autor de la traducción de idiomas:
+--------------
+- Bulgaro(Bg):      ???(???@gmail.com)
+- English(En):      Lester Carballo Pérez(lestcape@gmail.com)
+- Spanish(Es):      Lester Carballo Pérez(lestcape@gmail.com)
 
 Este es un simple desklet para añadir notas en el escritorio.
 Las notas serán salvadas cuando el foco del editor de texto se pierda.
@@ -31,6 +38,11 @@ Instrucciones de instalación:
 
 Registro de cambios:
 --------------
+v1.5-Beta
+   - Añadido el idioma Bulgaro, gracias a ???
+   - Compatibilidad con Cinnamon 2.4.
+   - Algunos errores solucionados.
+
 v1.4-Beta
    - Compatibilidad con Cinnamon 2.3.
    - Algunos errores solucionados.

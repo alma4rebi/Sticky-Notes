@@ -1,28 +1,31 @@
-Sticky Notes
-=====
+Cinnamon Desklet: Sticky Notes Version: v1.5
 
-Desklet: Sticky Notes Version: v1.4-Beta
+Last version release date: 21 November 2014.
+***
+Author: [Lester Carballo Pérez](https://github.com/lestcape).
 
-O.S.: Cinnamon 
-
-Release Date: 7 September 2014.
-
-Author: Lester Carballo Pérez
-
-Email: lestcape@gmail.com
+Contact: lestcape@gmail.com
  
-Website: https://github.com/lestcape/Sticky-Notes
+***
+Special thanks to:
+
+- Bernard            (https://github.com/zagortenay33) Help with several ideas about visual aspects.
+- Stephen Collins    (https://github.com/collinss)     The behavior of Raised Notes.
 
 --------------
+Author of language translation:
+--------------
+- Bulgaro(Bg):      ???(???@gmail.com)
+- English(En):      Lester Carballo Pérez(lestcape@gmail.com)
+- Spanish(Es):      Lester Carballo Pérez(lestcape@gmail.com)
 
-This is a simple desklet to add notes in the desktop.
-
-Based on: https://github.com/linuxmint/Cinnamon/pull/2119
-
-Thanks for the visual aspect ideas to:
-https://github.com/zagortenay333
-
+--------------
 ![Alt text](/stickyNotes@lestcape/Capture.png)
+
+Description
+--------------
+This is a simple desklet to add sticky notes in the desktop.
+The sticky notes will be saved when a focus of the text editor was lost.
 
 IMPORTANT: Use with Cinnamon 2.0 or higher.
 --------------
@@ -35,7 +38,6 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 
 You should have received a copy of the GNU General Public License along with this program. If not, see http://www.gnu.org/licenses/.
 
-
 Installation Instructions:
 --------------
 1. Download this desklet from their website : https://github.com/lestcape/Sticky-Notes
@@ -45,6 +47,11 @@ Installation Instructions:
 
 Change Log:
 --------------
+v1.5-Beta
+   - Añadido el idioma Bulgaro, thanks ???...
+   - Compatibility with Cinnamon 2.4.
+   - Some bugs was fixed.
+
 v1.4-Beta
    - Compatibility with Cinnamon 2.3.
    - Some bugs was fixed.
