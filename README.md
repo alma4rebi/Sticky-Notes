@@ -1,6 +1,9 @@
-Cinnamon Desklet: Sticky Notes Version: v1.5
+Cinnamon Desklet: Sticky Notes Version: v1.6
 
-Last version release date: 22 November 2014.
+Last version release date: 24 November 2014.
+--------------
+![Alt text](/stickyNotes@lestcape/Capture.png)
+
 ***
 Author: [Lester Carballo Pérez](https://github.com/lestcape).
 
@@ -16,12 +19,11 @@ Special thanks to:
 Author of language translation:
 --------------
 - Bulgarian(Bg):    Peyu Yovev (spacy01) (spacy00001@gmail.com)
+- Croatian(Hr):     gogo (trebelnik2@gmail.com)
 - English(En):      Lester Carballo Pérez(lestcape@gmail.com)
 - Spanish(Es):      Lester Carballo Pérez(lestcape@gmail.com)
 
 --------------
-![Alt text](/stickyNotes@lestcape/Capture.png)
-
 Description
 --------------
 This is a simple desklet to add sticky notes in the desktop.
@@ -47,7 +49,10 @@ Installation Instructions:
 
 Change Log:
 --------------
-v1.5-Beta
+v1.6
+   - Added Croatian language, thanks to gogo.
+
+v1.5
    - Added Bulgarian language, thanks to Peyu Yovev.
    - Compatibility with Cinnamon 2.4.
    - Some bugs was fixed.
