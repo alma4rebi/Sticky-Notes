@@ -365,6 +365,10 @@ MyDesklet.prototype = {
       this._initDeskletContruction();
       this.setContent(this.mainBox);
 
+      this.entry.visible = false;//This is need to open note without enter on any line.
+      Mainloop.idle_add(Lang.bind(this, function() {
+         this.entry.visible = true;
+      }));
       if(this.initDeskletType()) {
          this.clutterText.connect('button-press-event', Lang.bind(this, this._onButtonPress));
          this.clutterText.connect('button-release-event', Lang.bind(this, this._onButtonRelease));

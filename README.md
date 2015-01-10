@@ -1,6 +1,6 @@
-Cinnamon Desklet: Sticky Notes Version: v1.6
+Cinnamon Desklet: Sticky Notes Version: v1.7
 
-Last version release date: 24 November 2014.
+Last version release date: 09 November 2015.
 --------------
 ![Alt text](/stickyNotes@lestcape/Capture.png)
 
@@ -49,6 +49,9 @@ Installation Instructions:
 
 Change Log:
 --------------
+v1.7
+   - Fixed a little problem of size on the initialize.
+
 v1.6
    - Added Croatian language, thanks to gogo.
 

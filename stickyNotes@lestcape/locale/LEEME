@@ -1,5 +1,5 @@
-Desklet   : Sticky Notes           Version              : v1.6
-S.O.      : Cinnamon               Fecha de lanzamiento : 24 de Noviembre de 2014.
+Desklet   : Sticky Notes           Version              : v1.7
+S.O.      : Cinnamon               Fecha de lanzamiento : 09 de Enero de 2015.
 Autor     : Lester Carballo Pérez  Correo electrónico   : lestcape@gmail.com
 Sitio Web : https://github.com/lestcape/Sticky-Notes
 
@@ -39,6 +39,9 @@ Instrucciones de instalación:
 
 Registro de cambios:
 --------------
+v1.7
+   - Se ha corregido un pequeño problema de tamaño en la inicialización.
+
 v1.6
    - Añadido el idioma Crotata, gracias a gogo.
 
