@@ -1,6 +1,6 @@
 Cinnamon Desklet: Sticky Notes Version: v1.7
 
-Last version release date: 09 November 2015.
+Last version release date: 09 November 2014.
 --------------
 ![Alt text](/stickyNotes@lestcape/Capture.png)
 
