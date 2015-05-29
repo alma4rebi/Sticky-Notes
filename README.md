@@ -1,6 +1,6 @@
-Cinnamon Desklet: Sticky Notes Version: v1.7
+Cinnamon Desklet: Sticky Notes Version: v1.8
 
-Last version release date: 09 November 2014.
+Last version release date: 28 May 2015.
 --------------
 ![Alt text](/stickyNotes@lestcape/Capture.png)
 
@@ -49,6 +49,10 @@ Installation Instructions:
 
 Change Log:
 --------------
+v1.8
+   - Added support for cinnamon 2.6.
+   - Fixed the hide option.
+
 v1.7
    - Fixed a little problem of size on the initialize.
 
