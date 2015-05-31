@@ -1,6 +1,6 @@
-Cinnamon Desklet: Sticky Notes Version: v1.8
+Cinnamon Desklet: Sticky Notes Version: v1.9
 
-Last version release date: 28 May 2015.
+Last version release date: 31 May 2015.
 --------------
 ![Alt text](/stickyNotes@lestcape/Capture.png)
 
@@ -49,6 +49,9 @@ Installation Instructions:
 
 Change Log:
 --------------
+v1.9
+   - Was extended the symbolic option to all icons inside the manager.
+
 v1.8
    - Added support for cinnamon 2.6.
    - Fixed the hide option.

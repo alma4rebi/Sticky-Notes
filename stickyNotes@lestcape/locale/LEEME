@@ -1,5 +1,5 @@
-Desklet   : Sticky Notes           Version              : v1.7
-S.O.      : Cinnamon               Fecha de lanzamiento : 09 de Enero de 2015.
+Desklet   : Sticky Notes           Version              : v1.9
+S.O.      : Cinnamon               Fecha de lanzamiento : 31 de Mayo de 2015.
 Autor     : Lester Carballo Pérez  Correo electrónico   : lestcape@gmail.com
 Sitio Web : https://github.com/lestcape/Sticky-Notes
 
@@ -39,6 +39,13 @@ Instrucciones de instalación:
 
 Registro de cambios:
 --------------
+v1.9
+   - Se amplió la opción simbólico a todos los iconos dentro del manejador.
+
+v1.8
+   - Añadido soporte para cinnamon 2.6.
+   - Arreglada la opción para ocultar.
+
 v1.7
    - Se ha corregido un pequeño problema de tamaño en la inicialización.
 

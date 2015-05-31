@@ -1,5 +1,5 @@
-Desklet : Sticky Notes           Version      : v1.7
-O.S.    : Cinnamon               Release Date : 09 January 2015.
+Desklet : Sticky Notes           Version      : v1.9
+O.S.    : Cinnamon               Release Date : 31 May 2015.
 Author  : Lester Carballo Pérez  Email        : lestcape@gmail.com
 Website : https://github.com/lestcape/Sticky-Notes
 
@@ -48,6 +48,13 @@ Installation Instructions:
 
 Change Log:
 --------------
+v1.9
+   - Was extended the symbolic option to all icons inside the manager.
+
+v1.8
+   - Added support for cinnamon 2.6.
+   - Fixed the hide option.
+
 v1.7
    - Fixed a little problem of size on the initialize.
 
