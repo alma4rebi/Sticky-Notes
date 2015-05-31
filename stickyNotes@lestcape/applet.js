@@ -55,10 +55,10 @@ function PopupIconMenuItem() {
 PopupIconMenuItem.prototype = {
    __proto__: PopupMenu.PopupBaseMenuItem.prototype,
 
-   _init: function (text, iconName, iconType, params) {
+   _init: function(text, iconName, iconType, params) {
       PopupMenu.PopupBaseMenuItem.prototype._init.call(this, params);
-      if(!iconType)
-          iconType = St.IconType.FULLCOLOR;
+      if(iconType != St.IconType.FULLCOLOR)
+          iconType = St.IconType.SYMBOLIC;
       this.label = new St.Label({text: text});
       this._icon = new St.Icon({ style_class: 'popup-menu-icon',
          icon_name: iconName,
@@ -67,12 +67,12 @@ PopupIconMenuItem.prototype = {
       this.addActor(this.label);
    },
 
-   setIconSymbolicName: function (iconName) {
+   setIconSymbolicName: function(iconName) {
       this._icon.set_icon_name(iconName);
       this._icon.set_icon_type(St.IconType.SYMBOLIC);
    },
 
-   setIconName: function (iconName) {
+   setIconName: function(iconName) {
       this._icon.set_icon_name(iconName);
       this._icon.set_icon_type(St.IconType.FULLCOLOR);
    }
@@ -95,7 +95,14 @@ MyApplet.prototype = {
          this.menuManager = new PopupMenu.PopupMenuManager(this);
          this.menu = new Applet.AppletPopupMenu(this, orientation);
          this.menuManager.addMenu(this.menu);
-         this.context_menu_item_collapse = new PopupIconMenuItem(_("Collapse"), "dialog-question");
+         this._iconType = St.IconType.SYMBOLIC;
+         this._isGenerate = false;
+         this._collapsed = false;
+         this._raised = false;
+         this._hide = false;
+         this._multInstance = false;
+
+         this.context_menu_item_collapse = new PopupIconMenuItem(_("Collapse"), "dialog-question", this._iconType);
          this.context_menu_item_collapse.connect('activate', Lang.bind(this, function(actor) {
             if(this.desklet) {
                this.desklet._appletCollapsed = !this.desklet._appletCollapsed;
@@ -123,117 +130,20 @@ MyApplet.prototype = {
    _onSetAppletType: function(collapsed, symbolic) {
       try {
          if(this.appletBox) {
-            if(this.menu.isOpen)
-               this.menu.close();
-            this.menu.removeAll();
-            this.appletBox.remove_all();
-            this.btAddNote = null;
-            this.btRaiseNote = null;
-            this.btHideNote = null;
-            this.btMultInstance = null;
-            this.menuAddNote = null;
-            this.menuRaiseNotes = null;
-            this.menuHideNotes = null;
-            this.menuMultInstance = null;
-            //let boxParent = this.appletBox.actor.get_parent();
-            //if(boxParent) boxParent.remove_actor(this.appletBox.actor);
+            let iconType = St.IconType.FULLCOLOR;
             if(symbolic)
-               this.appletBox.set_icon_type(St.IconType.SYMBOLIC);
-            else
-               this.appletBox.set_icon_type(St.IconType.FULLCOLOR);
-            if(collapsed) {
-               this.context_menu_item_collapse.setIconName("go-up");
-               this.context_menu_item_collapse.label.set_text(_("Collapse"));
-   
-               this.btAddNote = this.appletBox.add_applet_icon_name("list-add");
-               this.btAddNote.connect('notify::hover', Lang.bind(this, function(actor) {
-                  if(actor.get_hover()) {
-                     this.set_applet_tooltip(_("Add new Note"));
-                  }
-               }));
-               this.btAddNote.connect('button-press-event', Lang.bind(this, this.addNewNote));
-               //if(this.desklet.deskletRaised)
-               //   this.btRaiseNote = this.appletBox.add_applet_icon_name("go-down");
-               //else
-                  this.btRaiseNote = this.appletBox.add_applet_icon_name("go-up");
-               this.btRaiseNote.connect('notify::hover', Lang.bind(this, function(actor) {
-                  if(actor.get_hover()) {
-                     //if(this.desklet.deskletRaised)
-                        this.set_applet_tooltip(_("Raise Notes"));
-                     /*else
-                        this.set_applet_tooltip(_("Unraise Notes"));*/
-                  }
-               }));
-               this.btRaiseNote.connect('button-press-event', Lang.bind(this, this.raiseNotes));
-               if(this.desklet.deskletHide)
-                  this.btHideNote = this.appletBox.add_applet_icon_name("starred");
-               else
-                  this.btHideNote = this.appletBox.add_applet_icon_name("non-starred");
-               this.btHideNote.connect('notify::hover', Lang.bind(this, function(actor) {
-                  if(actor.get_hover()) {
-                     if(this.desklet.deskletHide)
-                        this.set_applet_tooltip(_("Show Notes"));
-                     else
-                        this.set_applet_tooltip(_("Hide Notes"));
-                  }
-               }));
-               this.btHideNote.connect('button-press-event', Lang.bind(this, this.tryHideNotes));
-               /*if(this.desklet._multInstance)
-                  this.btMultInstance = this.appletBox.add_applet_icon_name("window-maximize");//user-invisible
-               else*/
-                  this.btMultInstance = this.appletBox.add_applet_icon_name("input-dialpad");
-               this.btMultInstance.connect('notify::hover', Lang.bind(this, function(actor) {
-                  if(actor.get_hover()) {
-                     if(this.desklet._multInstance)
-                        this.set_applet_tooltip(_("Single Instance"));
-                     else
-                        this.set_applet_tooltip(_("Multiple Instances"));
-                  }
-               }));
-               this.btMultInstance.connect('button-press-event', Lang.bind(this, this.tryMultInstance));
-            } else {
-               this.context_menu_item_collapse.setIconName("go-down");
-               this.context_menu_item_collapse.label.set_text(("Expand"));
-               this.menuAddNote = new PopupIconMenuItem(_("Add new Note"), "list-add");
-               this.menuAddNote.connect('activate', Lang.bind(this, this.addNewNote));
-               this.menu.addMenuItem(this.menuAddNote);
-               let context_menu_separator = new PopupMenu.PopupSeparatorMenuItem();
-               this.menu.addMenuItem(context_menu_separator);
-               /*if(this.desklet.deskletRaised) {
-                  this.menuRaiseNotes = new PopupIconMenuItem(_("Unraise Notes"), "go-down");
-                  this.menuRaiseNotes.connect('activate', Lang.bind(this, this.raiseNotes));
-               } else {*/
-                  this.menuRaiseNotes = new PopupIconMenuItem(_("Raise Notes"), "go-up");
-                  this.menuRaiseNotes.connect('activate', Lang.bind(this, this.tryRaiseNotes));
-               // }
-               this.menu.addMenuItem(this.menuRaiseNotes);
-               if(this.desklet.deskletHide) {
-                  this.menuHideNotes = new PopupIconMenuItem(_("Show Notes"), "starred");
-                  this.menuHideNotes.connect('activate', Lang.bind(this, this.hideNotes));
-               } else {
-                  this.menuHideNotes = new PopupIconMenuItem(_("Hide Notes"), "non-starred");
-                  this.menuHideNotes.connect('activate', Lang.bind(this, this.hideNotes));
-               }
-               this.menu.addMenuItem(this.menuHideNotes);
-               context_menu_separator = new PopupMenu.PopupSeparatorMenuItem();
-               this.menu.addMenuItem(context_menu_separator);
-               this.menuMultInstance = new ConfigurablePopupSwitchMenuItem(_("Multiple Instances"), "input-dialpad", "input-dialpad", this.desklet._multInstance);
-               this.menuMultInstance.connect('activate', Lang.bind(this, function() {
-                  this.multInstance();
-               }));
-               this.menu.addMenuItem(this.menuMultInstance);
-
-               this.appletNote = this.appletBox.add_applet_icon_name("text-editor");
-               this.set_applet_tooltip(_("Sticky Notes Manager"));
-               this.appletNote.connect('button-press-event', Lang.bind(this, function(actor, event) {
-                  if((this._draggable)&&(!this._draggable.inhibit))
-                     return false;
-                  if(event.get_button() == 1) {
-                     this.menu.toggle();
-                  }
-                  return false;
-               }));
-               //this.mainBox.add(this.appletBox.actor, { y_align: St.Align.MIDDLE, y_fill: false });
+               iconType = St.IconType.SYMBOLIC;
+            if(iconType != this._iconType) {
+               this._iconType = iconType;
+               this._setIconType();
+            }
+            if((!this._isGenerate)||(collapsed != this._collapsed)) {
+               this._isGenerate = true;
+               this._collapsed = collapsed;
+               this._raised = this.desklet.deskletRaised;
+               this._hide = this.desklet.deskletHide;
+               this._multInstance = this.desklet._multInstance;
+               this._buildAppletType(collapsed);
             }
          }
       } catch(e) {
@@ -241,7 +151,135 @@ MyApplet.prototype = {
       }
    },
 
-   addNewNote: function (actor, event) {
+   _buildAppletType: function() {
+      if(this.menu.isOpen)
+         this.menu.close();
+      this.menu.removeAll();
+      this.appletBox.remove_all();
+      this.btAddNote = null;
+      this.btRaiseNote = null;
+      this.btHideNote = null;
+      this.btMultInstance = null;
+      this.menuAddNote = null;
+      this.menuRaiseNotes = null;
+      this.menuHideNotes = null;
+      this.menuMultInstance = null;
+      //let boxParent = this.appletBox.actor.get_parent();
+      //if(boxParent) boxParent.remove_actor(this.appletBox.actor);
+      this.appletBox.set_icon_type(this._iconType);
+      if(this._collapsed) {
+         if(this._iconType == St.IconType.SYMBOLIC)
+            this.context_menu_item_collapse.setIconSymbolicName("go-up");
+         else
+            this.context_menu_item_collapse.setIconName("go-up");
+         this.context_menu_item_collapse.label.set_text(_("Collapse"));
+
+         this.btAddNote = this.appletBox.add_applet_icon_name("list-add");
+         this.btAddNote.connect('notify::hover', Lang.bind(this, function(actor) {
+            if(actor.get_hover()) {
+               this.set_applet_tooltip(_("Add new Note"));
+            }
+         }));
+         this.btAddNote.connect('button-press-event', Lang.bind(this, this.addNewNote));
+         this.btRaiseNote = this.appletBox.add_applet_icon_name("go-up");
+         this.btRaiseNote.connect('notify::hover', Lang.bind(this, function(actor) {
+            if(actor.get_hover()) {
+               if(this._raised)
+                  this.set_applet_tooltip(_("Unraise Notes"));
+               else
+                  this.set_applet_tooltip(_("Raise Notes"));
+            }
+         }));
+         this.btRaiseNote.connect('button-press-event', Lang.bind(this, this.raiseNotes));
+         if(this._hide)
+            this.btHideNote = this.appletBox.add_applet_icon_name("starred");
+         else
+            this.btHideNote = this.appletBox.add_applet_icon_name("non-starred");
+         this.btHideNote.connect('notify::hover', Lang.bind(this, function(actor) {
+            if(actor.get_hover()) {
+               if(this._hide)
+                  this.set_applet_tooltip(_("Show Notes"));
+               else
+                  this.set_applet_tooltip(_("Hide Notes"));
+            }
+         }));
+         this.btHideNote.connect('button-press-event', Lang.bind(this, this.tryHideNotes));
+         /*if(this._multInstance)
+            this.btMultInstance = this.appletBox.add_applet_icon_name("window-maximize");//user-invisible
+         else*/
+            this.btMultInstance = this.appletBox.add_applet_icon_name("input-dialpad");
+         this.btMultInstance.connect('notify::hover', Lang.bind(this, function(actor) {
+            if(actor.get_hover()) {
+               if(this._multInstance)
+                  this.set_applet_tooltip(_("Single Instance"));
+               else
+                  this.set_applet_tooltip(_("Multiple Instances"));
+            }
+         }));
+         this.btMultInstance.connect('button-press-event', Lang.bind(this, this.tryMultInstance));
+      } else {
+         if(this._iconType == St.IconType.SYMBOLIC)
+            this.context_menu_item_collapse.setIconSymbolicName("go-down");
+         else
+            this.context_menu_item_collapse.setIconName("go-down");
+         this.context_menu_item_collapse.label.set_text(_("Expand"));
+         this.menuAddNote = new PopupIconMenuItem(_("Add new Note"), "list-add", this._iconType);
+         this.menuAddNote.connect('activate', Lang.bind(this, this.addNewNote));
+         this.menu.addMenuItem(this.menuAddNote);
+         let context_menu_separator = new PopupMenu.PopupSeparatorMenuItem();
+         this.menu.addMenuItem(context_menu_separator);
+         /*if(this._raised) {
+            this.menuRaiseNotes = new PopupIconMenuItem(_("Unraise Notes"), "go-down", this._iconType);
+            this.menuRaiseNotes.connect('activate', Lang.bind(this, this.raiseNotes));
+         } else {*/
+            this.menuRaiseNotes = new PopupIconMenuItem(_("Raise Notes"), "go-up", this._iconType);
+            this.menuRaiseNotes.connect('activate', Lang.bind(this, this.tryRaiseNotes));
+         // }
+         this.menu.addMenuItem(this.menuRaiseNotes);
+         if(this._hide) {
+            this.menuHideNotes = new PopupIconMenuItem(_("Show Notes"), "starred", this._iconType);
+            this.menuHideNotes.connect('activate', Lang.bind(this, this.hideNotes));
+         } else {
+            this.menuHideNotes = new PopupIconMenuItem(_("Hide Notes"), "non-starred", this._iconType);
+            this.menuHideNotes.connect('activate', Lang.bind(this, this.hideNotes));
+         }
+         this.menu.addMenuItem(this.menuHideNotes);
+         context_menu_separator = new PopupMenu.PopupSeparatorMenuItem();
+         this.menu.addMenuItem(context_menu_separator);
+         this.menuMultInstance = new ConfigurablePopupSwitchMenuItem(_("Multiple Instances"), "input-dialpad", "input-dialpad", this._multInstance);
+         this.menuMultInstance.connect('activate', Lang.bind(this, function() {
+            this.multInstance();
+         }));
+         this.menu.addMenuItem(this.menuMultInstance);
+
+         this.appletNote = this.appletBox.add_applet_icon_name("text-editor");
+         this.set_applet_tooltip(_("Sticky Notes Manager"));
+         this.appletNote.connect('button-press-event', Lang.bind(this, function(actor, event) {
+            if((this._draggable)&&(!this._draggable.inhibit))
+               return false;
+            if(event.get_button() == 1) {
+               this.menu.toggle();
+            }
+            return false;
+         }));
+         //this.mainBox.add(this.appletBox.actor, { y_align: St.Align.MIDDLE, y_fill: false });
+      }
+   },
+
+   _setIconType: function() {
+       this.appletBox.set_icon_type(this._iconType);
+       this._setContextMenuIconType();
+       if(this.menuAddNote != null)
+          this.menuAddNote._icon.set_icon_type(this._iconType);
+       if(this.menuRaiseNotes != null)
+          this.menuRaiseNotes._icon.set_icon_type(this._iconType);
+       if(this.menuHideNotes != null)
+          this.menuHideNotes._icon.set_icon_type(this._iconType);
+       if(this.menuMultInstance != null)
+          this.menuMultInstance._icon.set_icon_type(this._iconType);
+   },
+
+   addNewNote: function(actor, event) {
       if((this._draggable)&&(!this._draggable.inhibit))
          return false;
       if(event.get_button() == 1) {
@@ -250,13 +288,13 @@ MyApplet.prototype = {
       return false;
    },
 
-   tryRaiseNotes: function (actor, event) {
+   tryRaiseNotes: function(actor, event) {
       Mainloop.idle_add(Lang.bind(this, function() {
          this.desklet.toggleRaise();
       }));
    },
 
-   raiseNotes: function (actor, event) {
+   raiseNotes: function(actor, event) {
       if((this._draggable)&&(!this._draggable.inhibit))
          return false;
       if(event.get_button() == 1) {
@@ -265,7 +303,7 @@ MyApplet.prototype = {
       return false;
    },
 
-   tryHideNotes: function (actor, event) {
+   tryHideNotes: function(actor, event) {
       if((this._draggable)&&(!this._draggable.inhibit))
          return false;
       if(event.get_button() == 1) {
@@ -274,11 +312,11 @@ MyApplet.prototype = {
       return false;
    },
 
-   hideNotes: function (actor, event) {
+   hideNotes: function(actor, event) {
       this.desklet.toggleHide();
    },
 
-   tryMultInstance: function (actor, event) {
+   tryMultInstance: function(actor, event) {
       if((this._draggable)&&(!this._draggable.inhibit))
          return false;
       if(event.get_button() == 1) {
@@ -287,9 +325,10 @@ MyApplet.prototype = {
       return false;
    },
 
-   multInstance: function () {
+   multInstance: function() {
       Mainloop.idle_add(Lang.bind(this, function() {
-         let activeMultInstance = !this.desklet._multInstance;
+         this._multInstance = this.desklet._multInstance;
+         let activeMultInstance = !this._multInstance;
          if(this.menuMultInstance) {
             this.menuMultInstance._switch.state = !this.menuMultInstance._switch.state;
             activeMultInstance = this.menuMultInstance._switch.state;
@@ -299,45 +338,62 @@ MyApplet.prototype = {
       }));
    },
 
-   setRaiseStatus: function (raise) {
-   /*   if(this.btRaiseNote) {
-         if(raise)
-            this.btRaiseNote.set_icon_name("go-down");
-         else
-            this.btRaiseNote.set_icon_name("go-up");
-      }
-      if(this.menuRaiseNotes) {
-         if(raise) {
-            this.menuRaiseNote.setIconName("go-down");
-            this.menuRaiseNote.label.set_text(_("Unraise Notes"));
+   setRaiseStatus: function (raised) {
+      if(this._raised != raised) {
+         this._raised = raised;
+         if(this.btRaiseNote) {
+            if(this._raised)
+               this.btRaiseNote.set_icon_name("go-down");
+            else
+               this.btRaiseNote.set_icon_name("go-up");
          }
-         else {
-            this.menuRaiseNote.setIconName("go-up");
-            this.menuRaiseNote.label.set_text(_("Raise Notes"));
-         }
-      }*/
-   },
-
-   setHideStatus: function (hide) {
-      if(this.btRaiseNote) {
-         if(hide)
-            this.btHideNote.set_icon_name("starred");
-         else
-            this.btHideNote.set_icon_name("non-starred");
-      }
-      if(this.menuHideNotes) {
-         if(hide) {
-            this.menuHideNotes.setIconName("starred");
-            this.menuHideNotes.label.set_text(_("Show Notes"));
-         }
-         else {
-            this.menuHideNotes.setIconName("non-starred");
-            this.menuHideNotes.label.set_text(_("Hide Notes"));
+         if(this.menuRaiseNotes) {
+            if(this._raised) {
+               if(this._iconType == St.IconType.SYMBOLIC)
+                  this.menuRaiseNote.setIconSymbolicName("go-down");
+               else
+                  this.menuRaiseNote.setIconName("go-down");
+               this.menuRaiseNote.label.set_text(_("Unraise Notes"));
+            } else {
+               if(this._iconType == St.IconType.SYMBOLIC)
+                  this.menuRaiseNote.setIconSymbolicName("go-up");
+               else
+                  this.menuRaiseNote.setIconName("go-up");
+               this.menuRaiseNote.label.set_text(_("Raise Notes"));
+            }
          }
       }
    },
 
-   setParentDesklet: function (desklet) {
+   setHideStatus: function(hide) {
+      if(this._hide != hide) {
+         this._hide = hide;
+         if(this.btRaiseNote) {
+            if(this._hide)
+               this.btHideNote.set_icon_name("starred");
+            else
+               this.btHideNote.set_icon_name("non-starred");
+         }
+         if(this.menuHideNotes) {
+            if(this._hide) {
+               if(this._iconType == St.IconType.SYMBOLIC)
+                  this.menuHideNotes.setIconSymbolicName("starred");
+               else
+                  this.menuHideNotes.setIconName("starred");
+               this.menuHideNotes.label.set_text(_("Show Notes"));
+            }
+            else {
+               if(this._iconType == St.IconType.SYMBOLIC)
+                  this.menuHideNotes.setIconSymbolicName("non-starred");
+               else
+                  this.menuHideNotes.setIconName("non-starred");
+               this.menuHideNotes.label.set_text(_("Hide Notes"));
+            }
+         }
+      }
+   },
+
+   setParentDesklet: function(desklet) {
       this.desklet = desklet;
       this._onSetAppletType(this.desklet._appletCollapsed, this.desklet._appletSymbolic);
    },
@@ -361,19 +417,34 @@ MyApplet.prototype = {
          this.appletBox.set_panel_height(this._panelHeight);
       }
    },
+
+   _setContextMenuIconType: function() {
+      if(this.context_menu_item_remove != null)
+         this.context_menu_item_remove._icon.set_icon_type(this._iconType); 
+      if(this.context_menu_item_about != null)
+         this.context_menu_item_about._icon.set_icon_type(this._iconType);  
+      if(this.context_menu_item_configure != null) {
+         if(this._iconType == St.IconType.SYMBOLIC)
+            this.context_menu_item_configure.setIconSymbolicName("system-run");
+         else
+            this.context_menu_item_configure.setIconName("preferences-system");
+      }
+      if(this.context_menu_item_collapse != null)
+         this.context_menu_item_collapse._icon.set_icon_type(this._iconType);
+   },
    
-   finalizeContextMenu: function () {
+   finalizeContextMenu: function() {
       try {
          // Add default context menus if we're in panel edit mode, ensure their removal if we're not       
          let items = this._applet_context_menu._getMenuItems();
 
          if(this.context_menu_item_remove == null) {
-            this.context_menu_item_remove = new PopupIconMenuItem(_("Remove this applet"), "edit-delete");
+            this.context_menu_item_remove = new PopupIconMenuItem(_("Remove this applet"), "edit-delete", this._iconType);
             this.context_menu_item_remove.connect('activate', Lang.bind(this, this.removedFromPanel));
          }
 
          if((this.openAbout)&&(this.context_menu_item_about == null)) {
-            this.context_menu_item_about = new PopupIconMenuItem(_("About..."), "dialog-question");
+            this.context_menu_item_about = new PopupIconMenuItem(_("About..."), "dialog-question", this._iconType);
             this.context_menu_item_about.connect('activate', Lang.bind(this, this.openAbout));
          }
 
@@ -391,7 +462,7 @@ MyApplet.prototype = {
 
          if(!this._meta["hide-configuration"] && GLib.file_test(this._meta["path"] + "/settings-schema.json", GLib.FileTest.EXISTS)) {     
             if(this.context_menu_item_configure == null) {           
-               this.context_menu_item_configure = new PopupIconMenuItem(_("Configure..."), "system-run");
+               this.context_menu_item_configure = new PopupIconMenuItem(_("Configure..."), "system-run", this._iconType);
                this.context_menu_item_configure.connect('activate', Lang.bind(this, function() {
                   Util.spawnCommandLine("cinnamon-settings desklets " + this._uuid + " " + this.desklet.instance_id);
                }));
@@ -474,7 +545,7 @@ AppletIconsBox.prototype = {
       this.set_icon_type(icon_type);
    },
 
-   set_icon_type: function (icon_type) {
+   set_icon_type: function(icon_type) {
       this._icon_type = icon_type;
       let childs = this.actor.get_children();
       for(let ch in childs) {
@@ -497,7 +568,7 @@ AppletIconsBox.prototype = {
       }
    },
 
-   add_applet_icon_name: function (icon_name) {
+   add_applet_icon_name: function(icon_name) {
       let applet_icon = new St.Icon({icon_name: icon_name, reactive: true, track_hover: true });
       applet_icon.set_icon_type(this._icon_type);
       if(this._icon_type == St.IconType.FULLCOLOR)
@@ -519,7 +590,7 @@ AppletIconsBox.prototype = {
       return applet_icon;
    },
 
-   remove_all: function () {
+   remove_all: function() {
       this.actor.destroy_all_children();
    },
 

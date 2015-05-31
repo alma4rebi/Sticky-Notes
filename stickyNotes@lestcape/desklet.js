@@ -2078,13 +2078,9 @@ MyDesklet.prototype = {
       try {
          if((this.deskletRaised)&&(this.raisedBox)) {
             this.raisedBox._actionCloseAll();
-            if((this.myManager)&&(this.myManager.applet))
-               this.myManager.applet.setRaiseStatus(false);
          }
          else {
             this.raise();
-            if((this.myManager)&&(this.myManager.applet))
-               this.myManager.applet.setRaiseStatus(true);
          }
          //throw "works";   
       } catch(e) {
@@ -2121,6 +2117,8 @@ MyDesklet.prototype = {
       this.raisedBox.show();
       this.deskletRaised = true;
       this.changingRaiseState = false;
+      if((this.myManager)&&(this.myManager.applet))
+         this.myManager.applet.setRaiseStatus(true);
    },
 
    raiseInstance: function(deskletC) {
@@ -2190,6 +2188,8 @@ MyDesklet.prototype = {
                this._enabledDragable(deskletC);
             }
          }
+         if((this.myManager)&&(this.myManager.applet))
+            this.myManager.applet.setRaiseStatus(false);
       }
 
       this.changingRaiseState = false;
