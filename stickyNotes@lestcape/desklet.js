@@ -88,9 +88,12 @@ ExtensionExtended.prototype = {
       }
 
       try {
-         if(global.add_extension_importer)
+         if(imports.addSubImporter) {
+            imports.addSubImporter(this.lowerType, this.meta.path);
+            type.maps.importObjects[this.uuid] = imports[this.lowerType];
+         }else if(global.add_extension_importer) {
             global.add_extension_importer('imports.ui.extension.importObjects', this.uuid, this.meta.path);
-         else {
+         } else {
             imports.gi.CinnamonJS.add_extension_importer('imports.ui.extension.importObjects', this.uuid, this.meta.path);
          }
       } catch (e) {
@@ -98,7 +101,11 @@ ExtensionExtended.prototype = {
       }
 
       try {
-         this.module = Extension.importObjects[this.uuid][this.lowerType]; // get [extension/applet/desklet].js
+         if(Extension.importObjects) {
+             this.module = Extension.importObjects[this.uuid][this.lowerType]; // get [extension/applet/desklet].js
+         } else {
+             this.module = type.maps.importObjects[this.uuid][this.lowerType];
+         }
       } catch (e) {
          throw this.logError('Error importing ' + this.lowerType + '.js from ' + this.uuid, e);
       }
