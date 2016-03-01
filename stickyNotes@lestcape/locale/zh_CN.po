@@ -1,0 +1,472 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Sticky-Notes 0.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2013-11-08 21:29-0600\n"
+"PO-Revision-Date: 2016-02-29 22:50+0800\n"
+"Last-Translator: Losywee <losywee@gmail.com>\n"
+"Language-Team: lestcape <lestcape@gmail.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: en\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Poedit 1.5.4\n"
+
+#: desklet.js:63
+msgid "Copy"
+msgstr "拷贝"
+
+#: desklet.js:68
+msgid "Paste"
+msgstr "粘贴"
+
+#: desklet.js:76
+msgid "Delete"
+msgstr "删除"
+
+#: desklet.js:100
+msgid "Multiple Instances"
+msgstr "多实例运行"
+
+#: applet.js:138 applet.js:294 applet.js:172
+msgid "Show Notes"
+msgstr "显示所有便签"
+
+#: applet.js:185
+msgid "Sticky Notes Manager"
+msgstr "便签管理"
+
+#: desklet.js:144
+msgid "Sticky Notes"
+msgstr "桌面便签"
+
+#: desklet.js:146
+msgid "README"
+msgstr "自述"
+
+#: desklet.js:148
+msgid "Help"
+msgstr "帮助"
+
+#: desklet.js:151
+msgid "Website"
+msgstr "官网"
+
+#: desklet.js:183
+msgid "Error"
+msgstr "错误信息"
+
+#: desklet.js:187 desklet.js:487
+msgid "Type your note..."
+msgstr "写点什么吧..."
+
+#: desklet.js:402
+msgid "Unsupported text size '%s'  to use the font '%s' in this theme."
+msgstr "该主题的字体 '%s' 不支持当前的文本大小 '%s'"
+
+#: desklet.js:432
+msgid "Sticky Notes is hidden to be visible again please, press '%s'."
+msgstr "桌面便签已经隐藏，请按 '%s' 键显示"
+
+#: desklet.js:453
+msgid "Add new Note"
+msgstr "添加新的便签"
+
+#: desklet.js:455
+msgid "Raise Notes"
+msgstr "着重便签"
+
+#: desklet.js:457
+msgid "Hide Notes"
+msgstr "隐藏便签"
+
+#: desklet.js:458
+msgid "Collapse"
+msgstr "折叠"
+
+#: desklet.js:459
+msgid "Expand"
+msgstr "放大"
+
+#: desklet.js:460
+msgid "Minimize or Maximize the Note"
+msgstr "最小化或最大化便签"
+
+#: desklet.js:462
+msgid "Single Instance"
+msgstr "单实例运行"
+
+#: desklet.js:463
+msgid "Do you want to delete this note?"
+msgstr "您真的要删除它吗？"
+
+#: desklet.js:466
+msgid "Back Note"
+msgstr "上一个便签"
+
+#: desklet.js:469
+msgid "Next Note"
+msgstr "下一个便签"
+
+#: desklet.js:474
+msgid "Configure..."
+msgstr "配置..."
+
+#: desklet.js:478
+msgid "Remove Note"
+msgstr "移除便签"
+
+#. #-#-#-#-#  default.pot (PACKAGE VERSION)  #-#-#-#-#
+#. notes@lestcape->settings-schema.json->borderBoxWidth->units
+#. #-#-#-#-#  default.pot (PACKAGE VERSION)  #-#-#-#-#
+#. notes@lestcape->settings-schema.json->textSize->units
+#. #-#-#-#-#  default.pot (PACKAGE VERSION)  #-#-#-#-#
+#. notes@lestcape->settings-schema.json->width->units
+msgid "pixels"
+msgstr "像素"
+
+#. notes@lestcape->settings-schema.json->header-general->description
+msgid "General:"
+msgstr "常规："
+
+#. notes@lestcape->settings-schema.json->header-general->description
+msgid "Applet Manager:"
+msgstr "套件管理："
+
+#. notes@lestcape->settings-schema.json->header-layouts->description
+msgid "Layouts:"
+msgstr "布局："
+
+#. notes@lestcape->settings-schema.json->header-shortcut->description
+msgid "Shortcut keys:"
+msgstr "快捷键："
+
+#. notes@lestcape->settings-schema.json->header-size->description
+msgid "Size:"
+msgstr "尺寸："
+
+#. notes@lestcape->settings-schema.json->header-appearance->description
+msgid "Appearance:"
+msgstr "外观："
+
+#. notes@lestcape->settings-schema.json->header-advance->description
+msgid "Advance Appearance:"
+msgstr "高级外观："
+
+#. notes@lestcape->settings-schema.json->multi-instance->description
+msgid "Multiple Instances."
+msgstr "多个实例："
+
+#. notes@lestcape->settings-schema.json->multi-instance->tooltip
+msgid ""
+"Check this if you want to have different instances of this desklet for each "
+"note."
+msgstr "检查您的每个便签是否有不同的实例在这个桌面。"
+
+#. notes@lestcape->settings-schema.json->auto-hide-buttons->description
+msgid "Auto hide buttons."
+msgstr "自动隐藏按钮。"
+
+#. notes@lestcape->settings-schema.json->auto-hide-buttons->tooltip
+msgid ""
+"Check this if you want to autohide the action buttons when mouse is outside "
+"of the desklet."
+msgstr "当鼠标离开该工具时，检查是否自动隐藏动作按钮"
+
+#. notes@lestcape->settings-schema.json->stripe-layout->description
+msgid "Selected theme of paper sheet:"
+msgstr "选择便签纸张主题："
+
+#. notes@lestcape->settings-schema.json->stripe-layout->tooltip
+msgid "Select a theme of paper sheet to show in Notes."
+msgstr "选择显示在便签的纸张主题。"
+
+#. notes@lestcape->settings-schema.json->staples-layout->description
+msgid "Selected theme of staples:"
+msgstr "选择订书钉主题："
+
+#. notes@lestcape->settings-schema.json->staples-layout->tooltip
+msgid "Select theme of staples to show in Notes."
+msgstr "选择显示在便签的订书钉主题。"
+
+#. notes@lestcape->settings-schema.json->pencil-layout->description
+msgid "Selected theme of pencil:"
+msgstr "选择铅笔的主题："
+
+#. notes@lestcape->settings-schema.json->pencil-layout->tooltip
+msgid "Select a theme of pencil to show in Notes."
+msgstr "选择显示在便签的铅笔主题。"
+
+#. notes@lestcape->settings-schema.json->raise-key->description
+msgid "Shortcut key to raise the desklet to the top:"
+msgstr "快捷键着重到桌面顶层："
+
+#. notes@lestcape->settings-schema.json->hide-key->description
+msgid "Shortcut key to hide the desklet:"
+msgstr "快捷键隐藏该工具："
+
+#. notes@lestcape->settings-schema.json->fix-size->description
+msgid "Fixed size."
+msgstr "固定尺寸。"
+
+#. notes@lestcape->settings-schema.json->fix-size->tooltip
+msgid "Check this if you want to control the size of all instances."
+msgstr "检查是否设定所有便签实例的尺寸。"
+
+#. notes@lestcape->settings-schema.json->same-size->description
+msgid "All instace have the same fixed size."
+msgstr "所有的便签实例相同尺寸。"
+
+#. notes@lestcape->settings-schema.json->same-size->tooltip
+msgid "Check this if you want to have the same fixed size on all instances."
+msgstr "检查所有的便签实例是否具备相同尺寸。"
+
+#. notes@lestcape->settings-schema.json->width->description
+msgid "Width:"
+msgstr "宽度："
+
+#. notes@lestcape->settings-schema.json->width->tooltip
+msgid "Increase or decrease the desklet width."
+msgstr "增加或者减少该工具的宽度。"
+
+#. notes@lestcape->settings-schema.json->height->description
+msgid "Height:"
+msgstr "高度："
+
+#. notes@lestcape->settings-schema.json->height->tooltip
+msgid "Increase or decrease the desklet height."
+msgstr "增加或者减少该工具的高度。"
+
+#. notes@lestcape->settings-schema.json->show-scroll->description
+msgid "Show scrolling area."
+msgstr "显示滚动条区域。"
+
+#. notes@lestcape->settings-schema.json->show-scroll->tooltip
+msgid "Check this if you want to show the scrolling area or not."
+msgstr "检查是否显示滚动条 区。"
+
+#. notes@lestcape->settings-schema.json->auto-scroll->description
+msgid "Enable autoscrolling."
+msgstr "开启自动滚动。"
+
+#. notes@lestcape->settings-schema.json->auto-scroll->tooltip
+msgid "Check this if you want to enable smooth autoscrolling or not."
+msgstr "检查是否开始平滑自动滚动。"
+
+#. notes@lestcape->settings-schema.json->raise-new-note->description
+msgid "Raise the new note."
+msgstr "着重新添加的便签。"
+
+#. notes@lestcape->settings-schema.json->raise-new-note->tooltip
+msgid "Check this if you want to raise the new note or not."
+msgstr "检查是否着重新添加的便签。"
+
+#. notes@lestcape->settings-schema.json->applet-manager->description
+msgid "Show Applet Manager."
+msgstr "显示套件管理。"
+
+#. notes@lestcape->settings-schema.json->applet-manager->tooltip
+msgid "Check this if you want to show the Applet Manager."
+msgstr "检查是否显示套件管理。"
+
+#. notes@lestcape->settings-schema.json->applet-collapsed->description
+msgid "Collapsed Applet Manager."
+msgstr "折叠套件管理 。"
+
+#. notes@lestcape->settings-schema.json->applet-collapsed->tooltip
+msgid "Check this if you want to collapsed the Applet Manager."
+msgstr "检查是否折叠套件管理。"
+
+#. notes@lestcape->settings-schema.json->applet-symbolic->description
+msgid "Show symbolic icons in the Applet Manager."
+msgstr "在套件管理显示标志。"
+
+#. notes@lestcape->settings-schema.json->applet-symbolic->tooltip
+msgid "Check this if you want to show symbolic icons in the Applet Manager."
+msgstr "检查是否在套件管理显示标志。"
+
+#. notes@lestcape->settings-schema.json->text-size->description
+msgid "Font size:"
+msgstr "字体大小："
+
+#. notes@lestcape->settings-schema.json->text-size->tooltip
+msgid "Increase or decrease the font size of Note text."
+msgstr "增加或减小便签字体大小。"
+
+#. notes@lestcape->settings-schema.json->font-family->description
+msgid "Font family:"
+msgstr "字体："
+
+#. notes@lestcape->settings-schema.json->font-family->tooltip
+msgid "Select a Font family to use in Notes."
+msgstr "选择便签的字体。"
+
+#. notes@lestcape->settings-schema.json->symbolic-icons->description
+msgid "Show symbolic icons."
+msgstr "显示标志图标。"
+
+#. notes@lestcape->settings-schema.json->symbolic-icons->tooltip
+msgid "Check this if you want to show symbolic instead full color icons."
+msgstr "检查是否使用标志来代替完全的颜色图标。"
+
+#. notes@lestcape->settings-schema.json->desklet-opacity->description
+msgid "Opacity of the desklet:"
+msgstr "透明度："
+
+#. notes@lestcape->settings-schema.json->desklet-opacity->tooltip
+msgid "Select the opacity of the desklet."
+msgstr "选择该工具的透明度。"
+
+#. notes@lestcape->settings-schema.json->boxes-opacity->description
+msgid "Opacity of the boxes:"
+msgstr "方框的透明度："
+
+#. notes@lestcape->settings-schema.json->boxes-opacity->tooltip
+msgid "Select the opacity of the boxes."
+msgstr "选择方框的透明度。"
+
+#. notes@lestcape->settings-schema.json-override-theme->description
+msgid "Override the Cinnamon theme properties."
+msgstr "覆盖Cinamon主题配置。"
+
+#. notes@lestcape->settings-schema.json-override-theme->tooltip
+msgid ""
+"Check this if you want to override the Cinnamon theme properties or not."
+msgstr "检查是否覆盖Cinnamon的主题配置。"
+
+#. notes@lestcape->settings-schema.json->override-text-box->description
+msgid "Override all Cinnamon theme properties on the text box."
+msgstr "在文本框覆盖所有的Cinnamon主题属性配置。"
+
+#. notes@lestcape->settings-schema.json->override-text-box->tooltip
+msgid ""
+"Check this if you also want to override all Cinnamon theme properties on the "
+"text box or not."
+msgstr "检查是否在文本框覆盖所有的Cinnamon主题属性配置。"
+
+#. notes@lestcape->settings-schema.json->main-box-color->description
+msgid "Main box color:"
+msgstr "主框颜色："
+
+#. notes@lestcape->settings-schema.json->main-box-color->tooltip
+msgid "Set the custom main box's color."
+msgstr "设置个性化的主框颜色。"
+
+#. notes@lestcape->settings-schema.json->text-box-color->description
+msgid "Text box color:"
+msgstr "文本框颜色："
+
+#. notes@lestcape->settings-schema.json->text-box-color->tooltip
+msgid "Set the custom text box's color."
+msgstr "设置个性化的文本框颜色。"
+
+#. notes@lestcape->settings-schema.json->font-color->description
+msgid "Font color:"
+msgstr "字体颜色："
+
+#. notes@lestcape->settings-schema.json->font-color->tooltip
+msgid "Set the custom text color."
+msgstr "设置个性化的文本颜色。"
+
+#. notes@lestcape->settings-schema.json->selected-text-color->description
+msgid "Selected text color:"
+msgstr "选中的文本颜色："
+
+#. notes@lestcape->settings-schema.json->selected-text-color->tooltip
+msgid "Set the custom selected text color."
+msgstr "设置个性化选中的文本颜色。"
+
+#. notes@lestcape->settings-schema.json->border-box-width->description
+msgid "Border's box width:"
+msgstr "边缘的框宽度："
+
+#. notes@lestcape->settings-schema.json->border-box-width->tooltip
+msgid "Increase or decrease the border's box width."
+msgstr "减少或增加边缘框的宽度。"
+
+#. notes@lestcape->settings-schema.json->border-box-color->description
+msgid "Border's box color:"
+msgstr "边缘框颜色："
+
+#. notes@lestcape->settings-schema.json->border-box-color->tooltip
+msgid "Set the custom border box's color."
+msgstr "设置个性的边缘框颜色。"
+
+#. #-#-#-#-#  default.pot (PACKAGE VERSION)  #-#-#-#-#
+#. notes@lestcape->settings-schema.json->stripe-layout->combobox->None
+#. #-#-#-#-#  default.pot (PACKAGE VERSION)  #-#-#-#-#
+#. notes@lestcape->settings-schema.json->staples-layout->combobox->None
+#. #-#-#-#-#  default.pot (PACKAGE VERSION)  #-#-#-#-#
+#. notes@lestcape->settings-schema.json->pencil-layout->combobox->None
+msgid "None"
+msgstr "空"
+
+#. notes@lestcape->settings-schema.json->stripe-layout->combobox->simplestripe
+msgid "Simple Stripe"
+msgstr "简单条纹"
+
+#. notes@lestcape->settings-schema.json->stripe-layout->combobox->doublestripe
+msgid "Double Stripe"
+msgstr "双条纹"
+
+#. notes@lestcape->settings-schema.json->stripe-layout->combobox->griddedstripe
+msgid "Gridded Stripe"
+msgstr "格子条纹"
+
+#. notes@lestcape->settings-schema.json->staples-layout->combobox->doublestaple
+msgid "Double Staple"
+msgstr "双钉书针"
+
+#. notes@lestcape->settings-schema.json->staples-layout->combobox->borderstaple
+msgid "Border Staple"
+msgstr "边缘订书针"
+
+#. notes@lestcape->settings-schema.json->staples-layout->combobox->brightstaple
+msgid "Bright Staple"
+msgstr "高亮订书针"
+
+#. notes@lestcape->settings-schema.json->staples-layout->combobox->chainstaple
+msgid "Chain Staple"
+msgstr "链状订书针"
+
+#. notes@lestcape->settings-schema.json->staples-layout->combobox->clampstaple
+msgid "Clamp Staple"
+msgstr "夹子"
+
+#. notes@lestcape->settings-schema.json->staples-layout->combobox->clipstaple
+msgid "Clip Staple"
+msgstr "回形针"
+
+#. notes@lestcape->settings-schema.json->staples-layout->combobox->offhandedstaple
+msgid "Offhanded Staple"
+msgstr "手持式订书针"
+
+#. notes@lestcape->settings-schema.json->staples-layout->combobox->tackstaple
+msgid "Tack Staple"
+msgstr "大头钉"
+
+#. notes@lestcape->settings-schema.json->staples-layout->combobox->whitestaple
+msgid "White Staple"
+msgstr "白色订书针"
+
+#. notes@lestcape->settings-schema.json->pencil-layout->combobox->bluepencil
+msgid "Blue Pencil"
+msgstr "蓝色订书针"
+
+#. notes@lestcape->settings-schema.json->pencil-layout->combobox->yellowpencil
+msgid "Yellow Pencil"
+msgstr "黄色订书针"
+
+#. notes@lestcape->settings-schema.json->pencil-layout->combobox->orangepencil
+msgid "Orange Pencil"
+msgstr "橙色订书针"
+
+#. notes@lestcape->settings-schema.json->pencil-layout->combobox->blackpencil
+msgid "Black Pencil"
+msgstr "黑色订书针"
