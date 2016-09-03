@@ -1645,7 +1645,7 @@ MyDesklet.prototype = {
       }
       if(this.symbol == Clutter.Escape) {
          if(this._isActivated()) {
-            this.reset();
+            global.stage.set_key_focus(null);
             return true;
          }
       }
