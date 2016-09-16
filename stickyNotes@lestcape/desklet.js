@@ -145,7 +145,7 @@ DeskletAppletManager.prototype = {
             this.applet = AppletManager.appletObj[newAppletID];
             this.applet.setParentDesklet(this.desklet);
          } catch (e) {
-            Main.notify("error", e.message);
+            this.showErrorMessage(e.message);
          }
       }
    },
@@ -177,11 +177,240 @@ DeskletAppletManager.prototype = {
             delete AppletManager.appletObj[this.applet.instance_id];
             this.applet = null; 
          } catch (e) {
-            Main.notify("error", e.message);
+            this.showErrorMessage(e.message);
          }
       }
+   },
+
+   showErrorMessage: function(menssage) {
+      Main.notifyError(_("Error:"), menssage);
    }
 };
+
+function TextProperty(label, insText, remText, position, selected, toRight) {
+   this._init(label, insText, remText, position, selected, toRight);
+}
+
+TextProperty.prototype = {
+   _init: function(label, insText, remText, position, selected, toRight) {
+      this.label = label;
+      this.insText = insText;
+      this.remText = remText;
+      this.position = position;
+      this.selected = selected;
+      this.toRight = toRight;
+   }
+};
+
+function EditAction(textEditor) {
+   this._init(textEditor);
+}
+
+EditAction.prototype = {
+   _init: function(textEditor) {
+      this.textEditor = textEditor;
+   },
+
+   canExecute: function() {
+      return true;
+   },
+
+   execute: function(value) {
+      try {
+         let action = new EditBidirectionalAction(this.textEditor);
+         action.setValue(value);
+         return action;
+      } catch(e) {
+         this.showErrorMessage(e.message);
+      }
+      return null;
+   },
+
+   showErrorMessage: function(menssage) {
+      Main.notifyError(_("Error:"), menssage);
+   },
+};
+
+function EditBidirectionalAction(textEditor, label) {
+   this._init(textEditor, label);
+}
+
+EditBidirectionalAction.prototype = {
+   _init: function(textEditor, label) {
+      this._textEditor = textEditor;
+      this.value = null;
+      this.label = label;
+   },
+
+   redo: function() {
+      if(this.value != null) {
+         try {
+            let currText = this._textEditor.clutterText.text;
+
+            currText = currText.substr(0, this.value.position) +
+                       this.value.insText + currText.substr(this.value.position);
+            currText = currText.substr(0, this.value.position) +
+                   currText.substr(this.value.position + this.value.remText.length);
+            this._textEditor.clutterText.text = currText;
+
+            if(this.value.selected) {
+               this._textEditor.clutterText.set_selection(
+                  this.value.position,
+                  this.value.position + this.value.insText.length
+               );
+            } else {
+               if(this.value.toRight)
+                  this._textEditor.clutterText.set_selection(
+                      this.value.position + this.value.insText.length,
+                      this.value.position + this.value.insText.length
+                  );
+               else
+                  this._textEditor.clutterText.set_selection(
+                     this.value.position,
+                     this.value.position
+                  );
+            }
+         } catch( e) {
+            this.showErrorMessage(e.message);
+         }
+      }
+   },
+
+   undo: function() {
+      if(this.value != null) {
+         try {
+            let currText = this._textEditor.clutterText.text;
+            currText = currText.substr(0, this.value.position) +
+                       currText.substr(this.value.position + this.value.insText.length);
+
+            currText = currText.substr(0, this.value.position) +
+                       this.value.remText + currText.substr(this.value.position);
+
+            this._textEditor.clutterText.text = currText;
+
+            if(this.value.selected) {
+               this._textEditor.clutterText.set_selection(
+                  this.value.position,
+                  this.value.position + this.value.remText.length
+               );
+            } else {
+               if(this.value.toRight)
+                  this._textEditor.clutterText.set_selection(
+                     this.value.position + this.value.remText.length,
+                     this.value.position + this.value.remText.length
+                  );
+               else
+                  this._textEditor.clutterText.set_selection(
+                     this.value.position,
+                     this.value.position
+                  );
+            }
+         } catch(e) {
+            this.showErrorMessage(e.message);
+	 }
+      }
+   },
+
+   setValue: function(value) {
+      this.value = value;
+   },
+
+   getValue: function() {
+      return this.value;
+   },
+
+   getLabel: function() {
+      return this.label;
+   },
+
+   showErrorMessage: function(menssage) {
+      Main.notifyError(_("Error:"), menssage);
+   }
+};
+
+function UndoCollector(sizeMax) {
+   this._init(sizeMax);
+}
+
+UndoCollector.prototype = {
+   _init: function(sizeMax) {
+       this.sizeMax = 30;
+       if(sizeMax)
+           this.sizeMax = sizeMax;
+       this.undoStack = new Array();
+       this.redoStack = new Array();
+   },
+
+   _notifyActionAdded: function() {
+      this.emit('action-added');
+   },
+
+   add: function(undoable) {
+      if(undoable != null && this.sizeMax > 0) {
+         if(this.undoStack.length == this.sizeMax) {
+            this.undoStack.shift();
+         }
+         this.undoStack.push(undoable);
+         this.redoStack = new Array();
+         this._notifyActionAdded(undoable);
+      }
+   },
+
+   clear: function() {
+       this.undoStack = new Array();
+       this.redoStack = new Array();
+   },
+
+   undo: function() {
+      if(this.undoStack.length > 0) {
+         let undoable = this.undoStack.pop();
+         undoable.undo();
+         this.redoStack.push(undoable);
+      }
+   },
+
+   redo: function() {
+      if(this.redoStack.length > 0) {
+         let undoable = this.redoStack.pop();
+         undoable.redo();
+         this.undoStack.push(undoable);
+      }
+   },
+
+   canRedo: function() {
+      return (this.redoStack.length > 0);
+   },
+
+   canUndo: function() {
+      return (this.undoStack.length > 0);
+   },
+
+   getLastUndoMessage: function() {
+      return !this.canUndo() ? "" : this.undoStack[this.undoStack.length - 1].getLabel();
+   },
+
+   getLastRedoMessage: function() {
+      return !this.canRedo() ? "" : this.redoStack[this.redoStack.length - 1].getLabel();
+   },
+
+   getLastUndo: function() {
+      return !this.canUndo() ? null : this.undoStack[this.undoStack.length - 1];
+   },
+
+   getLastRedo: function() {
+      return !this.canRedo() ? null : this.redoStack[this.redoStack.length - 1];
+   },
+
+   setSizeMax: function(sizeMax) {
+      if(sizeMax >= 0) {
+         for(let i = 0; i < this.undoStack.length - sizeMax; i++) {
+            this.undoStack.shift();
+         }
+         this.sizeMax = sizeMax;
+      }
+   },
+};
+Signals.addSignalMethods(UndoCollector.prototype);
 
 function MyDesklet(metadata, desklet_id){
    this._init(metadata, desklet_id);
@@ -191,11 +420,12 @@ MyDesklet.prototype = {
    __proto__: Desklet.Desklet.prototype,
 
    _init: function(metadata, desklet_id) {
-      //Desklet.Desklet.prototype._init.call(this, metadata, desklet_id);
+      Desklet.Desklet.prototype._init.call(this, metadata, desklet_id);
       this._myInit(metadata, desklet_id);
       this.metadata = metadata;
       this._uuid = this.metadata["uuid"];
       this.newText = "";
+      this._masterMutate = null;
      // this.renderFontFamily();
       this.execInstallLanguage();
       Gettext.bindtextdomain(this._uuid, GLib.get_home_dir() + "/.local/share/locale");
@@ -264,7 +494,6 @@ MyDesklet.prototype = {
       this.focusIDSignal = 0;
       this.keyPressIDSignal = 0;
       this.pressEventOutIDSignal = 0;
-      this.textInsertIDSignal = 0;
       this.textChangeIDSignal = 0;
       this.enterAutoHideButtonsIDSignal = 0;
       this.leaveAutoHideButtonsIDSignal = 0;
@@ -289,68 +518,40 @@ MyDesklet.prototype = {
       } catch(e) {
          this.showErrorMessage(e.message);
       }
+      this.collector = new UndoCollector(10000);
+      this._textProperty = null;
    },
 
    _myInit: function(metadata, desklet_id) {
-        this.metadata = metadata;
-        this.instance_id = desklet_id;
-        this.actor = new St.BoxLayout({reactive: true, track_hover: true, vertical: true});
+      if(this._draggable.buttonPressEventId != 0)
+         this.actor.disconnect(this._draggable.buttonPressEventId);
+      this._draggable.buttonPressEventId = 0;
 
-        this._header = new St.Bin({style_class: 'desklet-header'});
-        this._header_label = new St.Label();
-        this._header_label.set_text('Desklet');
-        this._header.set_child(this._header_label);
-
-        this.content = new St.Bin();
-
-        this.actor.add_actor(this._header);
-        this.actor.add_actor(this.content);
-
-        this._updateDecoration();
-        global.settings.connect('changed::desklet-decorations', Lang.bind(this, this._updateDecoration));
-
-        this._menu = new PopupMenu.PopupMenu(this.actor, 0.0, St.Side.LEFT, 0);
-        this._menuManager = new PopupMenu.PopupMenuManager(this);
-        this._menuManager.addMenu(this._menu);
-        Main.uiGroup.add_actor(this._menu.actor);
-        this._menu.actor.hide();
-
-        this.actor.connect('button-release-event', Lang.bind(this, this._onButtonReleaseEvent));
-
-        this._uuid = null;
-        this._dragging = false;
-        this._dragOffset = [0, 0];
-        this.actor._desklet = this;
-        this.actor._delegate = this;
-
-        this._draggable = DND.makeDraggable(this.actor, {restoreOnSuccess: true, manualMode: true}, Main.deskletContainer.actor);
-        this.idPress = this.actor.connect('button-press-event',
+      this.idPress = this.actor.connect('button-press-event',
                                Lang.bind(this._draggable, this._draggable._onButtonPress));
 
-        this._draggable.connect('drag-begin', Lang.bind(this, this._onDragBegin));
-        this._draggable.connect('drag-end', Lang.bind(this, this._onDragEnd));
-        this._draggable.connect('drag-cancelled', Lang.bind(this, this._onDragEnd));
+      this._draggable.connect('drag-begin', Lang.bind(this, this._onDragBegin));
+      this._draggable.connect('drag-end', Lang.bind(this, this._onDragEnd));
+      this._draggable.connect('drag-cancelled', Lang.bind(this, this._onDragEnd));
+      /*this._drag_end_ids["drag-end"] = this._draggable.connect('drag-end', Lang.bind(this, function() {
+         if(Main._findModal(this.actor) >= 0)
+            Main.popModal(this.actor, global.get_current_time());
+         else {
+            global.stage.set_key_focus(null);
+            global.end_modal(global.get_current_time());
+            global.set_stage_input_mode(Cinnamon.StageInputMode.NORMAL);
+         }
+      }));
 
-        this._drag_end_ids = {"drag-end": 0, "drag-cancelled": 0};
-        this._drag_end_ids["drag-end"] = this._draggable.connect('drag-end', Lang.bind(this, function() {
-           if(Main._findModal(this.actor) >= 0)
-              Main.popModal(this.actor, global.get_current_time());
-           else {
-              global.stage.set_key_focus(null);
-              global.end_modal(global.get_current_time());
-              global.set_stage_input_mode(Cinnamon.StageInputMode.NORMAL);
-           }
-        }));
-
-        this._drag_end_ids["drag-cancelled"] = this._draggable.connect('drag-cancelled', Lang.bind(this, function() {
-           if(Main._findModal(this.actor) >= 0)
-              Main.popModal(this.actor, global.get_current_time());
-           else {
-              global.stage.set_key_focus(null);
-              global.end_modal(global.get_current_time());
-              global.set_stage_input_mode(Cinnamon.StageInputMode.NORMAL);
-           }
-        }));
+      this._drag_end_ids["drag-cancelled"] = this._draggable.connect('drag-cancelled', Lang.bind(this, function() {
+         if(Main._findModal(this.actor) >= 0)
+            Main.popModal(this.actor, global.get_current_time());
+         else {
+            global.stage.set_key_focus(null);
+            global.end_modal(global.get_current_time());
+            global.set_stage_input_mode(Cinnamon.StageInputMode.NORMAL);
+         }
+      }));*/
    },
 
    _onDragBegin: function() {
@@ -394,7 +595,7 @@ MyDesklet.prototype = {
          this.textBoxChangeIdSignal = this.textBox.connect('style-changed', Lang.bind(this, this._onOpacityTextChange));
          this._keyFocusNotifyIDSignal = global.stage.connect('notify::key-focus', Lang.bind(this, this._onKeyFocusChanged));
          this._allocationSignal = this.scrollBox.connect('allocation_changed', Lang.bind(this, this._onAllocationChanged));
-         if(this.instance_id == this.getMasterInstance()) {
+         if(this.isMasterInstance()) {
             if(Main.settingsManager)
                Main.settingsManager.register(this._uuid, this._uuid, this.settings);
             Mainloop.idle_add(Lang.bind(this, function() {
@@ -419,12 +620,12 @@ MyDesklet.prototype = {
             }
          }
       } catch(e) {
-         Main.notify("error", e.message);
+         this.showErrorMessage(e.message);
       }
    },
 
    _onAppletManagerChange: function() {
-      if(this.instance_id == this.getMasterInstance()) {
+      if(this.isMasterInstance()) {
          this.setVisibleAppletManager(this._appletManager);
       }
    },
@@ -440,7 +641,7 @@ MyDesklet.prototype = {
    },
 
    _onSetAppletType: function() {
-      if((this.myManager)&&(this.myManager.applet)&&(this.instance_id == this.getMasterInstance()))
+      if((this.myManager)&&(this.myManager.applet)&&(this.isMasterInstance()))
          this.myManager.applet._onSetAppletType(this._appletCollapsed, this._appletSymbolic);
    },
 
@@ -450,7 +651,7 @@ MyDesklet.prototype = {
    },
 
    showErrorMessage: function(menssage) {
-      Main.notifyError(_("Error"), menssage);
+      Main.notifyError(_("Error:"), menssage);
    },
 
    initDeskletType: function() {
@@ -482,7 +683,7 @@ MyDesklet.prototype = {
          this.loadNote(0);
          return true;
       }
-      Main.notify("Invalid instances " + this.instance_id + " of " + this._uuid + " called.");
+      //this.showErrorMessage("Invalid instance: " + this.instance_id + ". There are " + countInstances + " instances.");
       Mainloop.idle_add(Lang.bind(this, function() {
          DeskletManager.removeDesklet(this._uuid, this.instance_id);
       }));
@@ -491,10 +692,14 @@ MyDesklet.prototype = {
 
    multInstanceUpdate: function() {
       try {
-         this.removeAllInstances();
-         Mainloop.idle_add(Lang.bind(this, function() {
-            this.openAllInstances(0);
-         }));
+         if(this.isMasterInstance() && (this._masterMutate == null)) {
+            this._masterMutate = this.instance_id;
+            this.removeAllInstances();
+            //FIXME: The effect cause a problem.
+            /*Mainloop.idle_add(Lang.bind(this, function() {
+               this.openAllInstances(0);
+            }));*/
+         }
       } catch(e) {
          this.showErrorMessage(e.message);
       }
@@ -504,6 +709,14 @@ MyDesklet.prototype = {
       try {
          let enabledDesklets = global.settings.get_strv("enabled-desklets");
          let newDeskletID = global.settings.get_int("next-desklet-id");
+         if(enabledDesklets == null)
+            enabledDesklets = [];
+         if(newDeskletID == null)
+            newDeskletID = 0;
+         if(this._xPosition == null)
+            this._xPosition = 100;
+         if(this._yPosition == null)
+            this._yPosition = 100;
          let deskletDef, nextDeskletId;
          if(this._multInstance) {
             let countDesklet = this.notesList.length;
@@ -566,6 +779,10 @@ MyDesklet.prototype = {
 
    on_desklet_removed: function() {
       this.scrollArea.set_auto_scrolling(false);
+      if(this._masterMutate == this.instance_id) {
+         this._masterMutate = null;
+         this.openAllInstances(0);
+      }
       try {
          this.settings.finalize();
       } catch(e) {}
@@ -591,9 +808,6 @@ MyDesklet.prototype = {
       if(this.keyPressIDSignal > 0)
          this.clutterText.disconnect(this.keyPressIDSignal);
       this.keyPressIDSignal = 0;
-      if(this.textInsertIDSignal > 0)
-         this.clutterText.disconnect(this.textInsertIDSignal);
-      this.textInsertIDSignal = 0;
       if(this.textChangeIDSignal > 0)
          this.clutterText.disconnect(this.textChangeIDSignal);
       this.textChangeIDSignal = 0;
@@ -679,6 +893,10 @@ MyDesklet.prototype = {
          this.showErrorMessage(e.message);
       }
       return currentInstance;
+   },
+
+   isMasterInstance: function() {
+      return (this.getMasterInstance() == parseInt(this.instance_id));
    },
 
    _getDeskletDefinition: function(definition) {
@@ -869,6 +1087,7 @@ MyDesklet.prototype = {
          return true;
       }
       else {
+         this.collector.clear();
          this.reset();
          this.noteCurrent = this.notesList.length + 1;
          this.currentNote.set_text(this.noteCurrent.toString());
@@ -893,6 +1112,7 @@ MyDesklet.prototype = {
             this._changeHideTextBox(true);
             this.scrollArea.visible = true;
             this.bottomBox.visible = true;
+            this.actor.raise_top();
             if(this._fSize) {
                this._onSizeChange();
             }
@@ -923,7 +1143,7 @@ MyDesklet.prototype = {
       }
    },
 
-   _onRemoveNote: function(actor) {
+   /*_onRemoveNote: function(actor) {
       try {
          this._effectIcon(actor, 0.2);
          let exist = false;
@@ -946,6 +1166,33 @@ MyDesklet.prototype = {
       } catch(e) {
          this.showErrorMessage(e.message);
       }
+   },*/
+
+   _onRemoveNote: function(actor) {
+      try {
+         this._effectIcon(actor, 0.2);
+         let exist = false;
+         let pos = this.noteCurrent - 1;
+         if((pos > -1)&&(pos < this.notesList.length)) {
+            let file = Gio.file_new_for_path(GLib.get_home_dir() + "/.local/share/notes/" + this.notesList[pos][0] + ".note");
+            exist = file.query_exists(null);
+         }
+         if(this.deskletRaised)
+            this.toggleRaise();
+         if(exist) {
+            Mainloop.idle_add(Lang.bind(this, function() {
+               this.showMessageDelete();
+            }));
+         } else if(this.notesList.length == 0) {
+            Mainloop.idle_add(Lang.bind(this, function() {
+               DeskletManager.removeDesklet(this._uuid, this.instance_id); 
+            }));
+         } else {
+            this._onBackNote(this.backButton);
+         }
+      } catch(e) {
+         this.showErrorMessage(e.message);
+      }
    },
 
    showMessageDelete: function() {
@@ -964,9 +1211,7 @@ MyDesklet.prototype = {
       try {
          if(this._multInstance) {
             if(this.getCountInstances() > 1) {
-              // Mainloop.idle_add(Lang.bind(this, function() {
-                  DeskletManager.removeDesklet(this._uuid, this.instance_id);
-               //}));
+               DeskletManager.removeDesklet(this._uuid, this.instance_id);
             }
             this.reset();
             this.deleteNote(this.noteCurrent - 1);
@@ -1007,6 +1252,7 @@ MyDesklet.prototype = {
 
    _onBackNote: function(actor) {
       if(this.notesList.length != 0) {
+         this.collector.clear();
          this._effectIcon(actor, 0.2);
          if((this.noteCurrent == 0)||(this.noteCurrent == 1)) {
             this.noteCurrent = this.notesList.length;
@@ -1023,6 +1269,7 @@ MyDesklet.prototype = {
 
    _onNextNote: function(actor) {
       if(this.notesList.length != 0) {
+         this.collector.clear();
          this._effectIcon(actor, 0.2);
          if(this.noteCurrent == 0) {
             if(this.notesList.length != 1) {
@@ -1448,9 +1695,6 @@ MyDesklet.prototype = {
          if(this.keyPressIDSignal > 0)
             this.clutterText.disconnect(this.keyPressIDSignal);
          this.keyPressIDSignal = 0;
-         if(this.textInsertIDSignal > 0)
-            this.clutterText.disconnect(this.textInsertIDSignal);
-         this.textInsertIDSignal = 0;
          if(this.textChangeIDSignal > 0)
             this.clutterText.disconnect(this.textChangeIDSignal);
          this.textChangeIDSignal = 0;
@@ -1488,8 +1732,6 @@ MyDesklet.prototype = {
             this.focusIDSignal = this.clutterText.connect('key-focus-out', Lang.bind(this, this._onFocusOut));
          if(this.keyPressIDSignal == 0)
             this.keyPressIDSignal = this.clutterText.connect('key-press-event', Lang.bind(this, this._onKeyPress));
-         if(this.textInsertIDSignal == 0)
-            this.textInsertIDSignal = this.clutterText.connect('insert-text', Lang.bind(this, this._onInsertText));
          if(this.textChangeIDSignal == 0)
             this.textChangeIDSignal = this.clutterText.connect('text-changed', Lang.bind(this, this._onChangedText));
          this.setPencil(true);
@@ -1512,6 +1754,8 @@ MyDesklet.prototype = {
    },
 
    _onButtonRelease: function(actor, event) {
+      if(this._menu.isOpen)
+         this._menu.toggle();
       if(this._entryActiveMenu) {
          this._onButtonReleaseEvent(this.actor, event);
          if(this.selection) {
@@ -1526,7 +1770,6 @@ MyDesklet.prototype = {
 
    _onButtonReleaseEvent: function(actor, event) {//block the new way handdle event on cinnamon...
       if(event.get_button() == 3) {
-         this._menu.toggle();
          // Check if menu gets out of monitor. Move menu to left side if so
          // Find x-position of right edge of monitor
          let rightEdge;
@@ -1546,11 +1789,8 @@ MyDesklet.prototype = {
          } else {
             this._menu.setArrowSide(St.Side.LEFT);
          }
-
+         this._menu.toggle();
       } else {
-         if(this._menu.isOpen) {
-            this._menu.toggle();
-         }
          this.on_desklet_clicked(event);
       }
       this._disableResize();
@@ -1568,16 +1808,16 @@ MyDesklet.prototype = {
 
    _updateCopyItem: function() {
       this.selectBounds = this.clutterText.get_selection_bound();
-      this.cursorPosition = this.clutterText.get_cursor_position();
+      let pos = this.clutterText.get_cursor_position();
       this.selection = this.clutterText.get_selection();
       this.copyMenuItem.setSensitive(this.selection && this.selection != '');
 
       let len = this.clutterText.text.length;
       if(this.selectBounds == -1)
         this.selectBounds = len;
-      if(this.cursorPosition == -1)
+      if(pos == -1)
          this.selectBounds = this.selectBounds + this.selection.length;
-      else if(this.selectBounds < this.cursorPosition)
+      else if(this.selectBounds < pos)
          this.selectBounds = this.selectBounds + this.selection.length;
       this.deleteMenuItem.setSensitive(this.selection && this.selection != '' && this.selectBounds);
    },
@@ -1601,17 +1841,29 @@ MyDesklet.prototype = {
                if(this.clutterText.text == _("Type your note...")) {
                   this.clutterText.set_text("");
                }
-               this.clutterText.delete_selection();
                let pos = this.clutterText.get_cursor_position();
+               if(pos == -1)
+                   pos = this.clutterText.text.length;
+               this.clutterText.delete_selection();
                this.clutterText.insert_text(text, pos);
                this.entry.set_text(this.clutterText.text);
-               this._onFocusOut();
+               this._textProperty = new TextProperty("paste", text, this.selection, pos, (this.selection.length > 0), false);
+               let action = new EditAction(this);
+               let undoable = action.execute(this._textProperty);
+               this.collector.add(undoable);
             }
          }));
    },
 
    _onDeleteActivated: function() {
-      this.clutterText.delete_text(this.selectBounds - this.selection.length, this.selectBounds);
+      if(this.selection.length > 0) {
+         let pos = this.selectBounds - this.selection.length;
+         this.clutterText.delete_text(this.selectBounds - this.selection.length, this.selectBounds);
+         this._textProperty = new TextProperty("remove", "", this.selection, pos, true, false);
+         let action = new EditAction(this);
+         let undoable = action.execute(this._textProperty);
+         this.collector.add(undoable);
+      }
    },
 
    // the entry does not show the hint
@@ -1620,36 +1872,64 @@ MyDesklet.prototype = {
    },
 
    _onKeyPress: function(actor, event) {
+      this.isModify = false;
       this.keyPress = new Date().getTime();
-      this.oldEntryText = actor.get_text();
+      this.oldEntryText = this.clutterText.get_text();
       this.symbol = event.get_key_symbol();
-      if((Keymap.get_caps_lock_state())&&((event.get_state()) & (Clutter.ModifierType.CONTROL_MASK))) {
-         if((this.symbol == Clutter.KEY_c) || (this.symbol == Clutter.KEY_C)) {
-            // allow ctrl+c event to be handled by the clutter text.
-            this._clipboard.set_text(actor.get_selection());
-            return true;
-         }
+      this.selection = this.clutterText.get_selection();
+      //(Clutter.ModifierType.CONTROL_MASK == 4) + (Clutter.ModifierType.LOCK_MASK == 2) = 6
+      if((Keymap.get_modifier_state() == 4) || (Keymap.get_modifier_state() == 6)) {
          if((this.symbol == Clutter.KEY_v) || (this.symbol == Clutter.KEY_V)) {
             // allow ctrl+v event to be handled by the clutter text.
-            this._clipboard.get_text(Lang.bind(this,
-               function(clipboard, text) {
-                  if(!text)
-                     return;
-                  this.clutterText.delete_selection();
-                  let pos = this.clutterText.get_cursor_position();
-                  this.keyPress = 0;
-                  this.clutterText.insert_text(text, pos);
+            this._clipboard.get_text(Lang.bind(this, function(clipboard, text) {
+               if(!text)
+                  return;
+               let pos = this.clutterText.get_cursor_position();
+               if(pos == -1)
+                   pos = this.clutterText.text.length;
+               this.clutterText.delete_selection();
+               this.clutterText.insert_text(text, pos);
+               this.entry.set_text(this.clutterText.text);
+               this._textProperty = new TextProperty("paste", text, this.selection, pos, (this.selection.length > 0), false);
+               let action = new EditAction(this);
+               let undoable = action.execute(this._textProperty);
+               this.collector.add(undoable);
+               this.keyPress = 0;
             }));
             return true;
          }
+         if((this.symbol == Clutter.KEY_x) || (this.symbol == Clutter.KEY_X)) {
+            if(this.selection.length > 0) {
+               let pos = this.clutterText.get_cursor_position();
+               this._textProperty = new TextProperty("cut", "", this.selection, pos, true, false);
+               let action = new EditAction(this);
+               let undoable = action.execute(this._textProperty);
+               this.collector.add(undoable);
+               return false;
+            }
+         }
+         if(this._isActivated()) {
+            if((this.symbol == Clutter.KEY_y) || (this.symbol == Clutter.KEY_Y)) {
+               this.isModify = true;
+               this.collector.redo();
+               this._textProperty = null;
+               return true;
+            }
+            if((this.symbol == Clutter.KEY_z) || (this.symbol == Clutter.KEY_Z)) {
+               this.isModify = true;
+               this.collector.undo();
+               this._textProperty = null;
+               return true;
+            }
+         }
       }
-      if(this.symbol == Clutter.Escape) {
+      if(this.symbol == Clutter.KEY_Escape) {
          if(this._isActivated()) {
             global.stage.set_key_focus(null);
             return true;
          }
       }
-      if(this.symbol == Clutter.Down) {
+      if(this.symbol == Clutter.KEY_Down) {
          let newValue = this.scrollArea.vscroll.get_adjustment().value + this._getTextHeight();
          if(newValue < this.scrollArea.vscroll.get_adjustment().upper)
             this.scrollArea.vscroll.get_adjustment().set_value(newValue);
@@ -1657,7 +1937,7 @@ MyDesklet.prototype = {
             this.scrollArea.vscroll.get_adjustment().set_value(this.scrollArea.vscroll.get_adjustment().upper);
          return false;
       }
-      if(this.symbol == Clutter.Up) {
+      if(this.symbol == Clutter.KEY_Up) {
          let newValue = this.scrollArea.vscroll.get_adjustment().value - this._getTextHeight();
          if(newValue >= 0)
             this.scrollArea.vscroll.get_adjustment().set_value(newValue);
@@ -1669,49 +1949,84 @@ MyDesklet.prototype = {
    },
 
    _onChangedText: function(actor) {
-      if((this.newText != "")&&(Keymap.get_caps_lock_state())) {
-         let position = -1;
-         let newEntryText = actor.get_text();
-         for(let i = 0; i < newEntryText.length; i++) {
-            if(this.oldEntryText.charAt(i) != newEntryText.charAt(i)) {
-               position = i;
-               break;
+      if((Keymap.get_modifier_state() == 4) || (Keymap.get_modifier_state() == 6)) {
+          return false;
+      }
+      let lastUndo = this.collector.getLastUndo();
+      let pos = this.clutterText.get_cursor_position();
+      if(pos == -1) {
+          if(this.symbol == Clutter.KEY_BackSpace)
+             pos = this.clutterText.text.length + 1;
+          else
+             pos = this.clutterText.text.length - 1;
+      }
+      let undoable, value;
+      if(this.selection && (this.selection.length > 0)) {
+          let action = new EditAction(this);
+          if(action.canExecute()) {
+             this._textProperty = new TextProperty("selection", "", this.selection, pos, true, true);
+             undoable = action.execute(this._textProperty);
+             this.collector.add(undoable);
+          }
+          if((this.symbol == Clutter.KEY_BackSpace) || (this.symbol == Clutter.KEY_Delete))
+             return false;
+      }
+      let ch = String.fromCharCode(Clutter.keysym_to_unicode(this.symbol));
+      if(this.symbol == Clutter.KEY_BackSpace) {
+         if((lastUndo != null) && (lastUndo.getValue() != null) &&
+            (lastUndo.getValue() == this._textProperty) && (lastUndo.getValue().position == pos)) {
+            value = lastUndo.getValue();
+            if(value != null) {
+               value.remText = this.oldEntryText.charAt(pos - 1) + value.remText;
+               value.position = pos - 1; 
+            }
+         } else {
+            let action = new EditAction(this);
+            if(action.canExecute()) {
+               this.oldEntryText.charAt(pos - 1);
+               this._textProperty = new TextProperty("backspace", "", this.oldEntryText.charAt(pos - 1), pos - 1, false, true);
+               undoable = action.execute(this._textProperty);
+               this.collector.add(undoable);
             }
          }
-         if(position != -1) {
-            actor.delete_text(position, position + 1);
-            actor.insert_text(this.newText.toUpperCase(), position);
-            actor.set_cursor_position(position);
-            actor.set_selection(position, position);
-            this.newText = "";
-            this.keyPress = 0; 
-         }
+         return false;
       }
-      this.newText = "";
-   },
-
-   _onInsertText: function(actor, newText, length) {
-      if((new Date().getTime() - this.keyPress < 20)&&(Keymap.get_caps_lock_state())) {
-         this.newText = newText;
-         let position = -1;
-         let newEntryText = actor.get_text();
-         for(let i = 0; i < newEntryText.length; i++) {
-            if(this.oldEntryText.charAt(i) != newEntryText.charAt(i)) {
-               position = i;
-               break;
+      if(this.symbol == Clutter.KEY_Delete) {
+         if((lastUndo != null) && (lastUndo.getValue() != null) &&
+            (lastUndo.getValue() == this._textProperty) && (lastUndo.getValue().position == pos)) {
+            value = lastUndo.getValue();
+            if((value != null) && (this.oldEntryText.length > pos)) {
+               value.remText = value.remText + this.oldEntryText.charAt(pos);
             }
-         }
-         if(position != -1) {
-            this.newText = "";
-            this.keyPress = 0;
-            actor.delete_text(position, position + 1);
-            actor.insert_text(newText.toUpperCase(), position);
-         }
+         } else {
+            let action = new EditAction(this);
+            if(action.canExecute() && (this.oldEntryText.length > pos)) {
+               this._textProperty = new TextProperty("delete", "", this.oldEntryText.charAt(pos), pos, false, false);
+               undoable = action.execute(this._textProperty);
+               this.collector.add(undoable);
+            }
+          }
+          return false; 
       }
+      if((lastUndo != null) && (lastUndo.getValue() != null) &&
+         (lastUndo.getValue() == this._textProperty) && (lastUndo.getValue().position + lastUndo.getValue().insText.length == pos)) {
+          value = lastUndo.getValue();
+          if(value != null) {
+              value.insText += ch;
+          }
+      } else if(!this.isModify) {
+          let action = new EditAction(this);
+          if(action.canExecute()) {
+             this._textProperty = new TextProperty("write", ch, "", pos, false, true);
+             undoable = action.execute(this._textProperty);
+             this.collector.add(undoable);
+          }
+      }
+      return false;
    },
 
    _onMultInstanceChange: function() {
-      if((this.instance_id == this.getMasterInstance())&&
+      if(this.isMasterInstance() &&
          (this._multInstance != this.multInstanceMenuItem._switch.state)) {
          Mainloop.idle_add(Lang.bind(this, function() {
             this.multInstanceUpdate();
@@ -2037,7 +2352,7 @@ MyDesklet.prototype = {
          else
             this.hideDesklet();
       } catch(e) {
-         Main.notify("Error:", e.message);
+         this.showErrorMessage(e.message);
          global.logError(e);
       }
    },
@@ -2091,8 +2406,7 @@ MyDesklet.prototype = {
          }
          //throw "works";   
       } catch(e) {
-         Main.notify("Error:", e.message);
-         global.logError(e);
+         this.showErrorMessage(e.message);
       }
    },
    
@@ -2159,7 +2473,7 @@ MyDesklet.prototype = {
       this.deskletRaised = true;
       this.changingRaiseState = false;
       } catch(e) {
-         Main.notify("ee", e.message);
+         this.showErrorMessage(e.message);
       }
    },
 
@@ -2556,14 +2870,13 @@ MyDesklet.prototype = {
                          _src.copy(_dest, Gio.FileCopyFlags.OVERWRITE, null, null);
                      }
                   } catch(e) {
-                     Main.notify("Error", e.message);
+                     this.showErrorMessage(e.message);
                   }
                }
             }
          }
       } catch(e) {
-         Main.notify("Error", e.message);
-         global.logError(e);
+         this.showErrorMessage(e.message);
       }
    }
 };
@@ -2607,8 +2920,7 @@ RaisedBox.prototype = {
          this.groupContent = new St.Bin();
          stack.add_actor(this.groupContent);
       } catch(e) {
-         Main.notify("Error:", e.message);
-         global.logError(e);
+         this.showErrorMessage(e.message);
       }
    },
 
@@ -2647,8 +2959,7 @@ RaisedBox.prototype = {
             return this._actionCloseAll();
          })));
       } catch(e) {
-         Main.notify("Error:", e.message);
-         global.logError(e);
+         this.showErrorMessage(e.message);
       }
    },
     
@@ -2664,8 +2975,7 @@ RaisedBox.prototype = {
                 this.actor.remove_actor(desklet.actor);
          }
       } catch(e) {
-         Main.notify("Error:", e.message);
-         global.logError(e);
+         this.showErrorMessage(e.message);
       }
    },
     
@@ -2691,8 +3001,7 @@ RaisedBox.prototype = {
             return true;
          }
       } catch(e) {
-         Main.notify("Error:", e.message);
-         global.logError(e);
+         this.showErrorMessage(e.message);
       }
 
       return true;
@@ -2731,6 +3040,10 @@ RaisedBox.prototype = {
          }
       }
       return false;
+   },
+
+   showErrorMessage: function(menssage) {
+      Main.notifyError(_("Error:"), menssage);
    }
 };
 Signals.addSignalMethods(RaisedBox.prototype);

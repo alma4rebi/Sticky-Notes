@@ -350,16 +350,16 @@ MyApplet.prototype = {
          if(this.menuRaiseNotes) {
             if(this._raised) {
                if(this._iconType == St.IconType.SYMBOLIC)
-                  this.menuRaiseNote.setIconSymbolicName("go-down");
+                  this.menuRaiseNotes.setIconSymbolicName("go-down");
                else
-                  this.menuRaiseNote.setIconName("go-down");
-               this.menuRaiseNote.label.set_text(_("Unraise Notes"));
+                  this.menuRaiseNotes.setIconName("go-down");
+               this.menuRaiseNotes.label.set_text(_("Unraise Notes"));
             } else {
                if(this._iconType == St.IconType.SYMBOLIC)
-                  this.menuRaiseNote.setIconSymbolicName("go-up");
+                  this.menuRaiseNotes.setIconSymbolicName("go-up");
                else
-                  this.menuRaiseNote.setIconName("go-up");
-               this.menuRaiseNote.label.set_text(_("Raise Notes"));
+                  this.menuRaiseNotes.setIconName("go-up");
+               this.menuRaiseNotes.label.set_text(_("Raise Notes"));
             }
          }
       }

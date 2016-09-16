@@ -2,10 +2,11 @@
     "website": "https://github.com/lestcape/Sticky-Notes", 
     "name": "Sticky Notes", 
     "contributors": "Author: Lester Carballo P\u00e9rez,Visual Concepts: Zagortenay333,Some Ideas: Stephen Collins", 
-    "uuid": "stickyNotes@lestcape", 
+    "dangerous": true, 
+    "description": "Sticky notes desklet.", 
     "comments": "This is not just a desklet, also has inside an applet  that manages notes on the desktop. Allow resize the notes, raise above all windows, and you can customise like you want.", 
     "version": "1.9", 
     "last-edited": "1433078110", 
     "prevent-decorations": true, 
-    "description": "Sticky notes desklet."
+    "uuid": "stickyNotes@lestcape"
 }
