@@ -4,100 +4,100 @@
     },
     "header-general": {
         "type": "header",
-        "description": "General:"
+        "description": "General"
     },
     "separator-general-bottom": {
        "type": "separator"
     },
     "multi-instance": {
         "default": false,
-        "description": "Multiple Instances.",
+        "description": "Multiple Instances",
         "type": "checkbox",
-        "tooltip": "Check this if you want to have different instances of this desklet for each note."
+        "tooltip": "Check this if you want to have different instances of this desklet for each note"
     },
     "auto-hide-buttons": {
         "default": false,
-        "description": "Auto hide buttons.",
+        "description": "Auto hide buttons",
         "type": "checkbox",
-        "tooltip": "Check this if you want to autohide the action buttons when mouse is outside of the desklet."
+        "tooltip": "Check this if you want to autohide the action buttons when mouse is outside of the desklet"
     },
     "show-scroll": {
         "default": true,
-        "description": "Show scrolling area.",
+        "description": "Show scrolling area",
         "type": "checkbox",
-        "tooltip": "Check this if you want to show the scrolling area or not."
+        "tooltip": "Check this if you want to show the scrolling area or not"
     },
     "auto-scroll": {
         "default": true,
-        "description": "Enable autoscrolling.",
+        "description": "Enable autoscrolling",
         "type": "checkbox",
-        "tooltip": "Check this if you want to enable smooth autoscrolling or not."
+        "tooltip": "Check this if you want to enable smooth autoscrolling or not"
     },
     "raise-new-note": {
         "default": false,
-        "description": "Raise the new note.",
+        "description": "Raise the new note",
         "type": "checkbox",
-        "tooltip": "Check this if you want to raise the new note or not."
+        "tooltip": "Check this if you want to raise the new note or not"
     },
     "remove-trash-notes": {
         "default": true,
-        "description": "Move the note to the trash when is removed.",
+        "description": "Move the note to the trash when is removed",
         "type": "checkbox",
-        "tooltip": "Check this if you want to move the note to the trash instead of removed permanently."
+        "tooltip": "Check this if you want to move the note to the trash instead of removed permanently"
     },
     "export-button": {
         "type": "button",
         "description": "Export all notes to the desktop",
         "callback": "_execute_export",
-        "tooltip": "Export all notes to a text file inside the desktop folder location."
+        "tooltip": "Export all notes to a text file inside the desktop folder location"
     },
     "separator-applet-top": {
        "type": "separator"
     },
     "header-applet": {
         "type": "header",
-        "description": "Applet Manager:"
+        "description": "Applet Manager"
     },
     "separator-applet-bottom": {
        "type": "separator"
     },
     "applet-manager": {
         "default": false,
-        "description": "Show Applet Manager.",
+        "description": "Show Applet Manager",
         "type": "checkbox",
-        "tooltip": "Check this if you want to show the Applet Manager."
+        "tooltip": "Check this if you want to show the Applet Manager"
     },
     "applet-collapsed": {
         "default": false,
-        "description": "Collapsed Applet Manager.",
+        "description": "Collapsed Applet Manager",
         "type": "checkbox",
         "dependency": "applet-manager",
         "indent": true,
-        "tooltip": "Check this if you want to collapsed the Applet Manager."
+        "tooltip": "Check this if you want to collapsed the Applet Manager"
     },
     "applet-symbolic": {
         "default": false,
-        "description": "Show symbolic icons in the Applet Manager.",
+        "description": "Show symbolic icons in the Applet Manager",
         "type": "checkbox",
         "dependency": "applet-manager",
         "indent": true,
-        "tooltip": "Check this if you want to show symbolic icons in the Applet Manager."
+        "tooltip": "Check this if you want to show symbolic icons in the Applet Manager"
     },
     "separator-layouts-top": {
        "type": "separator"
     },
     "header-layouts": {
         "type": "header",
-        "description": "Layouts:"
+        "description": "Layouts"
     },
     "separator-layouts-bottom": {
        "type": "separator"
     },
     "stripe-layout": {
         "type": "combobox",
-        "description": "Selected theme of paper sheet:",
+        "description": "Selected theme of paper sheet",
         "default": "none",
-        "tooltip": "Select a theme of paper sheet to show in Notes.",
+        "tooltip": "Select a theme of paper sheet to show in Notes",
         "options": {
             "None": "none",
             "Simple Stripe": "simplestripe",
@@ -107,9 +107,9 @@
     },
     "staples-layout": {
         "type": "combobox",
-        "description": "Selected theme of staples:",
+        "description": "Selected theme of staples",
         "default": "none",
-        "tooltip": "Select theme of staples to show in Notes.",
+        "tooltip": "Select theme of staples to show in Notes",
         "options": {
             "None": "none",
             "Double Staple": "doublestaple",
@@ -125,9 +125,9 @@
     },
     "pencil-layout": {
         "type": "combobox",
-        "description": "Selected theme of pencil:",
+        "description": "Selected theme of pencil",
         "default": "bluepencil",
-        "tooltip": "Select a theme of pencil to show in Notes.",
+        "tooltip": "Select a theme of pencil to show in Notes",
         "options": {
             "None": "none",
             "Blue Pencil": "bluepencil",
@@ -141,19 +141,19 @@
     },
     "header-shortcut": {
         "type": "header",
-        "description": "Shortcut keys:"
+        "description": "Shortcut keys"
     },
     "separator-shortcut-bottom": {
        "type": "separator"
     },
     "raise-key": {
         "type": "keybinding",
-        "description": "Shortcut key to raise the desklet to the top:",
+        "description": "Shortcut key to raise the desklet to the top",
         "default": "<Super>n"
     },
     "hide-key": {
         "type": "keybinding",
-        "description": "Shortcut key to hide the desklet:",
+        "description": "Shortcut key to hide the desklet",
         "default": "<Super>h"
     },
     "separator-size-top": {
@@ -161,47 +161,47 @@
     },
     "header-size": {
         "type": "header",
-        "description": "Size:"
+        "description": "Size"
     },
     "separator-size-bottom": {
        "type": "separator"
     },
     "fix-size": {
         "default": false,
-        "description": "Fixed size.",
+        "description": "Fixed size",
         "type": "checkbox",
-        "tooltip": "Check this if you want to control the size of all instances."
+        "tooltip": "Check this if you want to control the size of all instances"
     },
     "same-size": {
         "default": true,
-        "description": "All instace have the same fixed size.",
+        "description": "All instace have the same fixed size",
         "type": "checkbox",
         "dependency": "fix-size",
-        "tooltip": "Check this if you want to have the same fixed size on all instances."
+        "tooltip": "Check this if you want to have the same fixed size on all instances"
     },
     "width": {
         "default": 220,
         "type": "spinbutton",
         "min": 200,
         "max": 1600,
-        "description": "Width:",
+        "description": "Width",
         "units": "pixels",
         "step": 10,
         "indent": true,
         "dependency": "same-size",
-        "tooltip": "Increase or decrease the desklet width."
+        "tooltip": "Increase or decrease the desklet width"
     },
     "height": {
         "default": 120,
         "type": "spinbutton",
         "min": 80,
         "max": 500,
-        "description": "Height:",
+        "description": "Height",
         "units": "pixels",
         "step": 10,
         "indent": true,
         "dependency": "same-size",
-        "tooltip": "Increase or decrease the desklet height."
+        "tooltip": "Increase or decrease the desklet height"
     },
     "separator-appearance-top": {
        "type": "separator"
@@ -218,16 +218,16 @@
         "type": "spinbutton",
         "min": 10,
         "max": 30,
-        "description": "Font size:",
+        "description": "Font size",
         "units": "pixels",
         "step": 1,
-        "tooltip": "Increase or decrease the font size of Note text."
+        "tooltip": "Increase or decrease the font size of Note text"
     },
     "font-family": {
         "type": "combobox",
-        "description": "Font family:",
+        "description": "Font family",
         "default": "",
-        "tooltip": "Select a Font family to use in Notes.",
+        "tooltip": "Select a Font family to use in Notes",
         "options": {
             "UnGraphic": "UnGraphic",
             "TeXGyreCursor": "TeXGyreCursor",
@@ -356,9 +356,9 @@
     },
     "symbolic-icons": {
         "default": true,
-        "description": "Show symbolic icons.",
+        "description": "Show symbolic icons",
         "type": "checkbox",
-        "tooltip": "Check this if you want to show symbolic instead full color icons."
+        "tooltip": "Check this if you want to show symbolic instead full color icons"
     },
     "desklet-opacity": {
         "type": "scale",
@@ -366,8 +366,8 @@
         "min": 0,
         "max": 1,
         "step": 0.05,
-        "description": "Opacity of the desklet:",
-        "tooltip": "Select the opacity of the desklet."
+        "description": "Opacity of the desklet",
+        "tooltip": "Select the opacity of the desklet"
     },
     "boxes-opacity": {
         "type": "scale",
@@ -375,64 +375,64 @@
         "min": 0,
         "max": 1,
         "step": 0.05,
-        "description": "Opacity of the boxes:",
-        "tooltip": "Select the opacity of the boxes."
+        "description": "Opacity of the boxes",
+        "tooltip": "Select the opacity of the boxes"
     },
     "separator-advance-top": {
        "type": "separator"
     },
     "header-advance": {
         "type": "header",
-        "description": "Advance Appearance:"
+        "description": "Advance Appearance"
     },
     "separator-advance-bottom": {
        "type": "separator"
     },
     "override-theme": {
         "default": false,
-        "description": "Override the Cinnamon theme properties.",
+        "description": "Override the Cinnamon theme properties",
         "type": "checkbox",
-        "tooltip": "Check this if you want to override the Cinnamon theme properties or not."
+        "tooltip": "Check this if you want to override the Cinnamon theme properties or not"
     },
     "override-text-box": {
         "default": true,
-        "description": "Override all Cinnamon theme properties on the text box.",
+        "description": "Override all Cinnamon theme properties on the text box",
         "type": "checkbox",
         "indent": true,
         "dependency": "override-theme",
-        "tooltip": "Check this if you also want to override all Cinnamon theme properties on the text box or not."
+        "tooltip": "Check this if you also want to override all Cinnamon theme properties on the text box or not"
     },
     "main-box-color": {
         "type": "colorchooser",
         "default": "rgb(0,0,0)",
-        "description": "Main box color:",
+        "description": "Main box color",
         "indent": true,
         "dependency": "override-theme",
-        "tooltip": "Set the custom main box's color."
+        "tooltip": "Set the custom main box's color"
     },
     "text-box-color": {
         "type": "colorchooser",
         "default": "rgb(255,255,255)",
-        "description": "Text box color:",
+        "description": "Text box color",
         "indent": true,
         "dependency": "override-theme",
-        "tooltip": "Set the custom text box's color."
+        "tooltip": "Set the custom text box's color"
     },
     "font-color": {
         "type": "colorchooser",
         "default": "rgb(0,0,0)",
-        "description": "Font color:",
+        "description": "Font color",
         "indent": true,
         "dependency": "override-theme",
-        "tooltip": "Set the custom text color."
+        "tooltip": "Set the custom text color"
     },
     "selected-text-color": {
         "type": "colorchooser",
         "default": "rgb(128,128,128)",
-        "description": "Selected text color:",
+        "description": "Selected text color",
         "indent": true,
         "dependency": "override-theme",
-        "tooltip": "Set the custom selected text color."
+        "tooltip": "Set the custom selected text color"
     },
     "border-box-width": {
         "default": 1,
@@ -441,18 +441,18 @@
         "max": 4,
         "units": "pixels",
         "step": 1,
-        "description": "Border's box width:",
+        "description": "Border's box width",
         "indent": true,
         "dependency": "override-theme",
-        "tooltip": "Increase or decrease the border's box width."
+        "tooltip": "Increase or decrease the border's box width"
     },
     "border-box-color": {
         "type": "colorchooser",
         "default": "white",
-        "description": "Border's box color:",
+        "description": "Border's box color",
         "indent": true,
         "dependency": "override-theme",
-        "tooltip": "Set the custom border box's color."
+        "tooltip": "Set the custom border box's color"
     },
     "position-x": {
         "type": "generic",

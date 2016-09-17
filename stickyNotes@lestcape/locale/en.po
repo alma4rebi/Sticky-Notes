@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Sticky-Notes 0.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-11-08 21:29-0600\n"
-"PO-Revision-Date: 2014-11-21 19:28-0600\n"
+"PO-Revision-Date: 2016-09-17 10:05-0500\n"
 "Last-Translator: Lester Carballo Pérez <lestcape@gmail.com>\n"
 "Language-Team: lestcape <lestcape@gmail.com>\n"
 "MIME-Version: 1.0\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Language: en\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Poedit 1.5.4\n"
+"X-Generator: Poedit 1.8.7.1\n"
 
 #: desklet.js:63
 msgid "Copy"
@@ -30,6 +30,7 @@ msgstr "Paste"
 msgid "Delete"
 msgstr "Delete"
 
+#. stickyNotes@lestcape->settings-schema.json->multi-instance->description
 #: desklet.js:100
 msgid "Multiple Instances"
 msgstr "Multiple Instances"
@@ -122,358 +123,367 @@ msgstr "Configure..."
 msgid "Remove Note"
 msgstr "Remove Note"
 
-#. #-#-#-#-#  default.pot (PACKAGE VERSION)  #-#-#-#-#
-#. notes@lestcape->settings-schema.json->borderBoxWidth->units
-#. #-#-#-#-#  default.pot (PACKAGE VERSION)  #-#-#-#-#
-#. notes@lestcape->settings-schema.json->textSize->units
-#. #-#-#-#-#  default.pot (PACKAGE VERSION)  #-#-#-#-#
-#. notes@lestcape->settings-schema.json->width->units
+#. stickyNotes@lestcape->settings-schema.json->borderBoxWidth->units
+#. stickyNotes@lestcape->settings-schema.json->textSize->units
+#. stickyNotes@lestcape->settings-schema.json->width->units
 msgid "pixels"
 msgstr "pixels"
 
-#. notes@lestcape->settings-schema.json->header-general->description
-msgid "General:"
-msgstr "General:"
+#. stickyNotes@lestcape->settings-schema.json->header-general->description
+msgid "General"
+msgstr "General"
 
-#. notes@lestcape->settings-schema.json->header-general->description
-msgid "Applet Manager:"
-msgstr "Applet Manager:"
+#. stickyNotes@lestcape->settings-schema.json->header-general->description
+msgid "Applet Manager"
+msgstr "Applet Manager"
 
-#. notes@lestcape->settings-schema.json->header-layouts->description
-msgid "Layouts:"
-msgstr "Layouts:"
+#. stickyNotes@lestcape->settings-schema.json->header-layouts->description
+msgid "Layouts"
+msgstr "Layouts"
 
-#. notes@lestcape->settings-schema.json->header-shortcut->description
-msgid "Shortcut keys:"
-msgstr "Shortcut keys:"
+#. stickyNotes@lestcape->settings-schema.json->header-shortcut->description
+msgid "Shortcut keys"
+msgstr "Shortcut keys"
 
-#. notes@lestcape->settings-schema.json->header-size->description
-msgid "Size:"
-msgstr "Size:"
+#. stickyNotes@lestcape->settings-schema.json->header-size->description
+msgid "Size"
+msgstr "Size"
 
-#. notes@lestcape->settings-schema.json->header-appearance->description
-msgid "Appearance:"
-msgstr "Appearance:"
+#. stickyNotes@lestcape->settings-schema.json->header-appearance->description
+msgid "Appearance"
+msgstr "Appearance"
 
-#. notes@lestcape->settings-schema.json->header-advance->description
-msgid "Advance Appearance:"
-msgstr "Advance Appearance:"
+#. stickyNotes@lestcape->settings-schema.json->header-advance->description
+msgid "Advance Appearance"
+msgstr "Advance Appearance"
 
-#. notes@lestcape->settings-schema.json->multi-instance->description
-msgid "Multiple Instances."
-msgstr "Multiple Instances."
-
-#. notes@lestcape->settings-schema.json->multi-instance->tooltip
+#. stickyNotes@lestcape->settings-schema.json->multi-instance->tooltip
 msgid ""
 "Check this if you want to have different instances of this desklet for each "
-"note."
+"note"
 msgstr ""
 "Check this if you want to have different instances of this desklet for each "
-"note."
+"note"
 
-#. notes@lestcape->settings-schema.json->auto-hide-buttons->description
-msgid "Auto hide buttons."
-msgstr "Auto hide buttons."
+#. stickyNotes@lestcape->settings-schema.json->auto-hide-buttons->description
+msgid "Auto hide buttons"
+msgstr "Auto hide buttons"
 
-#. notes@lestcape->settings-schema.json->auto-hide-buttons->tooltip
+#. stickyNotes@lestcape->settings-schema.json->auto-hide-buttons->tooltip
 msgid ""
 "Check this if you want to autohide the action buttons when mouse is outside "
-"of the desklet."
+"of the desklet"
 msgstr ""
 "Check this if you want to autohide the action buttons when mouse is outside "
-"of the desklet."
+"of the desklet"
 
-#. notes@lestcape->settings-schema.json->stripe-layout->description
-msgid "Selected theme of paper sheet:"
-msgstr "Selected theme of paper sheet:"
+#. stickyNotes@lestcape->settings-schema.json->stripe-layout->description
+msgid "Selected theme of paper sheet"
+msgstr "Selected theme of paper sheet"
 
-#. notes@lestcape->settings-schema.json->stripe-layout->tooltip
-msgid "Select a theme of paper sheet to show in Notes."
-msgstr "Select a theme of paper sheet to show in Notes."
+#. stickyNotes@lestcape->settings-schema.json->stripe-layout->tooltip
+msgid "Select a theme of paper sheet to show in Notes"
+msgstr "Select a theme of paper sheet to show in Notes"
 
-#. notes@lestcape->settings-schema.json->staples-layout->description
-msgid "Selected theme of staples:"
-msgstr "Selected theme of staples:"
+#. stickyNotes@lestcape->settings-schema.json->staples-layout->description
+msgid "Selected theme of staples"
+msgstr "Selected theme of staples"
 
-#. notes@lestcape->settings-schema.json->staples-layout->tooltip
-msgid "Select theme of staples to show in Notes."
-msgstr "Select theme of staples to show in Notes."
+#. stickyNotes@lestcape->settings-schema.json->staples-layout->tooltip
+msgid "Select theme of staples to show in Notes"
+msgstr "Select theme of staples to show in Notes"
 
-#. notes@lestcape->settings-schema.json->pencil-layout->description
-msgid "Selected theme of pencil:"
-msgstr "Selected theme of pencil:"
+#. stickyNotes@lestcape->settings-schema.json->pencil-layout->description
+msgid "Selected theme of pencil"
+msgstr "Selected theme of pencil"
 
-#. notes@lestcape->settings-schema.json->pencil-layout->tooltip
-msgid "Select a theme of pencil to show in Notes."
-msgstr "Select a theme of pencil to show in Notes."
+#. stickyNotes@lestcape->settings-schema.json->pencil-layout->tooltip
+msgid "Select a theme of pencil to show in Notes"
+msgstr "Select a theme of pencil to show in Notes"
 
-#. notes@lestcape->settings-schema.json->raise-key->description
-msgid "Shortcut key to raise the desklet to the top:"
-msgstr "Shortcut key to raise the desklet to the top:"
+#. stickyNotes@lestcape->settings-schema.json->raise-key->description
+msgid "Shortcut key to raise the desklet to the top"
+msgstr "Shortcut key to raise the desklet to the top"
 
-#. notes@lestcape->settings-schema.json->hide-key->description
-msgid "Shortcut key to hide the desklet:"
-msgstr "Shortcut key to hide the desklet:"
+#. stickyNotes@lestcape->settings-schema.json->hide-key->description
+msgid "Shortcut key to hide the desklet"
+msgstr "Shortcut key to hide the desklet"
 
-#. notes@lestcape->settings-schema.json->fix-size->description
-msgid "Fixed size."
-msgstr "Fixed size."
+#. stickyNotes@lestcape->settings-schema.json->fix-size->description
+msgid "Fixed size"
+msgstr "Fixed size"
 
-#. notes@lestcape->settings-schema.json->fix-size->tooltip
-msgid "Check this if you want to control the size of all instances."
-msgstr "Check this if you want to control the size of all instances."
+#. stickyNotes@lestcape->settings-schema.json->fix-size->tooltip
+msgid "Check this if you want to control the size of all instances"
+msgstr "Check this if you want to control the size of all instances"
 
-#. notes@lestcape->settings-schema.json->same-size->description
-msgid "All instace have the same fixed size."
-msgstr "All instace have the same fixed size."
+#. stickyNotes@lestcape->settings-schema.json->same-size->description
+msgid "All instace have the same fixed size"
+msgstr "All instace have the same fixed size"
 
-#. notes@lestcape->settings-schema.json->same-size->tooltip
-msgid "Check this if you want to have the same fixed size on all instances."
-msgstr "Check this if you want to have the same fixed size on all instances."
+#. stickyNotes@lestcape->settings-schema.json->same-size->tooltip
+msgid "Check this if you want to have the same fixed size on all instances"
+msgstr "Check this if you want to have the same fixed size on all instances"
 
-#. notes@lestcape->settings-schema.json->width->description
-msgid "Width:"
-msgstr "Width:"
+#. stickyNotes@lestcape->settings-schema.json->width->description
+msgid "Width"
+msgstr "Width"
 
-#. notes@lestcape->settings-schema.json->width->tooltip
-msgid "Increase or decrease the desklet width."
-msgstr "Increase or decrease the desklet width."
+#. stickyNotes@lestcape->settings-schema.json->width->tooltip
+msgid "Increase or decrease the desklet width"
+msgstr "Increase or decrease the desklet width"
 
-#. notes@lestcape->settings-schema.json->height->description
-msgid "Height:"
-msgstr "Height:"
+#. stickyNotes@lestcape->settings-schema.json->height->description
+msgid "Height"
+msgstr "Height"
 
-#. notes@lestcape->settings-schema.json->height->tooltip
-msgid "Increase or decrease the desklet height."
-msgstr "Increase or decrease the desklet height."
+#. stickyNotes@lestcape->settings-schema.json->height->tooltip
+msgid "Increase or decrease the desklet height"
+msgstr "Increase or decrease the desklet height"
 
-#. notes@lestcape->settings-schema.json->show-scroll->description
-msgid "Show scrolling area."
-msgstr "Show scrolling area."
+#. stickyNotes@lestcape->settings-schema.json->show-scroll->description
+msgid "Show scrolling area"
+msgstr "Show scrolling area"
 
-#. notes@lestcape->settings-schema.json->show-scroll->tooltip
-msgid "Check this if you want to show the scrolling area or not."
-msgstr "Check this if you want to show the scrolling area or not."
+#. stickyNotes@lestcape->settings-schema.json->show-scroll->tooltip
+msgid "Check this if you want to show the scrolling area or not"
+msgstr "Check this if you want to show the scrolling area or not"
 
-#. notes@lestcape->settings-schema.json->auto-scroll->description
-msgid "Enable autoscrolling."
-msgstr "Enable autoscrolling."
+#. stickyNotes@lestcape->settings-schema.json->auto-scroll->description
+msgid "Enable autoscrolling"
+msgstr "Enable autoscrolling"
 
-#. notes@lestcape->settings-schema.json->auto-scroll->tooltip
-msgid "Check this if you want to enable smooth autoscrolling or not."
-msgstr "Check this if you want to enable smooth autoscrolling or not."
+#. stickyNotes@lestcape->settings-schema.json->auto-scroll->tooltip
+msgid "Check this if you want to enable smooth autoscrolling or not"
+msgstr "Check this if you want to enable smooth autoscrolling or not"
 
-#. notes@lestcape->settings-schema.json->raise-new-note->description
-msgid "Raise the new note."
-msgstr "Raise the new note."
+#. stickyNotes@lestcape->settings-schema.json->raise-new-note->description
+msgid "Raise the new note"
+msgstr "Raise the new note"
 
-#. notes@lestcape->settings-schema.json->raise-new-note->tooltip
-msgid "Check this if you want to raise the new note or not."
-msgstr "Check this if you want to raise the new note or not."
+#. stickyNotes@lestcape->settings-schema.json->raise-new-note->tooltip
+msgid "Check this if you want to raise the new note or not"
+msgstr "Check this if you want to raise the new note or not"
 
-#. notes@lestcape->settings-schema.json->applet-manager->description
-msgid "Show Applet Manager."
-msgstr "Show Applet Manager."
+#. stickyNotes@lestcape->settings-schema.json->remove-trash-notes->description
+msgid "Move the note to the trash when is removed"
+msgstr "Move the note to the trash when is removed"
 
-#. notes@lestcape->settings-schema.json->applet-manager->tooltip
-msgid "Check this if you want to show the Applet Manager."
-msgstr "Check this if you want to show the Applet Manager."
-
-#. notes@lestcape->settings-schema.json->applet-collapsed->description
-msgid "Collapsed Applet Manager."
-msgstr "Collapsed Applet Manager."
-
-#. notes@lestcape->settings-schema.json->applet-collapsed->tooltip
-msgid "Check this if you want to collapsed the Applet Manager."
-msgstr "Check this if you want to collapsed the Applet Manager."
-
-#. notes@lestcape->settings-schema.json->applet-symbolic->description
-msgid "Show symbolic icons in the Applet Manager."
-msgstr "Show symbolic icons in the Applet Manager."
-
-#. notes@lestcape->settings-schema.json->applet-symbolic->tooltip
-msgid "Check this if you want to show symbolic icons in the Applet Manager."
-msgstr "Check this if you want to show symbolic icons in the Applet Manager."
-
-#. notes@lestcape->settings-schema.json->text-size->description
-msgid "Font size:"
-msgstr "Font size:"
-
-#. notes@lestcape->settings-schema.json->text-size->tooltip
-msgid "Increase or decrease the font size of Note text."
-msgstr "Increase or decrease the font size of Note text."
-
-#. notes@lestcape->settings-schema.json->font-family->description
-msgid "Font family:"
-msgstr "Font family:"
-
-#. notes@lestcape->settings-schema.json->font-family->tooltip
-msgid "Select a Font family to use in Notes."
-msgstr "Select a Font family to use in Notes."
-
-#. notes@lestcape->settings-schema.json->symbolic-icons->description
-msgid "Show symbolic icons."
-msgstr "Show symbolic icons."
-
-#. notes@lestcape->settings-schema.json->symbolic-icons->tooltip
-msgid "Check this if you want to show symbolic instead full color icons."
-msgstr "Check this if you want to show symbolic instead full color icons."
-
-#. notes@lestcape->settings-schema.json->desklet-opacity->description
-msgid "Opacity of the desklet:"
-msgstr "Opacity of the desklet:"
-
-#. notes@lestcape->settings-schema.json->desklet-opacity->tooltip
-msgid "Select the opacity of the desklet."
-msgstr "Select the opacity of the desklet."
-
-#. notes@lestcape->settings-schema.json->boxes-opacity->description
-msgid "Opacity of the boxes:"
-msgstr "Opacity of the boxes:"
-
-#. notes@lestcape->settings-schema.json->boxes-opacity->tooltip
-msgid "Select the opacity of the boxes."
-msgstr "Select the opacity of the boxes."
-
-#. notes@lestcape->settings-schema.json-override-theme->description
-msgid "Override the Cinnamon theme properties."
-msgstr "Override the Cinnamon theme properties."
-
-#. notes@lestcape->settings-schema.json-override-theme->tooltip
+#. stickyNotes@lestcape->settings-schema.json->remove-trash-notes->tooltip
 msgid ""
-"Check this if you want to override the Cinnamon theme properties or not."
+"Check this if you want to move the note to the trash instead of removed "
+"permanently"
 msgstr ""
-"Check this if you want to override the Cinnamon theme properties or not."
+"Check this if you want to move the note to the trash instead of removed "
+"permanently"
 
-#. notes@lestcape->settings-schema.json->override-text-box->description
-msgid "Override all Cinnamon theme properties on the text box."
-msgstr "Override all Cinnamon theme properties on the text box."
+#. stickyNotes@lestcape->settings-schema.json->export-button->description
+msgid "Export all notes to the desktop"
+msgstr "Export all notes to the desktop"
 
-#. notes@lestcape->settings-schema.json->override-text-box->tooltip
+#. stickyNotes@lestcape->settings-schema.json->export-button->tooltip
+msgid "Export all notes to a text file inside the desktop folder location"
+msgstr "Export all notes to a text file inside the desktop folder location"
+
+#. stickyNotes@lestcape->settings-schema.json->applet-manager->description
+msgid "Show Applet Manager"
+msgstr "Show Applet Manager"
+
+#. stickyNotes@lestcape->settings-schema.json->applet-manager->tooltip
+msgid "Check this if you want to show the Applet Manager"
+msgstr "Check this if you want to show the Applet Manager"
+
+#. stickyNotes@lestcape->settings-schema.json->applet-collapsed->description
+msgid "Collapsed Applet Manager"
+msgstr "Collapsed Applet Manager"
+
+#. stickyNotes@lestcape->settings-schema.json->applet-collapsed->tooltip
+msgid "Check this if you want to collapsed the Applet Manager"
+msgstr "Check this if you want to collapsed the Applet Manager"
+
+#. stickyNotes@lestcape->settings-schema.json->applet-symbolic->description
+msgid "Show symbolic icons in the Applet Manager"
+msgstr "Show symbolic icons in the Applet Manager"
+
+#. stickyNotes@lestcape->settings-schema.json->applet-symbolic->tooltip
+msgid "Check this if you want to show symbolic icons in the Applet Manager"
+msgstr "Check this if you want to show symbolic icons in the Applet Manager"
+
+#. stickyNotes@lestcape->settings-schema.json->text-size->description
+msgid "Font size"
+msgstr "Font size"
+
+#. stickyNotes@lestcape->settings-schema.json->text-size->tooltip
+msgid "Increase or decrease the font size of Note text"
+msgstr "Increase or decrease the font size of Note text"
+
+#. stickyNotes@lestcape->settings-schema.json->font-family->description
+msgid "Font family"
+msgstr "Font family"
+
+#. stickyNotes@lestcape->settings-schema.json->font-family->tooltip
+msgid "Select a Font family to use in Notes"
+msgstr "Select a Font family to use in Notes"
+
+#. stickyNotes@lestcape->settings-schema.json->symbolic-icons->description
+msgid "Show symbolic icons"
+msgstr "Show symbolic icons"
+
+#. stickyNotes@lestcape->settings-schema.json->symbolic-icons->tooltip
+msgid "Check this if you want to show symbolic instead full color icons"
+msgstr "Check this if you want to show symbolic instead full color icons"
+
+#. stickyNotes@lestcape->settings-schema.json->desklet-opacity->description
+msgid "Opacity of the desklet"
+msgstr "Opacity of the desklet"
+
+#. stickyNotes@lestcape->settings-schema.json->desklet-opacity->tooltip
+msgid "Select the opacity of the desklet"
+msgstr "Select the opacity of the desklet"
+
+#. stickyNotes@lestcape->settings-schema.json->boxes-opacity->description
+msgid "Opacity of the boxes"
+msgstr "Opacity of the boxes"
+
+#. stickyNotes@lestcape->settings-schema.json->boxes-opacity->tooltip
+msgid "Select the opacity of the boxes"
+msgstr "Select the opacity of the boxes"
+
+#. stickyNotes@lestcape->settings-schema.json-override-theme->description
+msgid "Override the Cinnamon theme properties"
+msgstr "Override the Cinnamon theme properties"
+
+#. stickyNotes@lestcape->settings-schema.json-override-theme->tooltip
+msgid "Check this if you want to override the Cinnamon theme properties or not"
+msgstr ""
+"Check this if you want to override the Cinnamon theme properties or not"
+
+#. stickyNotes@lestcape->settings-schema.json->override-text-box->description
+msgid "Override all Cinnamon theme properties on the text box"
+msgstr "Override all Cinnamon theme properties on the text box"
+
+#. stickyNotes@lestcape->settings-schema.json->override-text-box->tooltip
 msgid ""
 "Check this if you also want to override all Cinnamon theme properties on the "
-"text box or not."
+"text box or not"
 msgstr ""
 "Check this if you also want to override all Cinnamon theme properties on the "
-"text box or not."
+"text box or not"
 
-#. notes@lestcape->settings-schema.json->main-box-color->description
-msgid "Main box color:"
-msgstr "Main box color:"
+#. stickyNotes@lestcape->settings-schema.json->main-box-color->description
+msgid "Main box color"
+msgstr "Main box color"
 
-#. notes@lestcape->settings-schema.json->main-box-color->tooltip
-msgid "Set the custom main box's color."
-msgstr "Set the custom main box's color."
+#. stickyNotes@lestcape->settings-schema.json->main-box-color->tooltip
+msgid "Set the custom main box's color"
+msgstr "Set the custom main box's color"
 
-#. notes@lestcape->settings-schema.json->text-box-color->description
-msgid "Text box color:"
-msgstr "Text box color:"
+#. stickyNotes@lestcape->settings-schema.json->text-box-color->description
+msgid "Text box color"
+msgstr "Text box color"
 
-#. notes@lestcape->settings-schema.json->text-box-color->tooltip
-msgid "Set the custom text box's color."
-msgstr "Set the custom text box's color."
+#. stickyNotes@lestcape->settings-schema.json->text-box-color->tooltip
+msgid "Set the custom text box's color"
+msgstr "Set the custom text box's color"
 
-#. notes@lestcape->settings-schema.json->font-color->description
-msgid "Font color:"
-msgstr "Font color:"
+#. stickyNotes@lestcape->settings-schema.json->font-color->description
+msgid "Font color"
+msgstr "Font color"
 
-#. notes@lestcape->settings-schema.json->font-color->tooltip
-msgid "Set the custom text color."
-msgstr "Set the custom text color."
+#. stickyNotes@lestcape->settings-schema.json->font-color->tooltip
+msgid "Set the custom text color"
+msgstr "Set the custom text color"
 
-#. notes@lestcape->settings-schema.json->selected-text-color->description
-msgid "Selected text color:"
-msgstr "Selected text color:"
+#. stickyNotes@lestcape->settings-schema.json->selected-text-color->description
+msgid "Selected text color"
+msgstr "Selected text color"
 
-#. notes@lestcape->settings-schema.json->selected-text-color->tooltip
-msgid "Set the custom selected text color."
-msgstr "Set the custom selected text color."
+#. stickyNotes@lestcape->settings-schema.json->selected-text-color->tooltip
+msgid "Set the custom selected text color"
+msgstr "Set the custom selected text color"
 
-#. notes@lestcape->settings-schema.json->border-box-width->description
-msgid "Border's box width:"
-msgstr "Border's box width:"
+#. stickyNotes@lestcape->settings-schema.json->border-box-width->description
+msgid "Border's box width"
+msgstr "Border's box width"
 
-#. notes@lestcape->settings-schema.json->border-box-width->tooltip
-msgid "Increase or decrease the border's box width."
-msgstr "Increase or decrease the border's box width."
+#. stickyNotes@lestcape->settings-schema.json->border-box-width->tooltip
+msgid "Increase or decrease the border's box width"
+msgstr "Increase or decrease the border's box width"
 
-#. notes@lestcape->settings-schema.json->border-box-color->description
-msgid "Border's box color:"
-msgstr "Border's box color:"
+#. stickyNotes@lestcape->settings-schema.json->border-box-color->description
+msgid "Border's box color"
+msgstr "Border's box color"
 
-#. notes@lestcape->settings-schema.json->border-box-color->tooltip
-msgid "Set the custom border box's color."
-msgstr "Set the custom border box's color."
+#. stickyNotes@lestcape->settings-schema.json->border-box-color->tooltip
+msgid "Set the custom border box's color"
+msgstr "Set the custom border box's color"
 
-#. #-#-#-#-#  default.pot (PACKAGE VERSION)  #-#-#-#-#
-#. notes@lestcape->settings-schema.json->stripe-layout->combobox->None
-#. #-#-#-#-#  default.pot (PACKAGE VERSION)  #-#-#-#-#
-#. notes@lestcape->settings-schema.json->staples-layout->combobox->None
-#. #-#-#-#-#  default.pot (PACKAGE VERSION)  #-#-#-#-#
-#. notes@lestcape->settings-schema.json->pencil-layout->combobox->None
+#. stickyNotes@lestcape->settings-schema.json->stripe-layout->combobox->None
+#. stickyNotes@lestcape->settings-schema.json->staples-layout->combobox->None
+#. stickyNotes@lestcape->settings-schema.json->pencil-layout->combobox->None
 msgid "None"
 msgstr "None"
 
-#. notes@lestcape->settings-schema.json->stripe-layout->combobox->simplestripe
+#. stickyNotes@lestcape->settings-schema.json->stripe-layout->combobox->simplestripe
 msgid "Simple Stripe"
 msgstr "Simple Stripe"
 
-#. notes@lestcape->settings-schema.json->stripe-layout->combobox->doublestripe
+#. stickyNotes@lestcape->settings-schema.json->stripe-layout->combobox->doublestripe
 msgid "Double Stripe"
 msgstr "Double Stripe"
 
-#. notes@lestcape->settings-schema.json->stripe-layout->combobox->griddedstripe
+#. stickyNotes@lestcape->settings-schema.json->stripe-layout->combobox->griddedstripe
 msgid "Gridded Stripe"
 msgstr "Gridded Stripe"
 
-#. notes@lestcape->settings-schema.json->staples-layout->combobox->doublestaple
+#. stickyNotes@lestcape->settings-schema.json->staples-layout->combobox->doublestaple
 msgid "Double Staple"
 msgstr "Double Staple"
 
-#. notes@lestcape->settings-schema.json->staples-layout->combobox->borderstaple
+#. stickyNotes@lestcape->settings-schema.json->staples-layout->combobox->borderstaple
 msgid "Border Staple"
 msgstr "Border Staple"
 
-#. notes@lestcape->settings-schema.json->staples-layout->combobox->brightstaple
+#. stickyNotes@lestcape->settings-schema.json->staples-layout->combobox->brightstaple
 msgid "Bright Staple"
 msgstr "Bright Staple"
 
-#. notes@lestcape->settings-schema.json->staples-layout->combobox->chainstaple
+#. stickyNotes@lestcape->settings-schema.json->staples-layout->combobox->chainstaple
 msgid "Chain Staple"
 msgstr "Chain Staple"
 
-#. notes@lestcape->settings-schema.json->staples-layout->combobox->clampstaple
+#. stickyNotes@lestcape->settings-schema.json->staples-layout->combobox->clampstaple
 msgid "Clamp Staple"
 msgstr "Clamp Staple"
 
-#. notes@lestcape->settings-schema.json->staples-layout->combobox->clipstaple
+#. stickyNotes@lestcape->settings-schema.json->staples-layout->combobox->clipstaple
 msgid "Clip Staple"
 msgstr "Clip Staple"
 
-#. notes@lestcape->settings-schema.json->staples-layout->combobox->offhandedstaple
+#. stickyNotes@lestcape->settings-schema.json->staples-layout->combobox->offhandedstaple
 msgid "Offhanded Staple"
 msgstr "Offhanded Staple"
 
-#. notes@lestcape->settings-schema.json->staples-layout->combobox->tackstaple
+#. stickyNotes@lestcape->settings-schema.json->staples-layout->combobox->tackstaple
 msgid "Tack Staple"
 msgstr "Tack Staple"
 
-#. notes@lestcape->settings-schema.json->staples-layout->combobox->whitestaple
+#. stickyNotes@lestcape->settings-schema.json->staples-layout->combobox->whitestaple
 msgid "White Staple"
 msgstr "White Staple"
 
-#. notes@lestcape->settings-schema.json->pencil-layout->combobox->bluepencil
+#. stickyNotes@lestcape->settings-schema.json->pencil-layout->combobox->bluepencil
 msgid "Blue Pencil"
 msgstr "Blue Pencil"
 
-#. notes@lestcape->settings-schema.json->pencil-layout->combobox->yellowpencil
+#. stickyNotes@lestcape->settings-schema.json->pencil-layout->combobox->yellowpencil
 msgid "Yellow Pencil"
 msgstr "Yellow Pencil"
 
-#. notes@lestcape->settings-schema.json->pencil-layout->combobox->orangepencil
+#. stickyNotes@lestcape->settings-schema.json->pencil-layout->combobox->orangepencil
 msgid "Orange Pencil"
 msgstr "Orange Pencil"
 
-#. notes@lestcape->settings-schema.json->pencil-layout->combobox->blackpencil
+#. stickyNotes@lestcape->settings-schema.json->pencil-layout->combobox->blackpencil
 msgid "Black Pencil"
 msgstr "Black Pencil"

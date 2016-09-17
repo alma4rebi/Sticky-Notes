@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Sticky-Notes 1.5\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-11-08 21:29-0600\n"
-"PO-Revision-Date: 2014-11-22 03:39-0600\n"
+"PO-Revision-Date: 2016-09-17 10:04-0500\n"
 "Last-Translator: spacy01 <spacy00001@gmail.com>\n"
 "Language-Team: spacy01 <spacy00001@gmail.com>\n"
 "MIME-Version: 1.0\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Language: bg\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Poedit 1.5.4\n"
+"X-Generator: Poedit 1.8.7.1\n"
 
 #: desklet.js:63
 msgid "Copy"
@@ -30,9 +30,15 @@ msgstr "Постави"
 msgid "Delete"
 msgstr "Изтрий"
 
+#. stickyNotes@lestcape->settings-schema.json->multi-instance->description
 #: desklet.js:100
+#, fuzzy
 msgid "Multiple Instances"
-msgstr "Много  инстанции"
+msgstr ""
+"#-#-#-#-#  0catalog.po (Sticky-Notes 1.5)  #-#-#-#-#\n"
+"Много  инстанции\n"
+"#-#-#-#-#  0catalog.po (Sticky-Notes 1.5)  #-#-#-#-#\n"
+"Множество инстанции"
 
 #: applet.js:138 applet.js:294 applet.js:172
 msgid "Show Notes"
@@ -67,12 +73,12 @@ msgid "Type your note..."
 msgstr "Напишете бележка"
 
 #: desklet.js:402
-msgid "Unsupported text size '%s' to use the font '%s' in this theme."
-msgstr "Неподдържан размер на текста '%s', използвайте шрифт  '%s'."
+msgid "Unsupported text size '%s' to use the font '%s' in this theme"
+msgstr "Неподдържан размер на текста '%s', използвайте шрифт  '%s'"
 
 #: desklet.js:432
-msgid "Sticky Notes is hidden to be visible again please, press '%s'."
-msgstr "Бележките са скрити, за да се покажат натиснете  '%s'."
+msgid "Sticky Notes is hidden to be visible again please, press '%s'"
+msgstr "Бележките са скрити, за да се покажат натиснете  '%s'"
 
 #: desklet.js:453
 msgid "Add new Note"
@@ -122,355 +128,361 @@ msgstr "Конфигуриране..."
 msgid "Remove Note"
 msgstr "Премахване на бележка"
 
-#. #-#-#-#-# default.pot (PACKAGE VERSION) #-#-#-#-#
-#. notes@lestcape->settings-schema.json->borderBoxWidth->units
-#. #-#-#-#-# default.pot (PACKAGE VERSION) #-#-#-#-#
-#. notes@lestcape->settings-schema.json->textSize->units
-#. #-#-#-#-# default.pot (PACKAGE VERSION) #-#-#-#-#
-#. notes@lestcape->settings-schema.json->width->units
+#. stickyNotes@lestcape->settings-schema.json->borderBoxWidth->units
+#. stickyNotes@lestcape->settings-schema.json->textSize->units
+#. stickyNotes@lestcape->settings-schema.json->width->units
 msgid "pixels"
 msgstr "пиксела"
 
-#. notes@lestcape->settings-schema.json->header-general->description
-msgid "General:"
-msgstr "Обобщено:"
+#. stickyNotes@lestcape->settings-schema.json->header-general->description
+msgid "General"
+msgstr "Обобщено"
 
-#. notes@lestcape->settings-schema.json->header-general->description
-msgid "Applet Manager:"
-msgstr "Мениджър на аплети:"
+#. stickyNotes@lestcape->settings-schema.json->header-general->description
+msgid "Applet Manager"
+msgstr "Мениджър на аплети"
 
-#. notes@lestcape->settings-schema.json->header-layouts->description
-msgid "Layouts:"
-msgstr "Външен вид:"
+#. stickyNotes@lestcape->settings-schema.json->header-layouts->description
+msgid "Layouts"
+msgstr "Външен вид"
 
-#. notes@lestcape->settings-schema.json->header-shortcut->description
-msgid "Shortcut keys:"
-msgstr "Клавишни комбинации:"
+#. stickyNotes@lestcape->settings-schema.json->header-shortcut->description
+msgid "Shortcut keys"
+msgstr "Клавишни комбинации"
 
-#. notes@lestcape->settings-schema.json->header-size->description
-msgid "Size:"
-msgstr "Размер:"
+#. stickyNotes@lestcape->settings-schema.json->header-size->description
+msgid "Size"
+msgstr "Размер"
 
-#. notes@lestcape->settings-schema.json->header-appearance->description
-msgid "Appearance:"
-msgstr "Показване:"
+#. stickyNotes@lestcape->settings-schema.json->header-appearance->description
+msgid "Appearance"
+msgstr "Показване"
 
-#. notes@lestcape->settings-schema.json->header-advance->description
-msgid "Advance Appearance:"
-msgstr "Разширено показване:"
+#. stickyNotes@lestcape->settings-schema.json->header-advance->description
+msgid "Advance Appearance"
+msgstr "Разширено показване"
 
-#. notes@lestcape->settings-schema.json->multi-instance->description
-msgid "Multiple Instances."
-msgstr "Множество инстанции."
-
-#. notes@lestcape->settings-schema.json->multi-instance->tooltip
+#. stickyNotes@lestcape->settings-schema.json->multi-instance->tooltip
 msgid ""
 "Check this if you want to have different instances of this desklet for each "
-"note."
-msgstr "Маркирайте, за да имате отделни инстанции за всяка бележка."
+"note"
+msgstr "Маркирайте, за да имате отделни инстанции за всяка бележка"
 
-#. notes@lestcape->settings-schema.json->auto-hide-buttons->description
-msgid "Auto hide buttons."
-msgstr "Скриване на бутоните."
+#. stickyNotes@lestcape->settings-schema.json->auto-hide-buttons->description
+msgid "Auto hide buttons"
+msgstr "Скриване на бутоните"
 
-#. notes@lestcape->settings-schema.json->auto-hide-buttons->tooltip
+#. stickyNotes@lestcape->settings-schema.json->auto-hide-buttons->tooltip
 msgid ""
 "Check this if you want to autohide the action buttons when mouse is outside "
-"of the desklet."
-msgstr "Маркирайте, ако искате бутоните да скриват щом оттеглите мишката."
+"of the desklet"
+msgstr "Маркирайте, ако искате бутоните да скриват щом оттеглите мишката"
 
-#. notes@lestcape->settings-schema.json->stripe-layout->description
-msgid "Selected theme of paper sheet:"
-msgstr "Избрана тема за хартията на страницата:"
+#. stickyNotes@lestcape->settings-schema.json->stripe-layout->description
+msgid "Selected theme of paper sheet"
+msgstr "Избрана тема за хартията на страницата"
 
-#. notes@lestcape->settings-schema.json->stripe-layout->tooltip
-msgid "Select a theme of paper sheet to show in Notes."
-msgstr "Избор какъв да е вида на хартията на страницата."
+#. stickyNotes@lestcape->settings-schema.json->stripe-layout->tooltip
+msgid "Select a theme of paper sheet to show in Notes"
+msgstr "Избор какъв да е вида на хартията на страницата"
 
-#. notes@lestcape->settings-schema.json->staples-layout->description
-msgid "Selected theme of staples:"
-msgstr "Избрана тема на телчетата:"
+#. stickyNotes@lestcape->settings-schema.json->staples-layout->description
+msgid "Selected theme of staples"
+msgstr "Избрана тема на телчетата"
 
-#. notes@lestcape->settings-schema.json->staples-layout->tooltip
-msgid "Select theme of staples to show in Notes."
-msgstr "Избор какъв да е вида на телчетата."
+#. stickyNotes@lestcape->settings-schema.json->staples-layout->tooltip
+msgid "Select theme of staples to show in Notes"
+msgstr "Избор какъв да е вида на телчетата"
 
-#. notes@lestcape->settings-schema.json->pencil-layout->description
-msgid "Selected theme of pencil:"
-msgstr "Избрана тема на молива:"
+#. stickyNotes@lestcape->settings-schema.json->pencil-layout->description
+msgid "Selected theme of pencil"
+msgstr "Избрана тема на молива"
 
-#. notes@lestcape->settings-schema.json->pencil-layout->tooltip
-msgid "Select a theme of pencil to show in Notes."
-msgstr "Избор какъв да е вида на молива."
+#. stickyNotes@lestcape->settings-schema.json->pencil-layout->tooltip
+msgid "Select a theme of pencil to show in Notes"
+msgstr "Избор какъв да е вида на молива"
 
-#. notes@lestcape->settings-schema.json->raise-key->description
-msgid "Shortcut key to raise the desklet to the top:"
-msgstr "Клавишна комбинация за фокусиране на бележка:"
+#. stickyNotes@lestcape->settings-schema.json->raise-key->description
+msgid "Shortcut key to raise the desklet to the top"
+msgstr "Клавишна комбинация за фокусиране на бележка"
 
-#. notes@lestcape->settings-schema.json->hide-key->description
-msgid "Shortcut key to hide the desklet:"
-msgstr "Клавишна комбинация за скриване на бележката:"
+#. stickyNotes@lestcape->settings-schema.json->hide-key->description
+msgid "Shortcut key to hide the desklet"
+msgstr "Клавишна комбинация за скриване на бележката"
 
-#. notes@lestcape->settings-schema.json->fix-size->description
-msgid "Fixed size."
-msgstr "Фиксиран размер."
+#. stickyNotes@lestcape->settings-schema.json->fix-size->description
+msgid "Fixed size"
+msgstr "Фиксиран размер"
 
-#. notes@lestcape->settings-schema.json->fix-size->tooltip
-msgid "Check this if you want to control the size of all instances."
-msgstr "Маркирайте, ако искате да контролирате размера на всички инстанции."
+#. stickyNotes@lestcape->settings-schema.json->fix-size->tooltip
+msgid "Check this if you want to control the size of all instances"
+msgstr "Маркирайте, ако искате да контролирате размера на всички инстанции"
 
-#. notes@lestcape->settings-schema.json->same-size->description
-msgid "All instace have the same fixed size."
-msgstr "Всички инстанции имат еднакъв, фиксиран размер."
+#. stickyNotes@lestcape->settings-schema.json->same-size->description
+msgid "All instace have the same fixed size"
+msgstr "Всички инстанции имат еднакъв, фиксиран размер"
 
-#. notes@lestcape->settings-schema.json->same-size->tooltip
-msgid "Check this if you want to have the same fixed size on all instances."
+#. stickyNotes@lestcape->settings-schema.json->same-size->tooltip
+msgid "Check this if you want to have the same fixed size on all instances"
 msgstr ""
-"Маркирайте, ако искате да имате еднакъв и фиксиран размер на всички "
-"инстанции."
+"Маркирайте, ако искате да имате еднакъв и фиксиран размер на всички инстанции"
 
-#. notes@lestcape->settings-schema.json->width->description
-msgid "Width:"
-msgstr "Широчина:"
+#. stickyNotes@lestcape->settings-schema.json->width->description
+msgid "Width"
+msgstr "Широчина"
 
-#. notes@lestcape->settings-schema.json->width->tooltip
-msgid "Increase or decrease the desklet width."
-msgstr "Увеличава или намалява широчината на десклета."
+#. stickyNotes@lestcape->settings-schema.json->width->tooltip
+msgid "Increase or decrease the desklet width"
+msgstr "Увеличава или намалява широчината на десклета"
 
-#. notes@lestcape->settings-schema.json->height->description
-msgid "Height:"
-msgstr "Височина:"
+#. stickyNotes@lestcape->settings-schema.json->height->description
+msgid "Height"
+msgstr "Височина"
 
-#. notes@lestcape->settings-schema.json->height->tooltip
-msgid "Increase or decrease the desklet height."
-msgstr "Увеличава или намалява височината на десклета."
+#. stickyNotes@lestcape->settings-schema.json->height->tooltip
+msgid "Increase or decrease the desklet height"
+msgstr "Увеличава или намалява височината на десклета"
 
-#. notes@lestcape->settings-schema.json->show-scroll->description
-msgid "Show scrolling area."
-msgstr "Показване на скрола."
+#. stickyNotes@lestcape->settings-schema.json->show-scroll->description
+msgid "Show scrolling area"
+msgstr "Показване на скрола"
 
-#. notes@lestcape->settings-schema.json->show-scroll->tooltip
-msgid "Check this if you want to show the scrolling area or not."
-msgstr "Маркирайте, ако искате скрола да се вижда."
+#. stickyNotes@lestcape->settings-schema.json->show-scroll->tooltip
+msgid "Check this if you want to show the scrolling area or not"
+msgstr "Маркирайте, ако искате скрола да се вижда"
 
-#. notes@lestcape->settings-schema.json->auto-scroll->description
-msgid "Enable autoscrolling."
-msgstr "Включване на автоматичното скролиране."
+#. stickyNotes@lestcape->settings-schema.json->auto-scroll->description
+msgid "Enable autoscrolling"
+msgstr "Включване на автоматичното скролиране"
 
-#. notes@lestcape->settings-schema.json->auto-scroll->tooltip
-msgid "Check this if you want to enable smooth autoscrolling or not."
-msgstr "Маркирайте, ако искате да включите плавното автоматично скролиране."
+#. stickyNotes@lestcape->settings-schema.json->auto-scroll->tooltip
+msgid "Check this if you want to enable smooth autoscrolling or not"
+msgstr "Маркирайте, ако искате да включите плавното автоматично скролиране"
 
-#. notes@lestcape->settings-schema.json->raise-new-note->description
-msgid "Raise the new note."
-msgstr "Фокусиране на новата бележка."
+#. stickyNotes@lestcape->settings-schema.json->raise-new-note->description
+msgid "Raise the new note"
+msgstr "Фокусиране на новата бележка"
 
-#. notes@lestcape->settings-schema.json->raise-new-note->tooltip
-msgid "Check this if you want to raise the new note or not."
-msgstr "Маркирайте, ако искате да фокусирате на новата бележка."
+#. stickyNotes@lestcape->settings-schema.json->raise-new-note->tooltip
+msgid "Check this if you want to raise the new note or not"
+msgstr "Маркирайте, ако искате да фокусирате на новата бележка"
 
-#. notes@lestcape->settings-schema.json->applet-manager->description
-msgid "Show Applet Manager."
-msgstr "Покажи аплетния мениджър."
+#. stickyNotes@lestcape->settings-schema.json->remove-trash-notes->description
+msgid "Move the note to the trash when is removed"
+msgstr ""
 
-#. notes@lestcape->settings-schema.json->applet-manager->tooltip
-msgid "Check this if you want to show the Applet Manager."
-msgstr "Маркирайте, ако искате да виждате мениджъра на аплета."
-
-#. notes@lestcape->settings-schema.json->applet-collapsed->description
-msgid "Collapsed Applet Manager."
-msgstr "Разгъване на мениджъра."
-
-#. notes@lestcape->settings-schema.json->applet-collapsed->tooltip
-msgid "Check this if you want to collapsed the Applet Manager."
-msgstr "Маркирайте, ако искате да скриете мениджъра."
-
-#. notes@lestcape->settings-schema.json->applet-symbolic->description
-msgid "Show symbolic icons in the Applet Manager."
-msgstr "Показване на символни иконки в мениджъра."
-
-#. notes@lestcape->settings-schema.json->applet-symbolic->tooltip
-msgid "Check this if you want to show symbolic icons in the Applet Manager."
-msgstr "Маркирайте, ако искате мениджъра да показва символни иконки."
-
-#. notes@lestcape->settings-schema.json->text-size->description
-msgid "Font size:"
-msgstr "Размер на шрифта:"
-
-#. notes@lestcape->settings-schema.json->text-size->tooltip
-msgid "Increase or decrease the font size of Note text."
-msgstr "Увеличаване или намаляване на шрифта на текста на бележките."
-
-#. notes@lestcape->settings-schema.json->font-family->description
-msgid "Font family:"
-msgstr "Шрифт:"
-
-#. notes@lestcape->settings-schema.json->font-family->tooltip
-msgid "Select a Font family to use in Notes."
-msgstr "Избор на шрифт, използван в бележките."
-
-#. notes@lestcape->settings-schema.json->symbolic-icons->description
-msgid "Show symbolic icons."
-msgstr "Показване на символни иконки."
-
-#. notes@lestcape->settings-schema.json->symbolic-icons->tooltip
-msgid "Check this if you want to show symbolic instead full color icons."
-msgstr "Маркирайте, ако искате да се показват символни иконки вместо цветни."
-
-#. notes@lestcape->settings-schema.json->desklet-opacity->description
-msgid "Opacity of the desklet:"
-msgstr "Прозрачност на десклета:"
-
-#. notes@lestcape->settings-schema.json->desklet-opacity->tooltip
-msgid "Select the opacity of the desklet."
-msgstr "Избор на прозрачност на десклета."
-
-#. notes@lestcape->settings-schema.json->boxes-opacity->description
-msgid "Opacity of the boxes:"
-msgstr "Прозрачност на кутиите:"
-
-#. notes@lestcape->settings-schema.json->boxes-opacity->tooltip
-msgid "Select the opacity of the boxes."
-msgstr "Избор на прозрачност на кутиите."
-
-#. notes@lestcape->settings-schema.json-override-theme->description
-msgid "Override the Cinnamon theme properties."
-msgstr "Презаписване на настройките за тема на Cinnamon."
-
-#. notes@lestcape->settings-schema.json-override-theme->tooltip
+#. stickyNotes@lestcape->settings-schema.json->remove-trash-notes->tooltip
 msgid ""
-"Check this if you want to override the Cinnamon theme properties or not."
-msgstr "Маркирайте, ако искате да презапишете настройките на Cinnamon."
+"Check this if you want to move the note to the trash instead of removed "
+"permanently"
+msgstr ""
 
-#. notes@lestcape->settings-schema.json->override-text-box->description
-msgid "Override all Cinnamon theme properties on the text box."
-msgstr "Презаписване на всички настройки за теми за текстовите кутии."
+#. stickyNotes@lestcape->settings-schema.json->export-button->description
+msgid "Export all notes to the desktop"
+msgstr ""
 
-#. notes@lestcape->settings-schema.json->override-text-box->tooltip
+#. stickyNotes@lestcape->settings-schema.json->export-button->tooltip
+msgid "Export all notes to a text file inside the desktop folder location"
+msgstr ""
+
+#. stickyNotes@lestcape->settings-schema.json->applet-manager->description
+msgid "Show Applet Manager"
+msgstr "Покажи аплетния мениджър"
+
+#. stickyNotes@lestcape->settings-schema.json->applet-manager->tooltip
+msgid "Check this if you want to show the Applet Manager"
+msgstr "Маркирайте, ако искате да виждате мениджъра на аплета"
+
+#. stickyNotes@lestcape->settings-schema.json->applet-collapsed->description
+msgid "Collapsed Applet Manager"
+msgstr "Разгъване на мениджъра"
+
+#. stickyNotes@lestcape->settings-schema.json->applet-collapsed->tooltip
+msgid "Check this if you want to collapsed the Applet Manager"
+msgstr "Маркирайте, ако искате да скриете мениджъра"
+
+#. stickyNotes@lestcape->settings-schema.json->applet-symbolic->description
+msgid "Show symbolic icons in the Applet Manager"
+msgstr "Показване на символни иконки в мениджъра"
+
+#. stickyNotes@lestcape->settings-schema.json->applet-symbolic->tooltip
+msgid "Check this if you want to show symbolic icons in the Applet Manager"
+msgstr "Маркирайте, ако искате мениджъра да показва символни иконки"
+
+#. stickyNotes@lestcape->settings-schema.json->text-size->description
+msgid "Font size"
+msgstr "Размер на шрифта"
+
+#. stickyNotes@lestcape->settings-schema.json->text-size->tooltip
+msgid "Increase or decrease the font size of Note text"
+msgstr "Увеличаване или намаляване на шрифта на текста на бележките"
+
+#. stickyNotes@lestcape->settings-schema.json->font-family->description
+msgid "Font family"
+msgstr "Шрифт"
+
+#. stickyNotes@lestcape->settings-schema.json->font-family->tooltip
+msgid "Select a Font family to use in Notes"
+msgstr "Избор на шрифт, използван в бележките"
+
+#. stickyNotes@lestcape->settings-schema.json->symbolic-icons->description
+msgid "Show symbolic icons"
+msgstr "Показване на символни иконки"
+
+#. stickyNotes@lestcape->settings-schema.json->symbolic-icons->tooltip
+msgid "Check this if you want to show symbolic instead full color icons"
+msgstr "Маркирайте, ако искате да се показват символни иконки вместо цветни"
+
+#. stickyNotes@lestcape->settings-schema.json->desklet-opacity->description
+msgid "Opacity of the desklet"
+msgstr "Прозрачност на десклета"
+
+#. stickyNotes@lestcape->settings-schema.json->desklet-opacity->tooltip
+msgid "Select the opacity of the desklet"
+msgstr "Избор на прозрачност на десклета"
+
+#. stickyNotes@lestcape->settings-schema.json->boxes-opacity->description
+msgid "Opacity of the boxes"
+msgstr "Прозрачност на кутиите"
+
+#. stickyNotes@lestcape->settings-schema.json->boxes-opacity->tooltip
+msgid "Select the opacity of the boxes"
+msgstr "Избор на прозрачност на кутиите"
+
+#. stickyNotes@lestcape->settings-schema.json-override-theme->description
+msgid "Override the Cinnamon theme properties"
+msgstr "Презаписване на настройките за тема на Cinnamon"
+
+#. stickyNotes@lestcape->settings-schema.json-override-theme->tooltip
+msgid "Check this if you want to override the Cinnamon theme properties or not"
+msgstr "Маркирайте, ако искате да презапишете настройките на Cinnamon"
+
+#. stickyNotes@lestcape->settings-schema.json->override-text-box->description
+msgid "Override all Cinnamon theme properties on the text box"
+msgstr "Презаписване на всички настройки за теми за текстовите кутии"
+
+#. stickyNotes@lestcape->settings-schema.json->override-text-box->tooltip
 msgid ""
 "Check this if you also want to override all Cinnamon theme properties on the "
-"text box or not."
+"text box or not"
 msgstr ""
 "Маркирайте, ако искате да презапишете всички настройки за теми на Cinnamon "
-"за текстовите кутии."
+"за текстовите кутии"
 
-#. notes@lestcape->settings-schema.json->main-box-color->description
-msgid "Main box color:"
-msgstr "Цвят на основната кутия:"
+#. stickyNotes@lestcape->settings-schema.json->main-box-color->description
+msgid "Main box color"
+msgstr "Цвят на основната кутия"
 
-#. notes@lestcape->settings-schema.json->main-box-color->tooltip
-msgid "Set the custom main box's color."
-msgstr "Задайте цвят на основната кутия."
+#. stickyNotes@lestcape->settings-schema.json->main-box-color->tooltip
+msgid "Set the custom main box's color"
+msgstr "Задайте цвят на основната кутия"
 
-#. notes@lestcape->settings-schema.json->text-box-color->description
-msgid "Text box color:"
-msgstr "Цвят на текста в кутията:"
+#. stickyNotes@lestcape->settings-schema.json->text-box-color->description
+msgid "Text box color"
+msgstr "Цвят на текста в кутията"
 
-#. notes@lestcape->settings-schema.json->text-box-color->tooltip
-msgid "Set the custom text box's color."
-msgstr "Задайте цвят на текста в кутията."
+#. stickyNotes@lestcape->settings-schema.json->text-box-color->tooltip
+msgid "Set the custom text box's color"
+msgstr "Задайте цвят на текста в кутията"
 
-#. notes@lestcape->settings-schema.json->font-color->description
-msgid "Font color:"
-msgstr "Цвят на шрифта:"
+#. stickyNotes@lestcape->settings-schema.json->font-color->description
+msgid "Font color"
+msgstr "Цвят на шрифта"
 
-#. notes@lestcape->settings-schema.json->font-color->tooltip
-msgid "Set the custom text color."
-msgstr "Задайте цвят на текста."
+#. stickyNotes@lestcape->settings-schema.json->font-color->tooltip
+msgid "Set the custom text color"
+msgstr "Задайте цвят на текста"
 
-#. notes@lestcape->settings-schema.json->selected-text-color->description
-msgid "Selected text color:"
-msgstr "Цвят на избрания текст:"
+#. stickyNotes@lestcape->settings-schema.json->selected-text-color->description
+msgid "Selected text color"
+msgstr "Цвят на избрания текст"
 
-#. notes@lestcape->settings-schema.json->selected-text-color->tooltip
-msgid "Set the custom selected text color."
-msgstr "Задайте цвят на избрания текст."
+#. stickyNotes@lestcape->settings-schema.json->selected-text-color->tooltip
+msgid "Set the custom selected text color"
+msgstr "Задайте цвят на избрания текст"
 
-#. notes@lestcape->settings-schema.json->border-box-width->description
-msgid "Border's box width:"
-msgstr "Широчина на рамката на кутията:"
+#. stickyNotes@lestcape->settings-schema.json->border-box-width->description
+msgid "Border's box width"
+msgstr "Широчина на рамката на кутията"
 
-#. notes@lestcape->settings-schema.json->border-box-width->tooltip
-msgid "Increase or decrease the border's box width."
-msgstr "Увеличаване или намаляване на ширината на рамката."
+#. stickyNotes@lestcape->settings-schema.json->border-box-width->tooltip
+msgid "Increase or decrease the border's box width"
+msgstr "Увеличаване или намаляване на ширината на рамката"
 
-#. notes@lestcape->settings-schema.json->border-box-color->description
-msgid "Border's box color:"
-msgstr "Цвят на рамката:"
+#. stickyNotes@lestcape->settings-schema.json->border-box-color->description
+msgid "Border's box color"
+msgstr "Цвят на рамката"
 
-#. notes@lestcape->settings-schema.json->border-box-color->tooltip
-msgid "Set the custom border box's color."
-msgstr "Задайте цвят на рамката."
+#. stickyNotes@lestcape->settings-schema.json->border-box-color->tooltip
+msgid "Set the custom border box's color"
+msgstr "Задайте цвят на рамката"
 
-#. #-#-#-#-# default.pot (PACKAGE VERSION) #-#-#-#-#
-#. notes@lestcape->settings-schema.json->stripe-layout->combobox->None
-#. #-#-#-#-# default.pot (PACKAGE VERSION) #-#-#-#-#
-#. notes@lestcape->settings-schema.json->staples-layout->combobox->None
-#. #-#-#-#-# default.pot (PACKAGE VERSION) #-#-#-#-#
-#. notes@lestcape->settings-schema.json->pencil-layout->combobox->None
+#. stickyNotes@lestcape->settings-schema.json->stripe-layout->combobox->None
+#. stickyNotes@lestcape->settings-schema.json->staples-layout->combobox->None
+#. stickyNotes@lestcape->settings-schema.json->pencil-layout->combobox->None
 msgid "None"
 msgstr "Без"
 
-#. notes@lestcape->settings-schema.json->stripe-layout->combobox->simplestripe
+#. stickyNotes@lestcape->settings-schema.json->stripe-layout->combobox->simplestripe
 msgid "Simple Stripe"
 msgstr "Широки редове"
 
-#. notes@lestcape->settings-schema.json->stripe-layout->combobox->doublestripe
+#. stickyNotes@lestcape->settings-schema.json->stripe-layout->combobox->doublestripe
 msgid "Double Stripe"
 msgstr "Тесни редове"
 
-#. notes@lestcape->settings-schema.json->stripe-layout->combobox->griddedstripe
+#. stickyNotes@lestcape->settings-schema.json->stripe-layout->combobox->griddedstripe
 msgid "Gridded Stripe"
 msgstr "Карирано"
 
-#. notes@lestcape->settings-schema.json->staples-layout->combobox->doublestaple
+#. stickyNotes@lestcape->settings-schema.json->staples-layout->combobox->doublestaple
 msgid "Double Staple"
 msgstr "Двойна скоба"
 
-#. notes@lestcape->settings-schema.json->staples-layout->combobox->borderstaple
+#. stickyNotes@lestcape->settings-schema.json->staples-layout->combobox->borderstaple
 msgid "Border Staple"
 msgstr "Спирална скоба"
 
-#. notes@lestcape->settings-schema.json->staples-layout->combobox->brightstaple
+#. stickyNotes@lestcape->settings-schema.json->staples-layout->combobox->brightstaple
 msgid "Bright Staple"
 msgstr "Сребриста скоба"
 
-#. notes@lestcape->settings-schema.json->staples-layout->combobox->chainstaple
+#. stickyNotes@lestcape->settings-schema.json->staples-layout->combobox->chainstaple
 msgid "Chain Staple"
 msgstr "Верижка"
 
-#. notes@lestcape->settings-schema.json->staples-layout->combobox->clampstaple
+#. stickyNotes@lestcape->settings-schema.json->staples-layout->combobox->clampstaple
 msgid "Clamp Staple"
 msgstr "Щипка"
 
-#. notes@lestcape->settings-schema.json->staples-layout->combobox->clipstaple
+#. stickyNotes@lestcape->settings-schema.json->staples-layout->combobox->clipstaple
 msgid "Clip Staple"
 msgstr "Кламер"
 
-#. notes@lestcape->settings-schema.json->staples-layout->combobox->offhandedstaple
+#. stickyNotes@lestcape->settings-schema.json->staples-layout->combobox->offhandedstaple
 msgid "Offhanded Staple"
 msgstr "Голяма щипка"
 
-#. notes@lestcape->settings-schema.json->staples-layout->combobox->tackstaple
+#. stickyNotes@lestcape->settings-schema.json->staples-layout->combobox->tackstaple
 msgid "Tack Staple"
 msgstr "Габърче"
 
-#. notes@lestcape->settings-schema.json->staples-layout->combobox->whitestaple
+#. stickyNotes@lestcape->settings-schema.json->staples-layout->combobox->whitestaple
 msgid "White Staple"
 msgstr "Бяла скоба"
 
-#. notes@lestcape->settings-schema.json->pencil-layout->combobox->bluepencil
+#. stickyNotes@lestcape->settings-schema.json->pencil-layout->combobox->bluepencil
 msgid "Blue Pencil"
 msgstr "Син молив"
 
-#. notes@lestcape->settings-schema.json->pencil-layout->combobox->yellowpencil
+#. stickyNotes@lestcape->settings-schema.json->pencil-layout->combobox->yellowpencil
 msgid "Yellow Pencil"
 msgstr "Жълт молив"
 
-#. notes@lestcape->settings-schema.json->pencil-layout->combobox->orangepencil
+#. stickyNotes@lestcape->settings-schema.json->pencil-layout->combobox->orangepencil
 msgid "Orange Pencil"
 msgstr "Оранжев молив"
 
-#. notes@lestcape->settings-schema.json->pencil-layout->combobox->blackpencil
+#. stickyNotes@lestcape->settings-schema.json->pencil-layout->combobox->blackpencil
 msgid "Black Pencil"
 msgstr "Черен молив"
