@@ -1,6 +1,6 @@
-Cinnamon Desklet: Sticky Notes Version: v1.9
+Cinnamon Desklet: Sticky Notes Version: v2.0
 
-Last version release date: 31 May 2015.
+Last version release date: 17 Sep 2016.
 --------------
 ![Alt text](/stickyNotes@lestcape/Capture.png)
 
@@ -29,7 +29,7 @@ Description
 This is a simple desklet to add sticky notes in the desktop.
 The sticky notes will be saved when a focus of the text editor was lost.
 
-IMPORTANT: Use with Cinnamon 2.0 or higher.
+IMPORTANT: Use with Cinnamon 3.0 or higher.
 --------------
 
 This program is free software:
@@ -49,6 +49,13 @@ Installation Instructions:
 
 Change Log:
 --------------
+v2.0
+   - Was added the functionalities for undo (CTRL+Z) and redo (CTRL+Y).
+   - When we delete notes, now they will be send to the trash system, instead of a permanently delete.
+   - The notes would be recovered from the nemo trash folder and they will automatically loaded when they will recovered.
+   - Permanently delete or send to the trash system, can be changed in the settings.
+   - You can export all your notes to one file that will be write in your desktop folder from the settings or the right click menu.
+
 v1.9
    - Was extended the symbolic option to all icons inside the manager.
 

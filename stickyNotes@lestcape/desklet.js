@@ -694,7 +694,7 @@ MyDesklet.prototype = {
          this.loadNote(0);
          return true;
       }
-      //this.showErrorMessage("Invalid instance: " + this.instance_id + ". There are " + countInstances + " instances.");
+      global.logError("Invalid instance: " + this.instance_id + ". There are " + countInstances + " instances.");
       Mainloop.idle_add(Lang.bind(this, function() {
          this._disconnectSignals();
          DeskletManager.removeDesklet(this._uuid, this.instance_id);
@@ -1053,7 +1053,6 @@ MyDesklet.prototype = {
             return true;
          }
       } catch(e) {
-         Main.notify("error" , e.message);
          global.logError(e);
       }
       return false;
@@ -1136,65 +1135,6 @@ MyDesklet.prototype = {
       }
    },
 
-   _onAddNote: function(actor) {
-      if(actor)
-         this._effectIcon(actor, 0.2);
-      if(this._multInstance) {
-         let countInstances = this.getCountInstances();
-         this.openAllInstances(countInstances);
-         return true;
-      } else {
-         this.collector.clear();
-         this.reset();
-         this.noteCurrent = this.notesList.length + 1;
-         this.currentNote.set_text(this.noteCurrent.toString());
-         if(this._raiseNewNote)
-            this.raiseInstance(this);
-        return true;
-      }
-      return false
-   },
-
-/*
-execInstallLanguage: function() {
-      try {
-         let _shareFolder = GLib.get_home_dir() + "/.local/share/";
-         let _localeFolder = Gio.file_new_for_path(_shareFolder + "locale/");
-         let _moFolder = Gio.file_new_for_path(_shareFolder + "cinnamon/desklets/" + this._uuid + "/locale/mo/");
-         let children = _moFolder.enumerate_children('standard::name,standard::type,time::modified',
-                                                     Gio.FileQueryInfoFlags.NONE, null);
-                     
-         let info, child, _moFile, _moLocale, _moPath, _src, _dest, _modified, _destModified;
-         while((info = children.next_file(null)) != null) {
-            let _modified = info.get_modification_time().tv_sec;
-            if(info.get_file_type() == Gio.FileType.REGULAR) {
-               _moFile = info.get_name();
-               if(_moFile.substring(_moFile.lastIndexOf(".")) == ".mo") {
-                  _moLocale = _moFile.substring(0, _moFile.lastIndexOf("."));
-                  _moPath = _localeFolder.get_path() + "/" + _moLocale + "/LC_MESSAGES/";
-                  _src = Gio.file_new_for_path(String(_moFolder.get_path() + "/" + _moFile));
-                  _dest = Gio.file_new_for_path(String(_moPath + this._uuid + ".mo"));
-                  try {
-                     if(_dest.query_exists(null)) {
-                        _destModified = _dest.query_info('time::modified', Gio.FileQueryInfoFlags.NONE, null).get_modification_time().tv_sec;
-                        if(_modified > _destModified) {
-                           _src.copy(_dest, Gio.FileCopyFlags.OVERWRITE, null, null);
-                        }
-                     } else {
-                         this._makeDirectoy(_dest.get_parent());
-                         _src.copy(_dest, Gio.FileCopyFlags.OVERWRITE, null, null);
-                     }
-                  } catch(e) {
-                     this.showErrorMessage(e.message);
-                  }
-               }
-            }
-         }
-      } catch(e) {
-         this.showErrorMessage(e.message);
-      }
-*/
-
    readNotesFromFile: function() {
       try {
          for(let pos in this.notesList) {
@@ -1272,16 +1212,15 @@ execInstallLanguage: function() {
       }
       return notes;
    },
-/*
+
    _onAddNote: function(actor) {
       if(actor)
          this._effectIcon(actor, 0.2);
       if(this._multInstance) {
-         let countInstances = this.notesList.length;
-         this.openAllInstances(countInstances - 1);
+         let countInstances = this.getCountInstances();
+         this.openAllInstances(countInstances);
          return true;
-      }
-      else {
+      } else {
          this.collector.clear();
          this.reset();
          this.noteCurrent = this.notesList.length + 1;
@@ -1292,7 +1231,7 @@ execInstallLanguage: function() {
       }
       return false
    },
-*/
+
    _onVisibleNoteChange: function(actor, event) {
       this.setVisibleNote(!this.visibleNote);
    },
@@ -2447,13 +2386,7 @@ execInstallLanguage: function() {
          this.settings.bindProperty(Settings.BindingDirection.IN, "auto-scroll", "_scrollAuto", this._onScrollAutoChange, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "raise-new-note", "_raiseNewNote", null, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "remove-trash-notes", "_removeTrashNotes", null, null);
-         //this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "text", "_text", this._onTextSetting, null);
-         /*"text": {
-      "type": "entry",
-      "default": "",
-      "description": "Text current note:",
-      "tooltip": "The current note."
-       },*/
+
          this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "applet-manager", "_appletManager", this._onAppletManagerChange, null);
          this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "applet-collapsed", "_appletCollapsed", this._onSetAppletType, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "applet-symbolic", "_appletSymbolic", this._onSetAppletType, null); 
@@ -2576,8 +2509,7 @@ execInstallLanguage: function() {
          }
          else {
             this.raise();
-         }
-         //throw "works";   
+         }   
       } catch(e) {
          this.showErrorMessage(e.message);
       }
@@ -2654,8 +2586,6 @@ execInstallLanguage: function() {
       if((!this.deskletRaised) || (this.changingRaiseState))
          return;
       this.changingRaiseState = true;
-      /*if(this._menu.isOpen)
-         this._onButtonReleaseEvent(this.actor, event);*/
 
       if(this.raisedBox) {
          let listOfDesklets = this.getAllInstanceObject();
@@ -2876,8 +2806,6 @@ execInstallLanguage: function() {
             if(this.resizeIDSignal == 0) 
                this.resizeIDSignal = global.stage.connect('button-release-event', Lang.bind(this, this._disableResize));
             global.set_stage_input_mode(Cinnamon.StageInputMode.FULLSCREEN);
-            //if(Main.pushModal)
-            //    Main.pushModal(this.actorResize);
             this._inhibitDragable(this);
             this._findMouseDeltha();
             global.set_cursor(Cinnamon.Cursor.DND_MOVE);
@@ -2903,7 +2831,6 @@ execInstallLanguage: function() {
       this.eventLoopResize = 0;
       if(this.actorResize) {
          this._updatePosResize();
-        // this._updateSize();
          this.eventLoopResize = Mainloop.timeout_add(300, Lang.bind(this, this._doResize));
       } else
          this._disableResize();
@@ -3048,6 +2975,7 @@ execInstallLanguage: function() {
                }
             }
          }
+         children.close(null);
       } catch(e) {
          this.showErrorMessage(e.message);
       }

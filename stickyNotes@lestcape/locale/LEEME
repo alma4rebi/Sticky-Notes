@@ -1,5 +1,5 @@
-Desklet   : Sticky Notes           Version              : v1.9
-S.O.      : Cinnamon               Fecha de lanzamiento : 31 de Mayo de 2015.
+Desklet   : Sticky Notes           Version              : v2.0
+S.O.      : Cinnamon               Fecha de lanzamiento : 17 de Septiembre de 2016.
 Autor     : Lester Carballo Pérez  Correo electrónico   : lestcape@gmail.com
 Sitio Web : https://github.com/lestcape/Sticky-Notes
 
@@ -20,7 +20,7 @@ Autor de la traducción de idiomas:
 Este es un simple desklet para añadir notas en el escritorio.
 Las notas serán salvadas cuando el foco del editor de texto se pierda.
 
-IMPORTANTE: Usar con Cinnamon 2.0 o superior.  
+IMPORTANTE: Usar con Cinnamon 3.0 o superior.  
 --------------
 
 Este programa es software libre:
@@ -39,6 +39,12 @@ Instrucciones de instalación:
 
 Registro de cambios:
 --------------
+v2.0
+    - Se añadió la funcionalidad para deshacer (Ctrl + Z) y rehacer (CTRL + Y).
+    - Cuando borramos notas, ahora van a ser enviados al sistema de basura, en lugar de una eliminación permanente.
+    - Las notas se pueden recuperar de la papelera de nemo y se cargan automáticamente cuando se recuperan.
+    - Eliminar permanentemente o enviar a la papelera, se puede cambiar en la configuración.
+    - Puede exportar todas sus notas desde la configuración o el menú del botón derecho a un archivo que se escriben en el escritorio.
 v1.9
    - Se amplió la opción simbólico a todos los iconos dentro del manejador.
 
