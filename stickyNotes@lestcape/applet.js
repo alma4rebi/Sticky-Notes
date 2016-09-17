@@ -266,6 +266,12 @@ MyApplet.prototype = {
       }
    },
 
+   _execute_export: function() {
+      if(this.desklet) {
+         this.desklet._execute_export();
+      }
+   },
+
    _setIconType: function() {
        this.appletBox.set_icon_type(this._iconType);
        this._setContextMenuIconType();

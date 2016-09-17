@@ -39,6 +39,18 @@
         "type": "checkbox",
         "tooltip": "Check this if you want to raise the new note or not."
     },
+    "remove-trash-notes": {
+        "default": true,
+        "description": "Move the note to the trash when is removed.",
+        "type": "checkbox",
+        "tooltip": "Check this if you want to move the note to the trash instead of removed permanently."
+    },
+    "export-button": {
+        "type": "button",
+        "description": "Export all notes to the desktop",
+        "callback": "_execute_export",
+        "tooltip": "Export all notes to a text file inside the desktop folder location."
+    },
     "separator-applet-top": {
        "type": "separator"
     },

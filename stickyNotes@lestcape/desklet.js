@@ -42,6 +42,7 @@ const Pango = imports.gi.Pango;
 const Mainloop = imports.mainloop;
 const Gtk = imports.gi.Gtk;
 const Util = imports.misc.util;
+const FileUtils = imports.misc.fileUtils;
 const Tweener = imports.ui.tweener;
 const Keymap = imports.gi.Gdk.Keymap.get_default();
 const Signals = imports.signals;
@@ -49,6 +50,7 @@ const MIN_WIDTH = 200;
 const MIN_HEIGHT = 80;
 const DELTA_MIN_RESIZE = 10;
 const Gettext = imports.gettext;
+
 
 
 function _(str) {
@@ -426,6 +428,8 @@ MyDesklet.prototype = {
       this._uuid = this.metadata["uuid"];
       this.newText = "";
       this._masterMutate = null;
+      this._notesChangedTimeout = 0;
+      this._monitorNotesId = 0;
      // this.renderFontFamily();
       this.execInstallLanguage();
       Gettext.bindtextdomain(this._uuid, GLib.get_home_dir() + "/.local/share/locale");
@@ -468,6 +472,12 @@ MyDesklet.prototype = {
       this.multInstanceMenuItem = new PopupMenu.PopupSwitchMenuItem(_("Multiple Instances"), false);
       this.multInstanceMenuItem.connect('activate', Lang.bind(this, this._onMultInstanceActivated));
       this._menu.addMenuItem(this.multInstanceMenuItem);
+
+      this._menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+
+      this._menu.addAction(_("Export all notes to the desktop"), Lang.bind(this, function() {
+         this.exportNotesToDesktop();
+      }));
 
       this._menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
@@ -520,6 +530,7 @@ MyDesklet.prototype = {
       }
       this.collector = new UndoCollector(10000);
       this._textProperty = null;
+      this._monitorTrashNote();
    },
 
    _myInit: function(metadata, desklet_id) {
@@ -685,6 +696,7 @@ MyDesklet.prototype = {
       }
       //this.showErrorMessage("Invalid instance: " + this.instance_id + ". There are " + countInstances + " instances.");
       Mainloop.idle_add(Lang.bind(this, function() {
+         this._disconnectSignals();
          DeskletManager.removeDesklet(this._uuid, this.instance_id);
       }));
       return false;
@@ -695,10 +707,6 @@ MyDesklet.prototype = {
          if(this.isMasterInstance() && (this._masterMutate == null)) {
             this._masterMutate = this.instance_id;
             this.removeAllInstances();
-            //FIXME: The effect cause a problem.
-            /*Mainloop.idle_add(Lang.bind(this, function() {
-               this.openAllInstances(0);
-            }));*/
          }
       } catch(e) {
          this.showErrorMessage(e.message);
@@ -723,6 +731,8 @@ MyDesklet.prototype = {
             if(countDesklet == 0)
                countDesklet++;
             nextDeskletId = newDeskletID + countDesklet - currentInstances;
+            if(currentInstances == countDesklet)
+                countDesklet += 1;
             for(let numberInstance = currentInstances; numberInstance < countDesklet; numberInstance++) {
                let monitor = Main.layoutManager.focusMonitor;
                let countMaxDesklet = monitor.width/this.mainBox.get_width();
@@ -787,6 +797,11 @@ MyDesklet.prototype = {
          this.settings.finalize();
       } catch(e) {}
       this._untrackMouse();
+      this._disconnectSignals();
+   },
+
+   _disconnectSignals: function() {
+      this._cancelMonitor();
       //this.reset();
       if(this.getCountInstances() == 0)
          this.setVisibleAppletManager(false);
@@ -818,7 +833,6 @@ MyDesklet.prototype = {
          this.actor.disconnect(this.leaveAutoHideButtonsIDSignal);
       this.leaveAutoHideButtonsIDSignal = 0;
    },
-
    getInstanceNumber: function() {
       let currentInstance = parseInt(this.instance_id);
       let resultNumber = 0;
@@ -973,32 +987,213 @@ MyDesklet.prototype = {
       this.titleNote.set_text(this.entry.text);
    },
 
+   _execute_export: function() {
+      this.exportNotesToDesktop();
+   },
+
+   exportNotesToDesktop: function() {
+      let filePath = FileUtils.getUserDesktopDir() + "/sticky-notes.txt";
+      let rawData = "";
+      for(let pos in this.notesList) {
+          rawData += "*******************/" + pos + "/*******************\n";
+          rawData += this.notesList[pos][1] + "\n";
+      }
+      if(this._saveFileContent(filePath, rawData)) {
+         Util.spawnCommandLine("xdg-open " + filePath);
+      }
+   },
+
    writeNoteToFile: function(pos) {
       if((pos > -1)&&(pos < this.notesList.length)) {
-         try {
-            let output_file = Gio.file_new_for_path(GLib.get_home_dir() + "/.local/share/notes/" + this.notesList[pos][0] + ".note");
-            this._makeDirectoy(output_file.get_parent());
-            this.deleteNote(pos);
-            let raw = output_file.replace(null, false, Gio.FileCreateFlags.NONE, null);
-            let out_file = Gio.BufferedOutputStream.new_sized (raw, 4096);
-            Cinnamon.write_string_to_stream(out_file, this.notesList[pos][1]);
-            out_file.close(null);
-            return true;
-         } catch(e) {
-            this.showErrorMessage(e.message);
-         }
+         let filePath = GLib.get_home_dir() + "/.local/share/notes/" + this.notesList[pos][0] + ".note";
+         return this._saveFileContent(filePath, this.notesList[pos][1]);
       }
       return false;
    },
 
    deleteNote: function(pos) {
       if((pos > -1)&&(pos < this.notesList.length)) {
-         let file = Gio.file_new_for_path(GLib.get_home_dir() + "/.local/share/notes/" + this.notesList[pos][0] + ".note");
-         if(file.query_exists(null))
-            return file.delete(null, null);
+         let canRemoved = true;
+         if(this._removeTrashNotes) {
+            canRemoved = false;
+            let now = new Date();
+            let deleteName = "sticky-notes." + this.notesList[pos][0] + "." + now.toLocaleFormat("%Y-%m-%dT%H:%M:%S") + ".note~";
+
+            let encodeName = "sticky-notes." + this.notesList[pos][0] + "." + encodeURIComponent(now.toLocaleFormat("%Y-%m-%dT%H:%M:%S")) + ".note~";
+            let trashInfoFile = GLib.get_home_dir() + "/.local/share/Trash/info/" + deleteName + ".trashinfo";
+            let trashInfo = "[Trash Info]\n";
+            trashInfo += "Path=" + GLib.get_home_dir() + "/.local/share/notes/" + encodeName + "\n";
+            trashInfo += "DeletionDate=" + now.toLocaleFormat("%Y-%m-%dT%H:%M:%S");
+            if(this._saveFileContent(trashInfoFile, trashInfo)) {
+               let trashFile = GLib.get_home_dir() + "/.local/share/Trash/files/" + deleteName;
+               canRemoved = this._saveFileContent(trashFile, this.notesList[pos][1]);
+            }
+         }
+         if(canRemoved) {
+            let filePath = GLib.get_home_dir() + "/.local/share/notes/" + this.notesList[pos][0] + ".note";
+            let file = Gio.file_new_for_path(filePath);
+            if(file.query_exists(null))
+               return file.delete(null, null);
+         }
       } 
       return false;
    },
+
+   _saveFileContent: function(path, content) {
+      try {
+         let file = Gio.file_new_for_path(path);
+         this._makeDirectoy(file.get_parent());
+         if(file.query_exists(null))
+            file.delete(null, null);
+         if(!file.query_exists(null)) {
+            let raw = file.replace(null, false, Gio.FileCreateFlags.NONE, null);
+            let out_file = Gio.BufferedOutputStream.new_sized(raw, 4096);
+            Cinnamon.write_string_to_stream(out_file, content);
+            out_file.close(null);
+            return true;
+         }
+      } catch(e) {
+         Main.notify("error" , e.message);
+         global.logError(e);
+      }
+      return false;
+   },
+
+   _monitorTrashNote: function() {
+      let notesPath = GLib.get_home_dir() + "/.local/share/notes";
+      this.notesDirectory = Gio.file_new_for_path(notesPath);
+      if(this._isDirectory(this.notesDirectory)) {
+         
+         this._onNotesChange();
+         if(this._monitorNotesId == 0) {
+            this.monitorNotes = this.notesDirectory.monitor_directory(0, null, null);
+            this._monitorNotesId = this.monitorNotes.connect('changed', Lang.bind(this, this._onNotesChange));
+         }
+      }
+   },
+
+   _cancelMonitor: function() {
+      if(this._monitorNotesId > 0) {
+         this.monitorNotes.disconnect(this._monitorNotesId);
+         this.monitorNotes.cancel();
+         this._monitorNotesId = 0;
+      }
+   },
+
+   _onNotesChange: function() {
+      if(this._notesChangedTimeout == 0) {
+         this._notesChangedTimeout = Mainloop.timeout_add_seconds(1, Lang.bind(this, this._onNotesChangeTimeout));
+      }
+   },
+
+   _onNotesChangeTimeout: function() {
+      if(this._notesChangedTimeout > 0) {
+         Mainloop.source_remove(this._notesChangedTimeout);
+         this._notesChangedTimeout = 0;
+      }
+      if(this.notesDirectory.query_exists(null)) {
+         let newNotes = [];
+         let maxValue = this.maxValueNote();
+         let children = this.notesDirectory.enumerate_children('standard::name,standard::type',
+                                                                Gio.FileQueryInfoFlags.NONE, null);
+         let info, filename, lastIndex, notePath, newNoteFile;
+         while((info = children.next_file(null)) != null) {
+             if(info.get_file_type() == Gio.FileType.REGULAR) {
+               filename = info.get_name();
+               lastIndex = filename.lastIndexOf(".");
+               if(filename.substring(lastIndex) == ".note~") {
+                  maxValue = (maxValue + 1);
+                  notePath = this.notesDirectory.get_path() + "/" + filename;
+                  newNoteFile = Gio.file_new_for_path(notePath);
+                  newNoteFile.set_display_name(maxValue.toString() + ".note", null);
+                  newNotes.push(filename.substring(0, lastIndex));
+               }
+             }
+         }
+         children.close(null);
+         if(newNotes.length > 0) {
+            let countInstances = this.getCountInstances();
+            this.notesList = this.findNotesFromFile();
+            if(this._multInstance) {
+               this.openAllInstances(countInstances);
+            } else {
+               this.notesList = this.findNotesFromFile();
+               this._readListPosition();
+               for(let i = countInstances; i < this.notesList.length; i++) {
+                  this.readNotesFromFile(i);
+               }
+               this.loadNote(this.notesList.length - 1);
+            }
+            let message = "";
+            for(let pos in newNotes) {
+               if(pos < newNotes.length - 1)
+                  message += "" + newNotes[pos] + ",\n";
+               else
+                  message += "" + newNotes[pos] + "\n";
+            }
+            Main.notify(_("Was recovered this notes:") + "\n" + message);
+         }
+      }
+   },
+
+   _onAddNote: function(actor) {
+      if(actor)
+         this._effectIcon(actor, 0.2);
+      if(this._multInstance) {
+         let countInstances = this.getCountInstances();
+         this.openAllInstances(countInstances);
+         return true;
+      } else {
+         this.collector.clear();
+         this.reset();
+         this.noteCurrent = this.notesList.length + 1;
+         this.currentNote.set_text(this.noteCurrent.toString());
+         if(this._raiseNewNote)
+            this.raiseInstance(this);
+        return true;
+      }
+      return false
+   },
+
+/*
+execInstallLanguage: function() {
+      try {
+         let _shareFolder = GLib.get_home_dir() + "/.local/share/";
+         let _localeFolder = Gio.file_new_for_path(_shareFolder + "locale/");
+         let _moFolder = Gio.file_new_for_path(_shareFolder + "cinnamon/desklets/" + this._uuid + "/locale/mo/");
+         let children = _moFolder.enumerate_children('standard::name,standard::type,time::modified',
+                                                     Gio.FileQueryInfoFlags.NONE, null);
+                     
+         let info, child, _moFile, _moLocale, _moPath, _src, _dest, _modified, _destModified;
+         while((info = children.next_file(null)) != null) {
+            let _modified = info.get_modification_time().tv_sec;
+            if(info.get_file_type() == Gio.FileType.REGULAR) {
+               _moFile = info.get_name();
+               if(_moFile.substring(_moFile.lastIndexOf(".")) == ".mo") {
+                  _moLocale = _moFile.substring(0, _moFile.lastIndexOf("."));
+                  _moPath = _localeFolder.get_path() + "/" + _moLocale + "/LC_MESSAGES/";
+                  _src = Gio.file_new_for_path(String(_moFolder.get_path() + "/" + _moFile));
+                  _dest = Gio.file_new_for_path(String(_moPath + this._uuid + ".mo"));
+                  try {
+                     if(_dest.query_exists(null)) {
+                        _destModified = _dest.query_info('time::modified', Gio.FileQueryInfoFlags.NONE, null).get_modification_time().tv_sec;
+                        if(_modified > _destModified) {
+                           _src.copy(_dest, Gio.FileCopyFlags.OVERWRITE, null, null);
+                        }
+                     } else {
+                         this._makeDirectoy(_dest.get_parent());
+                         _src.copy(_dest, Gio.FileCopyFlags.OVERWRITE, null, null);
+                     }
+                  } catch(e) {
+                     this.showErrorMessage(e.message);
+                  }
+               }
+            }
+         }
+      } catch(e) {
+         this.showErrorMessage(e.message);
+      }
+*/
 
    readNotesFromFile: function() {
       try {
@@ -1077,7 +1272,7 @@ MyDesklet.prototype = {
       }
       return notes;
    },
-
+/*
    _onAddNote: function(actor) {
       if(actor)
          this._effectIcon(actor, 0.2);
@@ -1097,7 +1292,7 @@ MyDesklet.prototype = {
       }
       return false
    },
-
+*/
    _onVisibleNoteChange: function(actor, event) {
       this.setVisibleNote(!this.visibleNote);
    },
@@ -1143,31 +1338,6 @@ MyDesklet.prototype = {
       }
    },
 
-   /*_onRemoveNote: function(actor) {
-      try {
-         this._effectIcon(actor, 0.2);
-         let exist = false;
-         let pos = this.noteCurrent - 1;
-         if((pos > -1)&&(pos < this.notesList.length)) {
-            let file = Gio.file_new_for_path(GLib.get_home_dir() + "/.local/share/notes/" + this.notesList[pos][0] + ".note");
-            exist = file.query_exists(null);
-         }
-         if(this.deskletRaised)
-            this.toggleRaise();
-         if(exist) {
-            Mainloop.idle_add(Lang.bind(this, function() {
-               this.showMessageDelete();
-            }));
-         } else {
-            Mainloop.idle_add(Lang.bind(this, function() {
-               DeskletManager.removeDesklet(this._uuid, this.instance_id); 
-            }));
-         }
-      } catch(e) {
-         this.showErrorMessage(e.message);
-      }
-   },*/
-
    _onRemoveNote: function(actor) {
       try {
          this._effectIcon(actor, 0.2);
@@ -1185,6 +1355,7 @@ MyDesklet.prototype = {
             }));
          } else if(this.notesList.length == 0) {
             Mainloop.idle_add(Lang.bind(this, function() {
+               this._disconnectSignals();
                DeskletManager.removeDesklet(this._uuid, this.instance_id); 
             }));
          } else {
@@ -1211,6 +1382,7 @@ MyDesklet.prototype = {
       try {
          if(this._multInstance) {
             if(this.getCountInstances() > 1) {
+               this._disconnectSignals();
                DeskletManager.removeDesklet(this._uuid, this.instance_id);
             }
             this.reset();
@@ -2274,6 +2446,7 @@ MyDesklet.prototype = {
          this.settings.bindProperty(Settings.BindingDirection.IN, "show-scroll", "_scrollVisible", this._onScrollVisibleChange, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "auto-scroll", "_scrollAuto", this._onScrollAutoChange, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "raise-new-note", "_raiseNewNote", null, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "remove-trash-notes", "_removeTrashNotes", null, null);
          //this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "text", "_text", this._onTextSetting, null);
          /*"text": {
       "type": "entry",
