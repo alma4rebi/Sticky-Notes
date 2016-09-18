@@ -725,9 +725,9 @@ MyDesklet.prototype = {
             let countDesklet = this.notesList.length;
             if(countDesklet == 0)
                countDesklet++;
-            nextDeskletId = newDeskletID + countDesklet - currentInstances;
             if(currentInstances == countDesklet)
                 countDesklet += 1;
+            nextDeskletId = newDeskletID + countDesklet - currentInstances;
             for(let numberInstance = currentInstances; numberInstance < countDesklet; numberInstance++) {
                let monitor = Main.layoutManager.focusMonitor;
                let countMaxDesklet = monitor.width/this.mainBox.get_width();
@@ -1287,7 +1287,7 @@ MyDesklet.prototype = {
             Mainloop.idle_add(Lang.bind(this, function() {
                this.showMessageDelete();
             }));
-         } else if(this.notesList.length == 0) {
+         } else if(this._multInstance || (this.notesList.length == 0)) {
             Mainloop.idle_add(Lang.bind(this, function() {
                this._disconnectSignals();
                DeskletManager.removeDesklet(this._uuid, this.instance_id); 
