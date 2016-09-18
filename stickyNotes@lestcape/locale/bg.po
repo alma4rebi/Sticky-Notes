@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Sticky-Notes 1.5\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-11-08 21:29-0600\n"
-"PO-Revision-Date: 2016-09-17 10:04-0500\n"
+"PO-Revision-Date: 2016-09-17 10:15-0500\n"
 "Last-Translator: spacy01 <spacy00001@gmail.com>\n"
 "Language-Team: spacy01 <spacy00001@gmail.com>\n"
 "MIME-Version: 1.0\n"
@@ -32,13 +32,8 @@ msgstr "Изтрий"
 
 #. stickyNotes@lestcape->settings-schema.json->multi-instance->description
 #: desklet.js:100
-#, fuzzy
 msgid "Multiple Instances"
-msgstr ""
-"#-#-#-#-#  0catalog.po (Sticky-Notes 1.5)  #-#-#-#-#\n"
-"Много  инстанции\n"
-"#-#-#-#-#  0catalog.po (Sticky-Notes 1.5)  #-#-#-#-#\n"
-"Множество инстанции"
+msgstr "Множество инстанции"
 
 #: applet.js:138 applet.js:294 applet.js:172
 msgid "Show Notes"

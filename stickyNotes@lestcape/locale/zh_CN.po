@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: 桌面便签 0.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-11-08 21:29-0600\n"
-"PO-Revision-Date: 2016-09-17 10:06-0500\n"
+"PO-Revision-Date: 2016-09-17 10:18-0500\n"
 "Last-Translator: Losywee <losywee@gmail.com>\n"
 "Language-Team: lestcape <lestcape@gmail.com>\n"
 "MIME-Version: 1.0\n"
@@ -32,13 +32,8 @@ msgstr "删除"
 
 #. stickyNotes@lestcape->settings-schema.json->multi-instance->description
 #: desklet.js:100
-#, fuzzy
 msgid "Multiple Instances"
-msgstr ""
-"#-#-#-#-#  0catalog.po (桌面便签 0.1)  #-#-#-#-#\n"
-"多实例运行\n"
-"#-#-#-#-#  0catalog.po (桌面便签 0.1)  #-#-#-#-#\n"
-"多个实例"
+msgstr "多实例运行"
 
 #: applet.js:138 applet.js:294 applet.js:172
 msgid "Show Notes"

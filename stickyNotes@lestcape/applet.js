@@ -127,6 +127,10 @@ MyApplet.prototype = {
       }
    },
 
+   getDisplayLayout: function() {
+      return Applet.DisplayLayout.BOTH;
+   },
+
    _onSetAppletType: function(collapsed, symbolic) {
       try {
          if(this.appletBox) {

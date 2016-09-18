@@ -518,9 +518,8 @@ MyDesklet.prototype = {
       this.eventLoopResize = 0;
       this.eventLoop = 0;
       this._timeOutResize = 0;
-      this._timeOutSettings = 0;
       this.myManager = null;
-     // this._untrackMouse();
+      this._untrackMouse();
       try {
          this._updateComplete();
          this._trackMouse();
@@ -576,10 +575,6 @@ MyDesklet.prototype = {
    },
 
    _updateComplete: function() {
-      if(this._timeOutSettings > 0) {
-         Mainloop.source_remove(this._timeOutSettings);
-         this._timeOutSettings = 0;
-      }
       this._initSettings();
       this._initDeskletContruction();
       this.setContent(this.mainBox);
@@ -597,8 +592,8 @@ MyDesklet.prototype = {
          this._onScrollAutoChange();
          this._onSetAutoHideButtons();
          this._onHideTextBox();
-         this._onRaiseKeyChange();
-         this._onHideKeyChange();
+         this._onAllRaiseKeyChange();
+         this._onAllHideKeyChange();
          this._onSymbolicIcons();
          this.multInstanceMenuItem._switch.setToggleState(this._multInstance);
          this._onStyleChange();
@@ -607,9 +602,9 @@ MyDesklet.prototype = {
          this._keyFocusNotifyIDSignal = global.stage.connect('notify::key-focus', Lang.bind(this, this._onKeyFocusChanged));
          this._allocationSignal = this.scrollBox.connect('allocation_changed', Lang.bind(this, this._onAllocationChanged));
          if(this.isMasterInstance()) {
-            if(Main.settingsManager)
-               Main.settingsManager.register(this._uuid, this._uuid, this.settings);
             Mainloop.idle_add(Lang.bind(this, function() {
+               //Wait for setting finalized on multiload change.
+               Main.settingsManager.register(this._uuid, this._uuid, this.settings);
                this._createAppletManager();
                this.setVisibleAppletManager(this._appletManager);
             }));
@@ -635,7 +630,8 @@ MyDesklet.prototype = {
       }
    },
 
-   _onAppletManagerChange: function() {
+   //FIXME: Could not...
+   _onAllAppletManagerChange: function() {
       if(this.isMasterInstance()) {
          this.setVisibleAppletManager(this._appletManager);
       }
@@ -651,7 +647,8 @@ MyDesklet.prototype = {
       }
    },
 
-   _onSetAppletType: function() {
+   //FIXME: For all.
+   _onAllSetAppletType: function() {
       if((this.myManager)&&(this.myManager.applet)&&(this.isMasterInstance()))
          this.myManager.applet._onSetAppletType(this._appletCollapsed, this._appletSymbolic);
    },
@@ -704,10 +701,8 @@ MyDesklet.prototype = {
 
    multInstanceUpdate: function() {
       try {
-         if(this.isMasterInstance() && (this._masterMutate == null)) {
-            this._masterMutate = this.instance_id;
-            this.removeAllInstances();
-         }
+         this._masterMutate = this.instance_id;
+         this.removeAllInstances();
       } catch(e) {
          this.showErrorMessage(e.message);
       }
@@ -2136,7 +2131,7 @@ MyDesklet.prototype = {
       return false;
    },
 
-   _onMultInstanceChange: function() {
+   _onAllMultInstanceChange: function() {
       if(this.isMasterInstance() &&
          (this._multInstance != this.multInstanceMenuItem._switch.state)) {
          Mainloop.idle_add(Lang.bind(this, function() {
@@ -2154,8 +2149,41 @@ MyDesklet.prototype = {
       }
    },
 
+   //Settings
+   _onAllStyleChange: function() {
+      let listOfDesklets = this.getAllInstanceObject();
+      let currentDesklet;
+      for(let i = 0; i < listOfDesklets.length; i++) {
+         currentDesklet = listOfDesklets[i];
+         currentDesklet._themeStripe = this._themeStripe;
+         currentDesklet._themeStaples = this._themeStaples;
+         currentDesklet._textSize = this._textSize;
+         currentDesklet._fontFamily = this._fontFamily;
+         currentDesklet._overrideTheme = this._overrideTheme;
+         currentDesklet._boxColor = this._boxColor;
+         currentDesklet._textBoxColor = this._textBoxColor;
+         currentDesklet._textSelectedColor = this._textSelectedColor;
+         currentDesklet._fontColor = this._fontColor;
+         currentDesklet._overrideTextBox = this._overrideTextBox;
+         currentDesklet._borderBoxWidth = this._borderBoxWidth;
+         currentDesklet._borderBoxColor = this._borderBoxColor;
+         currentDesklet.setStyle();
+      }
+   },
+
    _onStyleChange: function() {
       this.setStyle();
+   },
+
+   //settings
+   _onAllSymbolicIcons: function() {
+      let listOfDesklets = this.getAllInstanceObject();
+      let currentDesklet;
+      for(let i = 0; i < listOfDesklets.length; i++) {
+         currentDesklet = listOfDesklets[i];
+         currentDesklet._symbolicIcons = this._symbolicIcons;
+         currentDesklet._onSymbolicIcons();
+      }
    },
 
    _onSymbolicIcons: function() {
@@ -2170,9 +2198,32 @@ MyDesklet.prototype = {
       this.deleteButton.child.set_icon_type(iconType);
    },
 
+   //settings
+   _onAllOpacityDeskletChange: function() {
+      let listOfDesklets = this.getAllInstanceObject();
+      let currentDesklet;
+      for(let i = 0; i < listOfDesklets.length; i++) {
+         currentDesklet = listOfDesklets[i];
+         currentDesklet._opacityDesklet = this._opacityDesklet;
+         currentDesklet._onOpacityDeskletChange();
+      }
+   },
+
    _onOpacityDeskletChange: function() {
       this.mainBox.opacity = 255*this._opacityDesklet;
    },
+
+   //settings
+   _onAllOpacityBoxesChange: function() {
+      let listOfDesklets = this.getAllInstanceObject();
+      let currentDesklet;
+      for(let i = 0; i < listOfDesklets.length; i++) {
+         currentDesklet = listOfDesklets[i];
+         currentDesklet._opacityBoxes = this._opacityBoxes;
+         currentDesklet._onOpacityBoxesChange();
+      }
+   },
+
 
    _onOpacityBoxesChange: function() {
       this._onOpacityRootChange();
@@ -2265,6 +2316,21 @@ MyDesklet.prototype = {
       return (textRGB.replace(')',',' + opacity + ')')).replace('rgb','rgba');
    },
 
+   //settings //FIXME: remove fixed size?.
+   _onAllSizeChange: function() {
+      let listOfDesklets = this.getAllInstanceObject();
+      let currentDesklet;
+      for(let i = 0; i < listOfDesklets.length; i++) {
+         currentDesklet = listOfDesklets[i];
+         currentDesklet._fSize = this._fSize;
+         currentDesklet._sameSize = this._sameSize;
+         currentDesklet._width = this._width;
+         currentDesklet._height = this._height;
+         currentDesklet._onSizeChange();
+      }
+   },
+
+   //FIXME: Not all have the same size if is set on settings.
    _onSizeChange: function() {
       if(this._fSize) {
          if(this._multInstance) {
@@ -2296,7 +2362,10 @@ MyDesklet.prototype = {
          if(this._sameSize) { 
             if(this.eventLoop == 0) {
                this.eventLoop = Mainloop.timeout_add(1000, Lang.bind(this, function() {
-                  Mainloop.source_remove(this._eventLoop);
+                  if(this.eventLoop > 0) {
+                      Mainloop.source_remove(this._eventLoop);
+                      this.eventLoop = 0;
+                  }
                   this._sameSize = false;
                }));
             }
@@ -2306,17 +2375,69 @@ MyDesklet.prototype = {
       }
    },
 
+   _onAllScrollVisibleChange: function() {
+      let listOfDesklets = this.getAllInstanceObject();
+      let currentDesklet;
+      for(let i = 0; i < listOfDesklets.length; i++) {
+         currentDesklet = listOfDesklets[i];
+         currentDesklet._scrollVisible = this._scrollVisible;
+         currentDesklet._onScrollVisibleChange();
+      }
+   },
+
    _onScrollVisibleChange: function() {
       this.scrollArea.get_vscroll_bar().visible = this._scrollVisible;
+   },
+
+   //settings
+   _onAllScrollAutoChange: function() {
+      let listOfDesklets = this.getAllInstanceObject();
+      let currentDesklet;
+      for(let i = 0; i < listOfDesklets.length; i++) {
+         currentDesklet = listOfDesklets[i];
+         currentDesklet._scrollAuto = this._scrollAuto;
+         currentDesklet._onScrollAutoChange();
+      }
    },
 
    _onScrollAutoChange: function() {
       this.scrollArea.set_auto_scrolling(this._scrollAuto);
    },
 
+   //settings Fixme: error
+   _onAllRaiseNewNoteChange: function() {
+      let listOfDesklets = this.getAllInstanceObject();
+      let currentDesklet;
+      for(let i = 0; i < listOfDesklets.length; i++) {
+         currentDesklet = listOfDesklets[i];
+         currentDesklet._raiseNewNote = this._raiseNewNote;
+      }
+   },
+
+   //settings
+   _onAllRemoveTrashNotes: function() {
+      let listOfDesklets = this.getAllInstanceObject();
+      let currentDesklet;
+      for(let i = 0; i < listOfDesklets.length; i++) {
+         currentDesklet = listOfDesklets[i];
+         currentDesklet._removeTrashNotes = this._removeTrashNotes;
+      }
+   },
+
    _onTextSetting: function() {
       this.entry.text = this._text;
       this.titleNote.set_text(this.entry.text);
+   },
+
+   //Settings
+   _onAllThemePencilChange: function() {
+      let listOfDesklets = this.getAllInstanceObject();
+      let currentDesklet;
+      for(let i = 0; i < listOfDesklets.length; i++) {
+         currentDesklet = listOfDesklets[i];
+         currentDesklet._themePencil = this._themePencil;
+         currentDesklet._onThemePencilChange();
+      }
    },
 
    _onThemePencilChange: function() {
@@ -2331,6 +2452,17 @@ MyDesklet.prototype = {
             this.buttonBanner.visible = hide;
       } else {
          this.buttonBanner.visible = true;
+      }
+   },
+
+   //settings
+   _onAllSetAutoHideButtons: function() {
+      let listOfDesklets = this.getAllInstanceObject();
+      let currentDesklet;
+      for(let i = 0; i < listOfDesklets.length; i++) {
+         currentDesklet = listOfDesklets[i];
+         currentDesklet._autohideButtons = this._autohideButtons;
+         currentDesklet._onSetAutoHideButtons();
       }
    },
 
@@ -2380,52 +2512,52 @@ MyDesklet.prototype = {
    _initSettings: function() {
       try {
          this.settings = new Settings.DeskletSettings(this, this._uuid, this.instance_id);
-         this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "multi-instance", "_multInstance", this._onMultInstanceChange, null);
-         this.settings.bindProperty(Settings.BindingDirection.IN, "auto-hide-buttons", "_autohideButtons", this._onSetAutoHideButtons, null);
-         this.settings.bindProperty(Settings.BindingDirection.IN, "show-scroll", "_scrollVisible", this._onScrollVisibleChange, null);
-         this.settings.bindProperty(Settings.BindingDirection.IN, "auto-scroll", "_scrollAuto", this._onScrollAutoChange, null);
-         this.settings.bindProperty(Settings.BindingDirection.IN, "raise-new-note", "_raiseNewNote", null, null);
-         this.settings.bindProperty(Settings.BindingDirection.IN, "remove-trash-notes", "_removeTrashNotes", null, null);
+         this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "multi-instance", "_multInstance", this._onAllMultInstanceChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "auto-hide-buttons", "_autohideButtons", this._onAllSetAutoHideButtons, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "show-scroll", "_scrollVisible", this._onAllScrollVisibleChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "auto-scroll", "_scrollAuto", this._onAllScrollAutoChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "raise-new-note", "_raiseNewNote", this._onAllRaiseNewNoteChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "remove-trash-notes", "_removeTrashNotes", this._onAllRemoveTrashNotes, null);
 
-         this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "applet-manager", "_appletManager", this._onAppletManagerChange, null);
-         this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "applet-collapsed", "_appletCollapsed", this._onSetAppletType, null);
-         this.settings.bindProperty(Settings.BindingDirection.IN, "applet-symbolic", "_appletSymbolic", this._onSetAppletType, null); 
+         this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "applet-manager", "_appletManager", this._onAllAppletManagerChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "applet-collapsed", "_appletCollapsed", this._onAllSetAppletType, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "applet-symbolic", "_appletSymbolic", this._onAllSetAppletType, null); 
 
-         this.settings.bindProperty(Settings.BindingDirection.IN, "stripe-layout", "_themeStripe", this._onStyleChange, null);
-         this.settings.bindProperty(Settings.BindingDirection.IN, "staples-layout", "_themeStaples", this._onStyleChange, null);
-         this.settings.bindProperty(Settings.BindingDirection.IN, "pencil-layout", "_themePencil", this._onThemePencilChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "stripe-layout", "_themeStripe", this._onAllStyleChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "staples-layout", "_themeStaples", this._onAllStyleChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "pencil-layout", "_themePencil", this._onAllThemePencilChange, null);
 
-         this.settings.bindProperty(Settings.BindingDirection.IN, "raise-key", "_raiseKey", this._onRaiseKeyChange, null);
-         this.settings.bindProperty(Settings.BindingDirection.IN, "hide-key", "_hideKey", this._onHideKeyChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "raise-key", "_raiseKey", this._onAllRaiseKeyChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "hide-key", "_hideKey", this._onAllHideKeyChange, null);
 
-         this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "fix-size", "_fSize", this._onSizeChange, null);
-         this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "same-size", "_sameSize", this._onSizeChange, null);
-         this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "width", "_width", this._onSizeChange, null);
-         this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "height", "_height", this._onSizeChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "fix-size", "_fSize", this._onAllSizeChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "same-size", "_sameSize", this._onAllSizeChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "width", "_width", this._onAllSizeChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "height", "_height", this._onAllSizeChange, null);
 
 
-         this.settings.bindProperty(Settings.BindingDirection.IN, "text-size", "_textSize", this._onStyleChange, null);
-         this.settings.bindProperty(Settings.BindingDirection.IN, "font-family", "_fontFamily", this._onStyleChange, null);
-         this.settings.bindProperty(Settings.BindingDirection.IN, "symbolic-icons", "_symbolicIcons", this._onSymbolicIcons, null);
-         this.settings.bindProperty(Settings.BindingDirection.IN, "desklet-opacity", "_opacityDesklet", this._onOpacityDeskletChange, null);
-         this.settings.bindProperty(Settings.BindingDirection.IN, "boxes-opacity", "_opacityBoxes", this._onOpacityBoxesChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "text-size", "_textSize", this._onAllStyleChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "font-family", "_fontFamily", this._onAllStyleChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "symbolic-icons", "_symbolicIcons", this._onAllSymbolicIcons, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "desklet-opacity", "_opacityDesklet", this._onAllOpacityDeskletChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "boxes-opacity", "_opacityBoxes", this._onAllOpacityBoxesChange, null);
 
-         this.settings.bindProperty(Settings.BindingDirection.IN, "override-theme", "_overrideTheme", this._onStyleChange, null);
-         this.settings.bindProperty(Settings.BindingDirection.IN, "main-box-color", "_boxColor", this._onStyleChange, null);
-         this.settings.bindProperty(Settings.BindingDirection.IN, "text-box-color", "_textBoxColor", this._onStyleChange, null);
-         this.settings.bindProperty(Settings.BindingDirection.IN, "selected-text-color", "_textSelectedColor", this._onStyleChange, null);
-         this.settings.bindProperty(Settings.BindingDirection.IN, "font-color", "_fontColor", this._onStyleChange, null);
-         this.settings.bindProperty(Settings.BindingDirection.IN, "override-text-box", "_overrideTextBox", this._onStyleChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "override-theme", "_overrideTheme", this._onAllStyleChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "main-box-color", "_boxColor", this._onAllStyleChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "text-box-color", "_textBoxColor", this._onAllStyleChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "selected-text-color", "_textSelectedColor", this._onAllStyleChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "font-color", "_fontColor", this._onAllStyleChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "override-text-box", "_overrideTextBox", this._onAllStyleChange, null);
 
-         this.settings.bindProperty(Settings.BindingDirection.IN, "border-box-width", "_borderBoxWidth", this._onStyleChange, null);
-         this.settings.bindProperty(Settings.BindingDirection.IN, "border-box-color", "_borderBoxColor", this._onStyleChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "border-box-width", "_borderBoxWidth", this._onAllStyleChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "border-box-color", "_borderBoxColor", this._onAllStyleChange, null);
 
+         //Fixme: move to list position?
          this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "position-x", "_xPosition", null, null);
          this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "position-y", "_yPosition", null, null);
+         //Multi
          this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "list-position", "_listPosition", null, null);
-
          this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "list-size", "_listSize", null, null);
-
          this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "hide-text-box", "_hideTextBox", null, null);
          this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "list-hide-text-box", "_listHideTextBox", null, null);
          this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "applet-manager-order", "_appletManagerOrder", null, null);
@@ -2435,7 +2567,8 @@ MyDesklet.prototype = {
       }
    },
 
-   _onRaiseKeyChange: function() {
+   //FIXME: For all.
+   _onAllRaiseKeyChange: function() {
       if(this.keyRaiseId)
          Main.keybindingManager.removeHotKey(this.keyRaiseId);
        
@@ -2443,7 +2576,8 @@ MyDesklet.prototype = {
       Main.keybindingManager.addHotKey(this.keyRaiseId, this._raiseKey, Lang.bind(this, this.toggleRaise));
    },
 
-   _onHideKeyChange: function() {
+   //FIXME: For all.
+   _onAllHideKeyChange: function() {
       if(this.keyHideId)
          Main.keybindingManager.removeHotKey(this.keyHideId);
        
@@ -2664,10 +2798,15 @@ MyDesklet.prototype = {
       let [ax, ay] = this.actor.get_transformed_position();
       if(this._multInstance) {
          if((this.noteCurrent > 0)&&(this.noteCurrent < this.notesList.length + 1)) {
-            this._readListPosition();
             let strNote = "" + this.notesList[this.noteCurrent - 1][0];
-            this.positions[strNote] = [ax, ay];
-            this._writeListPosition();
+            let listOfDesklets = this.getAllInstanceObject();
+            let currentDesklet;
+            for(let i = 0; i < listOfDesklets.length; i++) {
+               currentDesklet = listOfDesklets[i];
+               currentDesklet._readListPosition();
+               currentDesklet.positions[strNote] = [ax, ay];
+               currentDesklet._writeListPosition();
+            }
          }
       } else {
          this._xPosition = ax;
@@ -2700,20 +2839,26 @@ MyDesklet.prototype = {
       this._listSize = stringList.substring(0, stringList.length - 2);//commit
    },
 
+   //FIXME: not yet well.
    _saveDeskletSize: function() {
       this._width = this.mainBox.get_width();
       this._height = this.mainBox.get_height();
       if(this._multInstance) {
-         this._readListSize();
-         if(this._sameSize) {
-            for(let key in this.sizes) {
-               this.sizes[key] = [this._width, this._height];
+         let listOfDesklets = this.getAllInstanceObject();
+         let currentDesklet;
+         for(let i = 0; i < listOfDesklets.length; i++) {
+            currentDesklet = listOfDesklets[i];
+            currentDesklet._readListSize();
+            if(currentDesklet._sameSize) {
+               for(let key in currentDesklet.sizes) {
+                  currentDesklet.sizes[key] = [this._width, this._height];
+               }
+               currentDesklet._writeListSize();
+            } else if((this.noteCurrent > 0)&&(this.noteCurrent < this.notesList.length + 1)) {
+               let strNote = "" + this.notesList[this.noteCurrent - 1][0];
+               currentDesklet.sizes[strNote] = [this._width, this._height];
+               this._writeListSize();
             }
-            this._writeListSize();
-         } else if((this.noteCurrent > 0)&&(this.noteCurrent < this.notesList.length + 1)) {
-            let strNote = "" + this.notesList[this.noteCurrent - 1][0];
-            this.sizes[strNote] = [this._width, this._height];
-            this._writeListSize();
          }
       }
    },
