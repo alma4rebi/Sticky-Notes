@@ -44,7 +44,6 @@ const Gtk = imports.gi.Gtk;
 const Util = imports.misc.util;
 const FileUtils = imports.misc.fileUtils;
 const Tweener = imports.ui.tweener;
-const Keymap = imports.gi.Gdk.Keymap.get_default();
 const Signals = imports.signals;
 const MIN_WIDTH = 200;
 const MIN_HEIGHT = 80;
@@ -516,7 +515,6 @@ MyDesklet.prototype = {
       this.actorResize = null;
       this.resizeIDSignal = 0;
       this.eventLoopResize = 0;
-      this.eventLoop = 0;
       this._timeOutResize = 0;
       this.myManager = null;
       this._untrackMouse();
@@ -1242,7 +1240,7 @@ MyDesklet.prototype = {
             this.scrollArea.visible = true;
             this.bottomBox.visible = true;
             this.actor.raise_top();
-            if(this._fSize) {
+            if(this._sameSize) {
                this._onSizeChange();
             }
          }
@@ -1690,7 +1688,7 @@ MyDesklet.prototype = {
                   parentArea.remove_actor(this._messageContainer);
                this._messageContainer.destroy();
                this.scrollBox.add(this.scrollArea, { x_fill: true, y_fill: true, expand: true, x_align: St.Align.START, y_align: St.Align.START });
-               if(this._fSize) {
+               if(this._sameSize) {
                   this.mainBox.set_width(currWidth);
                   this.mainBox.set_height(currHeight);
                }
@@ -1983,8 +1981,9 @@ MyDesklet.prototype = {
       this.oldEntryText = this.clutterText.get_text();
       this.symbol = event.get_key_symbol();
       this.selection = this.clutterText.get_selection();
-      //(Clutter.ModifierType.CONTROL_MASK == 4) + (Clutter.ModifierType.LOCK_MASK == 2) = 6
-      if((Keymap.get_modifier_state() == 4) || (Keymap.get_modifier_state() == 6)) {
+      let modifiers = event.get_state();
+      this.controlPress = modifiers & Clutter.ModifierType.CONTROL_MASK;
+      if(this.controlPress) {
          if((this.symbol == Clutter.KEY_v) || (this.symbol == Clutter.KEY_V)) {
             // allow ctrl+v event to be handled by the clutter text.
             this._clipboard.get_text(Lang.bind(this, function(clipboard, text) {
@@ -2055,7 +2054,7 @@ MyDesklet.prototype = {
    },
 
    _onChangedText: function(actor) {
-      if((Keymap.get_modifier_state() == 4) || (Keymap.get_modifier_state() == 6)) {
+      if(this.controlPress) {
           return false;
       }
       let lastUndo = this.collector.getLastUndo();
@@ -2067,20 +2066,22 @@ MyDesklet.prototype = {
              pos = this.clutterText.text.length - 1;
       }
       let undoable, value;
+      let ch = String.fromCharCode(Clutter.keysym_to_unicode(this.symbol));
       if(this.selection && (this.selection.length > 0)) {
           let action = new EditAction(this);
           if(action.canExecute()) {
-             this._textProperty = new TextProperty("selection", "", this.selection, pos, true, true);
+             if((this.symbol == Clutter.KEY_BackSpace) || (this.symbol == Clutter.KEY_Delete))
+                 this._textProperty = new TextProperty("selection", "", this.selection, pos, true, true);
+             else
+                 this._textProperty = new TextProperty("selection", ch, this.selection, pos, true, true);
              undoable = action.execute(this._textProperty);
              this.collector.add(undoable);
           }
-          if((this.symbol == Clutter.KEY_BackSpace) || (this.symbol == Clutter.KEY_Delete))
-             return false;
+          return false;
       }
-      let ch = String.fromCharCode(Clutter.keysym_to_unicode(this.symbol));
       if(this.symbol == Clutter.KEY_BackSpace) {
          if((lastUndo != null) && (lastUndo.getValue() != null) &&
-            (lastUndo.getValue() == this._textProperty) && (lastUndo.getValue().position == pos)) {
+            (lastUndo.getValue().label == "backspace") && (lastUndo.getValue().position == pos)) {
             value = lastUndo.getValue();
             if(value != null) {
                value.remText = this.oldEntryText.charAt(pos - 1) + value.remText;
@@ -2099,7 +2100,7 @@ MyDesklet.prototype = {
       }
       if(this.symbol == Clutter.KEY_Delete) {
          if((lastUndo != null) && (lastUndo.getValue() != null) &&
-            (lastUndo.getValue() == this._textProperty) && (lastUndo.getValue().position == pos)) {
+            (lastUndo.getValue().label == "delete") && (lastUndo.getValue().position == pos)) {
             value = lastUndo.getValue();
             if((value != null) && (this.oldEntryText.length > pos)) {
                value.remText = value.remText + this.oldEntryText.charAt(pos);
@@ -2115,7 +2116,7 @@ MyDesklet.prototype = {
           return false; 
       }
       if((lastUndo != null) && (lastUndo.getValue() != null) &&
-         (lastUndo.getValue() == this._textProperty) && (lastUndo.getValue().position + lastUndo.getValue().insText.length == pos)) {
+         (lastUndo.getValue().label == "write") && (lastUndo.getValue().position + lastUndo.getValue().insText.length == pos)) {
           value = lastUndo.getValue();
           if(value != null) {
               value.insText += ch;
@@ -2322,7 +2323,6 @@ MyDesklet.prototype = {
       let currentDesklet;
       for(let i = 0; i < listOfDesklets.length; i++) {
          currentDesklet = listOfDesklets[i];
-         currentDesklet._fSize = this._fSize;
          currentDesklet._sameSize = this._sameSize;
          currentDesklet._width = this._width;
          currentDesklet._height = this._height;
@@ -2332,46 +2332,30 @@ MyDesklet.prototype = {
 
    //FIXME: Not all have the same size if is set on settings.
    _onSizeChange: function() {
-      if(this._fSize) {
-         if(this._multInstance) {
-            if(this._sameSize) {
-               this.mainBox.set_width(this._width);
-               if(this.scrollArea.visible)
-                 this.mainBox.set_height(this._height);
-            } else {
-               this._readListSize();
-               let strNote = "";
-               if(this.noteCurrent <= this.notesList.length)
-                  strNote += this.notesList[this.noteCurrent - 1][0];
-               if(this.sizes[strNote]) {
-                  this.mainBox.set_width(this.sizes[strNote][0]);
-                  if(this.scrollArea.visible)
-                     this.mainBox.set_height(this.sizes[strNote][1]);
-               } else {
-                  /*this.mainBox.set_width(this._width);
-                  if(this.scrollArea.visible)
-                    this.mainBox.set_height(this._height);*/
-               }
-            }
-         } else {
+      if(this._multInstance) {
+         if(this._sameSize) {
             this.mainBox.set_width(this._width);
             if(this.scrollArea.visible)
                this.mainBox.set_height(this._height);
-         }
-      } else {
-         if(this._sameSize) { 
-            if(this.eventLoop == 0) {
-               this.eventLoop = Mainloop.timeout_add(1000, Lang.bind(this, function() {
-                  if(this.eventLoop > 0) {
-                      Mainloop.source_remove(this._eventLoop);
-                      this.eventLoop = 0;
-                  }
-                  this._sameSize = false;
-               }));
+         } else {
+            this._readListSize();
+            let strNote = "";
+            if(this.noteCurrent <= this.notesList.length)
+               strNote += this.notesList[this.noteCurrent - 1][0];
+            if(this.sizes[strNote]) {
+               this.mainBox.set_width(this.sizes[strNote][0]);
+               if(this.scrollArea.visible)
+                  this.mainBox.set_height(this.sizes[strNote][1]);
+            } else {
+               //this.mainBox.set_width(this._width);
+               //if(this.scrollArea.visible)
+               //  this.mainBox.set_height(this._height);
             }
          }
-         this.mainBox.set_width(-1);
-         this.mainBox.set_height(-1);
+      } else {
+         this.mainBox.set_width(this._width);
+         if(this.scrollArea.visible)
+            this.mainBox.set_height(this._height);
       }
    },
 
@@ -2530,7 +2514,7 @@ MyDesklet.prototype = {
          this.settings.bindProperty(Settings.BindingDirection.IN, "raise-key", "_raiseKey", this._onAllRaiseKeyChange, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "hide-key", "_hideKey", this._onAllHideKeyChange, null);
 
-         this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "fix-size", "_fSize", this._onAllSizeChange, null);
+         //this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "fix-size", "_fSize", this._onAllSizeChange, null);
          this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "same-size", "_sameSize", this._onAllSizeChange, null);
          this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "width", "_width", this._onAllSizeChange, null);
          this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "height", "_height", this._onAllSizeChange, null);
@@ -2848,13 +2832,11 @@ MyDesklet.prototype = {
          let currentDesklet;
          for(let i = 0; i < listOfDesklets.length; i++) {
             currentDesklet = listOfDesklets[i];
-            currentDesklet._readListSize();
             if(currentDesklet._sameSize) {
-               for(let key in currentDesklet.sizes) {
-                  currentDesklet.sizes[key] = [this._width, this._height];
-               }
-               currentDesklet._writeListSize();
+               currentDesklet.mainBox.set_width(this._width);
+               currentDesklet.mainBox.set_height(this._height);
             } else if((this.noteCurrent > 0)&&(this.noteCurrent < this.notesList.length + 1)) {
+               currentDesklet._readListSize();
                let strNote = "" + this.notesList[this.noteCurrent - 1][0];
                currentDesklet.sizes[strNote] = [this._width, this._height];
                this._writeListSize();
@@ -2954,7 +2936,7 @@ MyDesklet.prototype = {
             this._inhibitDragable(this);
             this._findMouseDeltha();
             global.set_cursor(Cinnamon.Cursor.DND_MOVE);
-            this._fSize = true;
+            //this._fSize = true;
             this._doResize();
          }
       }

@@ -166,17 +166,10 @@
     "separator-size-bottom": {
        "type": "separator"
     },
-    "fix-size": {
-        "default": false,
-        "description": "Fixed size",
-        "type": "checkbox",
-        "tooltip": "Check this if you want to control the size of all instances"
-    },
     "same-size": {
         "default": true,
         "description": "All instace have the same fixed size",
         "type": "checkbox",
-        "dependency": "fix-size",
         "tooltip": "Check this if you want to have the same fixed size on all instances"
     },
     "width": {
