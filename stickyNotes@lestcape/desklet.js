@@ -756,12 +756,11 @@ MyDesklet.prototype = {
 
    removeAllInstances: function() {
       let enabledDesklets = global.settings.get_strv("enabled-desklets");
-      let def, id;
+      let def;
       for(let idPos in enabledDesklets) {
          def = this._getDeskletDefinition(enabledDesklets[idPos]);
-         if((def)&&(def.uuid == this._uuid)) {
-            let id = parseInt(def.desklet_id);
-            DeskletManager.removeDesklet(this._uuid, id);
+         if(def && (def.uuid == this._uuid)) {
+            DeskletManager.removeDesklet(this._uuid, def.desklet_id);
          }
       }
       if(this.myManager)
@@ -832,11 +831,8 @@ MyDesklet.prototype = {
          let def, id;
          for(let idPos in enabledDesklets) {
             def = this._getDeskletDefinition(enabledDesklets[idPos]);
-            if((def)&&(def.uuid == this._uuid)) {
-               let id = parseInt(def.desklet_id);
-               if(id < currentInstance)
-                  resultNumber++;
-            }
+            if(def && (def.uuid == this._uuid) && (parseInt(def.desklet_id) < currentInstance))
+               resultNumber++;
          }
       } catch (e) {
          this.showErrorMessage(e.message);
@@ -849,13 +845,11 @@ MyDesklet.prototype = {
       let resultObject = new Array();
       try {
          let enabledDesklets = global.settings.get_strv("enabled-desklets");
-         let def, id;
+         let def;
          for(let idPos in enabledDesklets) {
             def = this._getDeskletDefinition(enabledDesklets[idPos]);
-            if((def)&&(def.uuid == this._uuid)) {
-               let id = parseInt(def.desklet_id);
-               resultObject.push(DeskletManager.get_object_for_instance(id));
-            }
+            if(def && (def.uuid == this._uuid))
+               resultObject.push(DeskletManager.get_object_for_instance(def.desklet_id));
          }
       } catch (e) {
          this.showErrorMessage(e.message);
@@ -867,12 +861,11 @@ MyDesklet.prototype = {
       let resultNumber = 0;
       try {
          let enabledDesklets = global.settings.get_strv("enabled-desklets");
-         let def, id;
+         let def;
          for(let idPos in enabledDesklets) {
             def = this._getDeskletDefinition(enabledDesklets[idPos]);
-            if((def)&&(def.uuid == this._uuid)) {
+            if(def &&(def.uuid == this._uuid))
                resultNumber++;
-            }
          }
       } catch (e) {
          this.showErrorMessage(e.message);
@@ -888,8 +881,8 @@ MyDesklet.prototype = {
          let def, id;
          for(let idPos in enabledDesklets) {
             def = this._getDeskletDefinition(enabledDesklets[idPos]);
-            if((def)&&(def.uuid == this._uuid)) {
-               let id = parseInt(def.desklet_id);
+            if(def && (def.uuid == this._uuid)) {
+               id = parseInt(def.desklet_id);
                if(id < currentInstance)
                   currentInstance = id;
             }
@@ -897,11 +890,11 @@ MyDesklet.prototype = {
       } catch (e) {
          this.showErrorMessage(e.message);
       }
-      return currentInstance;
+      return currentInstance.toString();
    },
 
    isMasterInstance: function() {
-      return (this.getMasterInstance() == parseInt(this.instance_id));
+      return (this.getMasterInstance() == this.instance_id);
    },
 
    _getDeskletDefinition: function(definition) {
@@ -1223,13 +1216,36 @@ MyDesklet.prototype = {
       return false
    },
 
+   _onHideTextBox: function() {
+      if(this._multInstance) {
+         if((this.noteCurrent > 0)&&(this.noteCurrent < this.notesList.length + 1)) {
+            this._readListHideTextBox();
+            let hideNote = this.hideTextBox["" + this.notesList[this.noteCurrent - 1][0]];
+            if(hideNote != null)
+               this.setVisibleNote(hideNote);
+            else
+               this.setVisibleNote(true);
+         }
+      } else {
+         this.setVisibleNote(this._hideTextBox);
+      }
+   }, 
+
    _onVisibleNoteChange: function(actor, event) {
       this.setVisibleNote(!this.visibleNote);
+      let listOfDesklets = this.getAllInstanceObject();
+      let currentDesklet;
+      for(let i = 0; i < listOfDesklets.length; i++) {
+         currentDesklet = listOfDesklets[i];
+         currentDesklet.hideTextBox = this.hideTextBox;
+         currentDesklet._listHideTextBox = this._listHideTextBox;
+      }
    },
 
    setVisibleNote: function(visible) {
       if(this.visibleNote != visible) {
          this.visibleNote = visible;
+         this.actor.raise_top();
          if(visible) {
             this.minimizeButton.child.set_icon_name('go-up');
             this.rootBox.add_style_pseudo_class('open');
@@ -1237,12 +1253,8 @@ MyDesklet.prototype = {
             this._changeHideTextBox(true);
             this.scrollArea.visible = true;
             this.bottomBox.visible = true;
-            this.actor.raise_top();
-            if(this._sameSize) {
-               this._onSizeChange();
-            }
-         }
-         else {
+            this._onSizeChange();
+         } else {
             this.minimizeButton.child.set_icon_name('go-down');
             this.rootBox.remove_style_pseudo_class('open');
             this.rootBox.set_style(' ');
@@ -2470,21 +2482,6 @@ MyDesklet.prototype = {
       }
    },
 
-   _onHideTextBox: function() {
-      if(this._multInstance) {
-         if((this.noteCurrent > 0)&&(this.noteCurrent < this.notesList.length + 1)) {
-            this._readListHideTextBox();
-            let hideNote = this.hideTextBox["" + this.notesList[this.noteCurrent - 1][0]];
-            if(hideNote != null)
-               this.setVisibleNote(hideNote);
-            else
-               this.setVisibleNote(true);
-         }
-      } else {
-         this.setVisibleNote(this._hideTextBox);
-      }
-   }, 
-
    _initSettings: function() {
       try {
          //Main.notify("is" + this.instance_id);
@@ -2815,7 +2812,6 @@ MyDesklet.prototype = {
       this._listSize = stringList.substring(0, stringList.length - 2);//commit
    },
 
-   //FIXME: not yet well.
    _saveDeskletSize: function() {
       if(this._multInstance) {
          let listOfDesklets = this.getAllInstanceObject();
@@ -2827,17 +2823,22 @@ MyDesklet.prototype = {
             this._width = this.mainBox.get_width();
             this._height = this.mainBox.get_height();
          }
-         for(let i = 0; i < listOfDesklets.length; i++) {
-            currentDesklet = listOfDesklets[i];
-            if(this._sameSize) {
-               currentDesklet._width = this._width;
-               currentDesklet._height = this._height;
-               currentDesklet.mainBox.set_width(this._width);
-               currentDesklet.mainBox.set_height(this._height);
-            } else if(strNote != null) {
-               currentDesklet._readListSize();
-               currentDesklet.sizes[strNote] = [this.mainBox.get_width(), this.mainBox.get_height()];
-               currentDesklet._writeListSize();
+         if(strNote != null) {
+            for(let i = 0; i < listOfDesklets.length; i++) {
+               currentDesklet = listOfDesklets[i];
+               if(this._sameSize) {
+                  currentDesklet._width = this._width;
+                  currentDesklet._height = this._height;
+                  currentDesklet.mainBox.set_width(this._width);
+                  if((currentDesklet.noteCurrent > 0)&&(currentDesklet.noteCurrent < currentDesklet.notesList.length + 1) &&
+                     (currentDesklet.hideTextBox["" + currentDesklet.notesList[currentDesklet.noteCurrent - 1][0]])) {
+                     currentDesklet.mainBox.set_height(this._height);
+                  }
+               } else {
+                  currentDesklet._readListSize();
+                  currentDesklet.sizes[strNote] = [this.mainBox.get_width(), this.mainBox.get_height()];
+                  currentDesklet._writeListSize();
+               }
             }
          }
       } else {
