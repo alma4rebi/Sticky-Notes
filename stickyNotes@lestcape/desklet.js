@@ -628,7 +628,6 @@ MyDesklet.prototype = {
       }
    },
 
-   //FIXME: Could not...
    _onAllAppletManagerChange: function() {
       if(this.isMasterInstance()) {
          this.setVisibleAppletManager(this._appletManager);
@@ -645,7 +644,6 @@ MyDesklet.prototype = {
       }
    },
 
-   //FIXME: For all.
    _onAllSetAppletType: function() {
       if((this.myManager)&&(this.myManager.applet)&&(this.isMasterInstance()))
          this.myManager.applet._onSetAppletType(this._appletCollapsed, this._appletSymbolic);
@@ -2317,7 +2315,6 @@ MyDesklet.prototype = {
       return (textRGB.replace(')',',' + opacity + ')')).replace('rgb','rgba');
    },
 
-   //settings //FIXME: remove fixed size?.
    _onAllSizeChange: function() {
       let listOfDesklets = this.getAllInstanceObject();
       let currentDesklet;
@@ -2330,7 +2327,6 @@ MyDesklet.prototype = {
       }
    },
 
-   //FIXME: Not all have the same size if is set on settings.
    _onSizeChange: function() {
       if(this._multInstance) {
          if(this._sameSize) {
@@ -2346,10 +2342,6 @@ MyDesklet.prototype = {
                this.mainBox.set_width(this.sizes[strNote][0]);
                if(this.scrollArea.visible)
                   this.mainBox.set_height(this.sizes[strNote][1]);
-            } else {
-               //this.mainBox.set_width(this._width);
-               //if(this.scrollArea.visible)
-               //  this.mainBox.set_height(this._height);
             }
          }
       } else {
@@ -2495,6 +2487,7 @@ MyDesklet.prototype = {
 
    _initSettings: function() {
       try {
+         //Main.notify("is" + this.instance_id);
          this.settings = new Settings.DeskletSettings(this, this._uuid, this.instance_id);
          this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "multi-instance", "_multInstance", this._onAllMultInstanceChange, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "auto-hide-buttons", "_autohideButtons", this._onAllSetAutoHideButtons, null);
@@ -2514,7 +2507,6 @@ MyDesklet.prototype = {
          this.settings.bindProperty(Settings.BindingDirection.IN, "raise-key", "_raiseKey", this._onAllRaiseKeyChange, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "hide-key", "_hideKey", this._onAllHideKeyChange, null);
 
-         //this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "fix-size", "_fSize", this._onAllSizeChange, null);
          this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "same-size", "_sameSize", this._onAllSizeChange, null);
          this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "width", "_width", this._onAllSizeChange, null);
          this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "height", "_height", this._onAllSizeChange, null);
@@ -2825,23 +2817,32 @@ MyDesklet.prototype = {
 
    //FIXME: not yet well.
    _saveDeskletSize: function() {
-      this._width = this.mainBox.get_width();
-      this._height = this.mainBox.get_height();
       if(this._multInstance) {
          let listOfDesklets = this.getAllInstanceObject();
          let currentDesklet;
+         let strNote = null;
+         if((this.noteCurrent > 0)&&(this.noteCurrent < this.notesList.length + 1))
+             strNote = "" + this.notesList[this.noteCurrent - 1][0];
+         if(this._sameSize) {
+            this._width = this.mainBox.get_width();
+            this._height = this.mainBox.get_height();
+         }
          for(let i = 0; i < listOfDesklets.length; i++) {
             currentDesklet = listOfDesklets[i];
-            if(currentDesklet._sameSize) {
+            if(this._sameSize) {
+               currentDesklet._width = this._width;
+               currentDesklet._height = this._height;
                currentDesklet.mainBox.set_width(this._width);
                currentDesklet.mainBox.set_height(this._height);
-            } else if((this.noteCurrent > 0)&&(this.noteCurrent < this.notesList.length + 1)) {
+            } else if(strNote != null) {
                currentDesklet._readListSize();
-               let strNote = "" + this.notesList[this.noteCurrent - 1][0];
-               currentDesklet.sizes[strNote] = [this._width, this._height];
-               this._writeListSize();
+               currentDesklet.sizes[strNote] = [this.mainBox.get_width(), this.mainBox.get_height()];
+               currentDesklet._writeListSize();
             }
          }
+      } else {
+         this._width = this.mainBox.get_width();
+         this._height = this.mainBox.get_height();
       }
    },
 
