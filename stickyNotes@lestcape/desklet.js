@@ -2077,6 +2077,8 @@ MyDesklet.prototype = {
       }
       let undoable, value;
       let ch = String.fromCharCode(Clutter.keysym_to_unicode(this.symbol));
+      if(this.symbol == Clutter.KEY_Return)
+         ch = "\n";
       if(this.selection && (this.selection.length > 0)) {
           let action = new EditAction(this);
           if(action.canExecute()) {
@@ -2127,10 +2129,10 @@ MyDesklet.prototype = {
       }
       if((lastUndo != null) && (lastUndo.getValue() != null) &&
          (lastUndo.getValue().label == "write") && (lastUndo.getValue().position + lastUndo.getValue().insText.length == pos)) {
-          value = lastUndo.getValue();
-          if(value != null) {
-              value.insText += ch;
-          }
+         value = lastUndo.getValue();
+         if(value != null) {
+            value.insText += ch;
+         }
       } else if(!this.isModify) {
           let action = new EditAction(this);
           if(action.canExecute()) {
