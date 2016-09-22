@@ -495,7 +495,7 @@ MyDesklet.prototype = {
       this._fontColor= "#ffffff";
       this._width = 220;
       this._height = 120;
-      //this._multInstance = true;
+      this._multInstance = true;
       this._scrollVisible = true;
       this._text = "";
       this.keyPress = 0;
@@ -658,6 +658,30 @@ MyDesklet.prototype = {
       Main.notifyError(_("Error:"), menssage);
    },
 
+   _getNumberOfEmptyNotes: function() {
+      let listOfDesklets = this.getAllInstanceObject();
+      let currentDesklet;
+      let count = 0;
+      for(let i = 0; i < listOfDesklets.length; i++) {
+         currentDesklet = listOfDesklets[i];
+         if(currentDesklet && currentDesklet.isEmptyNote()) {
+            count++;
+         }
+      }
+      return count;
+   },
+
+   _removeEmptyNotes: function() {
+      let listOfDesklets = this.getAllInstanceObject();
+      let currentDesklet;
+      for(let i = 0; i < listOfDesklets.length; i++) {
+         currentDesklet = listOfDesklets[i];
+         if(currentDesklet && currentDesklet.isEmptyNote()) {
+            DeskletManager.removeDesklet(currentDesklet._uuid, currentDesklet.instance_id);
+         }
+      }
+   },
+
    initDeskletType: function() {
       this.notesList = this.findNotesFromFile();
       this._readListPosition();
@@ -671,8 +695,7 @@ MyDesklet.prototype = {
             this.readNoteFromFile(numberInstance);
             this.loadNote(numberInstance);
          } else {
-            this.notesList.push([this.maxValueNote() + 1, ""]);
-            this.noteCurrent = numberInstance + 1;
+            this.noteCurrent = this.notesList.length + 1;
             this.reset();
             if(this._raiseNewNote) {
                Mainloop.idle_add(Lang.bind(this, function() {
@@ -823,6 +846,7 @@ MyDesklet.prototype = {
          this.actor.disconnect(this.leaveAutoHideButtonsIDSignal);
       this.leaveAutoHideButtonsIDSignal = 0;
    },
+
    getInstanceNumber: function() {
       let currentInstance = parseInt(this.instance_id);
       let resultNumber = 0;
@@ -943,6 +967,7 @@ MyDesklet.prototype = {
                this.writeNoteToFile(this.noteCurrent - 1);
             }
          }
+         this._updateNotesList();
       }
    },
 
@@ -978,9 +1003,19 @@ MyDesklet.prototype = {
    exportNotesToDesktop: function() {
       let filePath = FileUtils.getUserDesktopDir() + "/sticky-notes.txt";
       let rawData = "";
-      for(let pos in this.notesList) {
-          rawData += "*******************/" + pos + "/*******************\n";
-          rawData += this.notesList[pos][1] + "\n";
+      if(this._multInstance) {
+         let listOfDesklets = this.getAllInstanceObject();
+         let currentDesklet;
+         for(let i = 0; i < listOfDesklets.length; i++) {
+            currentDesklet = listOfDesklets[i];
+            rawData += "*******************/" + (currentDesklet.noteCurrent - 1) + "/*******************\n";
+            rawData += currentDesklet.notesList[currentDesklet.noteCurrent - 1][1] + "\n";
+         }
+      } else {
+         for(let pos in this.notesList) {
+            rawData += "*******************/" + pos + "/*******************\n";
+            rawData += this.notesList[pos][1] + "\n";
+         }
       }
       if(this._saveFileContent(filePath, rawData)) {
          Util.spawnCommandLine("xdg-open " + filePath);
@@ -1095,14 +1130,18 @@ MyDesklet.prototype = {
          }
          children.close(null);
          if(newNotes.length > 0) {
-            let countInstances = this.getCountInstances();
-            this.notesList = this.findNotesFromFile();
             if(this._multInstance) {
+               let countInstances = this.getCountInstances();
+               if(countInstances >= this.notesList.length) {
+                  this._removeEmptyNotes();
+                  countInstances =  this.notesList.length;
+               }
+               this._updateNotesList();
                this.openAllInstances(countInstances);
             } else {
                this.notesList = this.findNotesFromFile();
                this._readListPosition();
-               for(let i = countInstances; i < this.notesList.length; i++) {
+               for(let i = 0; i < this.notesList.length; i++) {
                   this.readNotesFromFile(i);
                }
                this.loadNote(this.notesList.length - 1);
@@ -1201,9 +1240,11 @@ MyDesklet.prototype = {
       if(actor)
          this._effectIcon(actor, 0.2);
       if(this._multInstance) {
-         let countInstances = this.getCountInstances();
-         this.openAllInstances(countInstances);
-         return true;
+         if(this.notesList[this.noteCurrent - 1][1] != "") {
+            let countInstances = this.getCountInstances();
+            this.openAllInstances(countInstances);
+            return true;
+         }
       } else {
          this.collector.clear();
          this.reset();
@@ -1214,6 +1255,39 @@ MyDesklet.prototype = {
         return true;
       }
       return false
+   },
+
+   _updateNotesList: function() {
+      if(this._multInstance) {
+         let notesList = this.findNotesFromFile();
+         let listOfDesklets = this.getAllInstanceObject();
+         let currentDesklet;
+         for(let i = 0; i < listOfDesklets.length; i++) {
+            currentDesklet = listOfDesklets[i];
+            currentDesklet._updateNotes(notesList);
+         }
+      }
+   },
+
+   isEmptyNote: function() {
+      return (this.noteCurrent > this.notesList.length) || (this.notesList[this.noteCurrent - 1][1] == "");
+   },
+
+   _updateNotes: function(newNote) {
+      let isEmpty = this.isEmptyNote();
+      if(!isEmpty) {
+         for(let i = 0; i < newNote.length; i++) {
+            if(newNote[i][0] == this.notesList[this.noteCurrent - 1][0]) {
+                newNote[i][1] = this.notesList[this.noteCurrent - 1][1];
+                this.noteCurrent = i + 1;
+                break;
+            }
+         }
+      }
+      this.notesList = newNote;
+      if(isEmpty) {
+         this.noteCurrent = this.notesList.length + 1;
+      }
    },
 
    _onHideTextBox: function() {
@@ -1282,7 +1356,8 @@ MyDesklet.prototype = {
 
    _onRemoveNote: function(actor) {
       try {
-         this._effectIcon(actor, 0.2);
+         if(actor)
+            this._effectIcon(actor, 0.2);
          let exist = false;
          let pos = this.noteCurrent - 1;
          if((pos > -1)&&(pos < this.notesList.length)) {
@@ -1329,6 +1404,7 @@ MyDesklet.prototype = {
             }
             this.reset();
             this.deleteNote(this.noteCurrent - 1);
+            this._updateNotesList();
          } else {
             if(this.notesList.length > 1) { 
                if((this.noteCurrent != 0)&&(this.noteCurrent <= this.notesList.length)) {
@@ -2486,7 +2562,6 @@ MyDesklet.prototype = {
 
    _initSettings: function() {
       try {
-         //Main.notify("is" + this.instance_id);
          this.settings = new Settings.DeskletSettings(this, this._uuid, this.instance_id);
          this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "multi-instance", "_multInstance", this._onAllMultInstanceChange, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "auto-hide-buttons", "_autohideButtons", this._onAllSetAutoHideButtons, null);
