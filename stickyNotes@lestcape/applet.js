@@ -121,8 +121,7 @@ MyApplet.prototype = {
             PANEL_HEIGHT_KEY, Lang.bind(this, this.on_panel_height_changed)));
          this.resize_signals_id.push(global.settings.connect("changed::" + 
             PANEL_RESIZABLE_KEY, Lang.bind(this, this.on_panel_height_changed)));
-      }
-      catch(e) {
+      } catch(e) {
          Main.notify("appletError", e.message);
          global.logError(e);
       }
@@ -143,7 +142,6 @@ MyApplet.prototype = {
    },
 
    on_orientation_changed: function(orientation) {
-      Main.notify("called");
       this.appletBox.on_orientation_changed(orientation);
    },
 
