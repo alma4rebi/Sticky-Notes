@@ -101,6 +101,7 @@ MyApplet.prototype = {
          this._raised = false;
          this._hide = false;
          this._multInstance = false;
+         this.actor._applet = this;
 
          this.context_menu_item_collapse = new PopupIconMenuItem(_("Collapse"), "dialog-question", this._iconType);
          this.context_menu_item_collapse.connect('activate', Lang.bind(this, function(actor) {
@@ -111,7 +112,7 @@ MyApplet.prototype = {
          }));
          this._applet_context_menu.addMenuItem(this.context_menu_item_collapse);
 
-         this.appletBox = new AppletIconsBox(this, panel_height, St.IconType.FULLCOLOR);
+         this.appletBox = new AppletIconsBox(this, panel_height, St.IconType.FULLCOLOR, orientation);
          this.actor.add(this.appletBox.actor, { y_align: St.Align.MIDDLE, y_fill: false });
          this.resize_signals_id = [];
          this.resize_signals_id.push(global.settings.connect("changed::" + 
@@ -127,8 +128,23 @@ MyApplet.prototype = {
       }
    },
 
+   set _newOrder(order) {
+      if(order)
+          this._newOrd = order;
+   },
+
+   set _newPanelLocation(location) {
+      if(location)
+          this._newPanelLoc = location;
+   },
+
    getDisplayLayout: function() {
       return Applet.DisplayLayout.BOTH;
+   },
+
+   on_orientation_changed: function(orientation) {
+      Main.notify("called");
+      this.appletBox.on_orientation_changed(orientation);
    },
 
    _onSetAppletType: function(collapsed, symbolic) {
@@ -541,18 +557,32 @@ ConfigurablePopupSwitchMenuItem.prototype = {
     }
 };
 
-function AppletIconsBox(parent, box_height, icon_type) {
-   this._init(parent, box_height, icon_type);
+function AppletIconsBox(parent, box_height, icon_type, orientation) {
+   this._init(parent, box_height, icon_type, orientation);
 }
 
 AppletIconsBox.prototype = {
-   _init: function(parent, box_height, icon_type) {
+   _init: function(parent, box_height, icon_type, orientation) {
       this.parent = parent;
       this._boxHeight = box_height;
       this._icon_type = icon_type;
       this._scaleMode = global.settings.get_boolean('panel-scale-text-icons') && global.settings.get_boolean('panel-resizable');
       this.actor = new St.BoxLayout();
       this.set_icon_type(icon_type);
+      this._vertical = false;
+      this.on_orientation_changed(orientation);
+   },
+
+   on_orientation_changed: function(orientation) {
+      this._vertical = (orientation == St.Side.LEFT || orientation == St.Side.RIGHT);
+      if(this._vertical) {
+         this.actor.set_important(true);
+         this.actor.set_vertical(true);
+         this.actor.set_x_expand(true);
+      } else {
+         this.actor.set_vertical(false);
+      }
+      let childs = this.actor.get_children();
    },
 
    set_icon_type: function(icon_type) {

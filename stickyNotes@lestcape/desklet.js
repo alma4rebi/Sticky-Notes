@@ -23,6 +23,7 @@
 //
 
 const DND = imports.ui.dnd;
+const Panel = imports.ui.panel;
 const Lang = imports.lang;
 const Gio = imports.gi.Gio;
 const St = imports.gi.St;
@@ -49,8 +50,6 @@ const MIN_WIDTH = 200;
 const MIN_HEIGHT = 80;
 const DELTA_MIN_RESIZE = 10;
 const Gettext = imports.gettext;
-
-
 
 function _(str) {
    let resultConf = Gettext.dgettext("stickyNotes@lestcape", str);
@@ -141,9 +140,9 @@ DeskletAppletManager.prototype = {
             let newAppletID = global.settings.get_int("next-applet-id");
             global.settings.set_int("next-applet-id", newAppletID + 1);
             let appletDef = ('%s:%s:%s').format(this.desklet._appletManagerOrder, uuid, newAppletID);
-            let appletDefinition = AppletManager.getAppletDefinition(appletDef);
-            AppletManager.addAppletToPanels(extCreate, appletDefinition);
-            this.applet = AppletManager.appletObj[newAppletID];
+            let appletDefinition = Main.AppletManager.getAppletDefinition(appletDef);
+            Main.AppletManager.addAppletToPanels(extCreate, appletDefinition);
+            this.applet = Main.AppletManager.appletObj[newAppletID];
             this.applet.setParentDesklet(this.desklet);
          } catch (e) {
             this.showErrorMessage(e.message);
@@ -151,15 +150,75 @@ DeskletAppletManager.prototype = {
       }
    },
 
+   _getKeyByValue: function(array, value) {
+      for(let key in array) {
+         if(array[key] == value) {
+            return key;
+         }
+      }
+      return -1;
+   },
+
    _onEnabledAppletsChanged: function() {
       if(this.applet) {
-         let pName = this.applet._panelLocation.get_name();
-         let zone_string = this.applet._panelLocation.get_name().substring(5, pName.length).toLowerCase();
-         let panel_string = "panel1";
-         if((Main.panel2)&&(Main.panel2["_"+zone_string+"Box"] == this.applet._panelLocation))
-            panel_string = "panel2";
-         this.desklet._appletManagerOrder = panel_string+":"+zone_string+":"+this.applet._order;
+         let panelLocation = "right";
+         let appletOrder = 0;
+         if(this.applet._newPanelLoc != null)
+            panelLocation = this.applet._newPanelLoc;
+         else
+            panelLocation = this.applet._panelLocation;
+         let panelId = 1;
+         let panel_string = "panel" + panelId;
+         if(this.applet.panel) {
+             let id = this._getKeyByValue(Main.panelManager.panels, this.applet.panel);
+             if(id != -1) {
+                 panelId = id;
+                 panel_string = "panel" + panelId;
+             }
+         }
+         if(panelLocation.get_parent()._delegate instanceof Panel.Panel) {
+             let newPanel = panelLocation.get_parent()._delegate;
+             let id = this._getKeyByValue(Main.panelManager.panels, newPanel);
+             if(id != -1) {
+                 panelId = id;
+                 panel_string = "panel" + panelId;
+                 this.applet.panel = newPanel;
+             }
+         }
+         if(this.applet._newOrd != null)
+            appletOrder = this.applet._newOrd;
+         else
+            appletOrder = this.applet._order;
+
+         let pName = panelLocation.get_name();
+         let zone_string = pName.substring(5, pName.length).toLowerCase();
+         this.desklet._appletManagerOrder = panel_string+":"+zone_string+":"+appletOrder;
+         this.moveApplet(panelLocation, appletOrder);
+         let height = Main.AppletManager.setHeightForPanel(this.applet.panel, this.applet.panel.panelPosition);
+         this.applet.setPanelHeight(height);
+         let orientation = Main.AppletManager.setOrientationForPanel(this.applet.panel.panelPosition);
+         this.applet.setOrientation(orientation);
       }
+   },
+
+   moveApplet: function(location, order) {
+        if(this.applet) {
+            // Remove it from its previous panel location (if it had one)
+            if(this.applet._panelLocation != null) {
+                this.applet._panelLocation.remove_actor(this.applet.actor);
+                this.applet._panelLocation = null;
+            }
+            let before = location.get_children()
+                .find(x => (x._applet instanceof Applet.Applet) &&
+                       (order < x._applet._order));
+            if(before)
+                location.insert_child_below(this.applet.actor, before);
+            else
+                location.add_actor(this.applet.actor);
+            this.applet._panelLocation = location;
+            this.applet._order = order;
+            this.applet.on_applet_added_to_panel_internal(true);
+       }
    },
 
    destroyAppletInstance: function() {
