@@ -91,7 +91,6 @@ MyApplet.prototype = {
       this.desklet = null;
       try {
          Gettext.bindtextdomain("stickyNotes@lestcape", GLib.get_home_dir() + "/.local/share/locale");
-         this.mainBox = new St.BoxLayout();
          this.menuManager = new PopupMenu.PopupMenuManager(this);
          this.menu = new Applet.AppletPopupMenu(this, orientation);
          this.menuManager.addMenu(this.menu);
@@ -139,6 +138,15 @@ MyApplet.prototype = {
 
    getDisplayLayout: function() {
       return Applet.DisplayLayout.BOTH;
+   },
+
+   setPanelHeight: function (panel_height) {
+      if(panel_height && panel_height > 0) {
+         this._panelHeight = panel_height;
+      }
+      if(this.panel)
+          this._scaleMode = this.panel.scaleMode;
+      this.on_panel_height_changed();
    },
 
    on_orientation_changed: function(orientation) {
@@ -280,7 +288,6 @@ MyApplet.prototype = {
             }
             return false;
          }));
-         //this.mainBox.add(this.appletBox.actor, { y_align: St.Align.MIDDLE, y_fill: false });
       }
    },
 
