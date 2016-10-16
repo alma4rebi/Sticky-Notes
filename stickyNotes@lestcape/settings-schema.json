@@ -168,7 +168,7 @@
     },
     "same-size": {
         "default": false,
-        "description": "All instace have the same fixed size",
+        "description": "All instances have the same fixed size",
         "type": "checkbox",
         "tooltip": "Check this if you want to have the same fixed size on all instances"
     },

@@ -217,7 +217,7 @@ msgid "Check this if you want to control the size of all instances"
 msgstr ""
 
 #. stickyNotes@lestcape->settings-schema.json->same-size->description
-msgid "All instace have the same fixed size"
+msgid "All instances have the same fixed size"
 msgstr ""
 
 #. stickyNotes@lestcape->settings-schema.json->same-size->tooltip

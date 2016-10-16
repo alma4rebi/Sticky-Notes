@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: 桌面便签 0.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-11-08 21:29-0600\n"
-"PO-Revision-Date: 2016-09-17 10:18-0500\n"
+"PO-Revision-Date: 2016-10-16 17:38-0500\n"
 "Last-Translator: Losywee <losywee@gmail.com>\n"
 "Language-Team: lestcape <lestcape@gmail.com>\n"
 "MIME-Version: 1.0\n"
@@ -214,7 +214,7 @@ msgid "Check this if you want to control the size of all instances"
 msgstr "检查是否设定所有便签实例的尺寸"
 
 #. stickyNotes@lestcape->settings-schema.json->same-size->description
-msgid "All instace have the same fixed size"
+msgid "All instances have the same fixed size"
 msgstr "所有的便签实例相同尺寸"
 
 #. stickyNotes@lestcape->settings-schema.json->same-size->tooltip

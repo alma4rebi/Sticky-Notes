@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Sticky-Notes 1.5\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-11-08 21:29-0600\n"
-"PO-Revision-Date: 2016-09-17 10:15-0500\n"
+"PO-Revision-Date: 2016-10-16 17:37-0500\n"
 "Last-Translator: spacy01 <spacy00001@gmail.com>\n"
 "Language-Team: spacy01 <spacy00001@gmail.com>\n"
 "MIME-Version: 1.0\n"
@@ -214,7 +214,7 @@ msgid "Check this if you want to control the size of all instances"
 msgstr "Маркирайте, ако искате да контролирате размера на всички инстанции"
 
 #. stickyNotes@lestcape->settings-schema.json->same-size->description
-msgid "All instace have the same fixed size"
+msgid "All instances have the same fixed size"
 msgstr "Всички инстанции имат еднакъв, фиксиран размер"
 
 #. stickyNotes@lestcape->settings-schema.json->same-size->tooltip

@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Sticky-Notes 0.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-11-08 21:29-0600\n"
-"PO-Revision-Date: 2016-09-17 10:06-0500\n"
+"PO-Revision-Date: 2016-10-16 17:38-0500\n"
 "Last-Translator: gogo <trebelnik2@gmail.com>\n"
 "Language-Team: Croatian <hr@hr.org>\n"
 "MIME-Version: 1.0\n"
@@ -220,7 +220,7 @@ msgstr ""
 "deskeleta"
 
 #. stickyNotes@lestcape->settings-schema.json->same-size->description
-msgid "All instace have the same fixed size"
+msgid "All instances have the same fixed size"
 msgstr "Svi primjerci imaju istu nepromjenjivu veličinu"
 
 #. stickyNotes@lestcape->settings-schema.json->same-size->tooltip
