@@ -12,10 +12,11 @@ Un agradecimiento especial a:
 --------------
 Autor de la traducción de idiomas:
 --------------
+- Ruso(Ru):         Andreev Alexander (@andreevlex) (andreevlex.as@gmail.com)
 - Búlgaro(Bg):      Peyu Yovev (spacy01) (spacy00001@gmail.com)
-- Croatian(Hr):     gogo (trebelnik2@gmail.com)
-- English(En):      Lester Carballo Pérez(lestcape@gmail.com)
-- Spanish(Es):      Lester Carballo Pérez(lestcape@gmail.com)
+- Croata(Hr):       gogo (trebelnik2@gmail.com)
+- Ingles(En):       Lester Carballo Pérez(lestcape@gmail.com)
+- Español(Es):      Lester Carballo Pérez(lestcape@gmail.com)
 
 Este es un simple desklet para añadir notas en el escritorio.
 Las notas serán salvadas cuando el foco del editor de texto se pierda.
@@ -40,6 +41,7 @@ Instrucciones de instalación:
 Registro de cambios:
 --------------
 v2.0
+    - Añadido el idioma Ruso, gracias a Andreev Alexander.
     - Se añadió la funcionalidad para deshacer (Ctrl + Z) y rehacer (CTRL + Y).
     - Cuando borramos notas, ahora van a ser enviados al sistema de basura, en lugar de una eliminación permanente.
     - Las notas se pueden recuperar de la papelera de nemo y se cargan automáticamente cuando se recuperan.

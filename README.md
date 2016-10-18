@@ -18,6 +18,7 @@ Special thanks to:
 --------------
 Author of language translation:
 --------------
+- Russian(Ru):      Andreev Alexander (@andreevlex) (andreevlex.as@gmail.com)
 - Bulgarian(Bg):    Peyu Yovev (spacy01) (spacy00001@gmail.com)
 - Croatian(Hr):     gogo (trebelnik2@gmail.com)
 - English(En):      Lester Carballo Pérez(lestcape@gmail.com)
@@ -50,6 +51,7 @@ Installation Instructions:
 Change Log:
 --------------
 v2.0
+   - Added Bulgarian language, thanks to Andreev Alexander.
    - Was added the functionalities for undo (CTRL+Z) and redo (CTRL+Y).
    - When we delete notes, now they will be send to the trash system, instead of a permanently delete.
    - The notes would be recovered from the nemo trash folder and they will automatically loaded when they will recovered.

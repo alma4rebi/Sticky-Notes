@@ -201,7 +201,7 @@
     },
     "header-appearance": {
         "type": "header",
-        "description": "Appearance:"
+        "description": "Appearance"
     },
     "separator-appearance-bottom": {
        "type": "separator"

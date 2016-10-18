@@ -90,6 +90,8 @@ MyApplet.prototype = {
 
       this.desklet = null;
       try {
+         if(this.setAllowedLayout)
+             this.setAllowedLayout(Applet.AllowedLayout.BOTH);
          Gettext.bindtextdomain("stickyNotes@lestcape", GLib.get_home_dir() + "/.local/share/locale");
          this.menuManager = new PopupMenu.PopupMenuManager(this);
          this.menu = new Applet.AppletPopupMenu(this, orientation);
@@ -134,10 +136,6 @@ MyApplet.prototype = {
    set _newPanelLocation(location) {
       if(location)
           this._newPanelLoc = location;
-   },
-
-   getDisplayLayout: function() {
-      return Applet.DisplayLayout.BOTH;
    },
 
    setPanelHeight: function (panel_height) {
