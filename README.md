@@ -1,7 +1,10 @@
-Cinnamon Desklet: Sticky Notes Version: v2.0
+Sticky Notes extension for Gnome Shell - Version: v2.0
 
 Last version release date: 17 Sep 2016.
+
+This desklet have not support for cinnamon desktop anymore, will be migrated to Gnome Shell soon.
 --------------
+
 ![Alt text](/stickyNotes@lestcape/Capture.png)
 
 ***
@@ -29,9 +32,6 @@ Description
 --------------
 This is a simple desklet to add sticky notes in the desktop.
 The sticky notes will be saved when a focus of the text editor was lost.
-
-IMPORTANT: Use with Cinnamon 3.0 or higher.
---------------
 
 This program is free software:
 --------------
